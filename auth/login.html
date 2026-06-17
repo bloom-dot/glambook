@@ -46,7 +46,13 @@
       </div>
       <div class="field">
         <label>Mot de passe</label>
-        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password"/>
+        <div style="position:relative;">
+          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" style="padding-right:44px;"/>
+          <button type="button" id="toggle-password" aria-label="Afficher le mot de passe"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--gris);font-size:1.1rem;line-height:1;">
+            👁
+          </button>
+        </div>
       </div>
       <div style="text-align:right; margin-top:-10px; margin-bottom:18px;">
         <a href="/auth/forgot.html" style="font-size:.82rem; color:var(--rose); text-decoration:none;">Mot de passe oublié ?</a>
@@ -75,35 +81,53 @@
 <script type="module">
 import { supabase } from '/js/supabase.js';
 
-const redirect = new URLSearchParams(location.search).get('redirect') || '/';
+const redirect = new URLSearchParams(location.search).get('redirect') || null;
 
-// Déjà connecté ?
-const { data: { user } } = await supabase.auth.getUser();
-if (user) redirectAfterLogin(user);
+// Déjà connecté → rediriger vers le bon dashboard
+const { data: { user: existingUser } } = await supabase.auth.getUser();
+if (existingUser) redirectAfterLogin(existingUser);
+
+// Œil mot de passe
+document.getElementById('toggle-password').addEventListener('click', function() {
+  const input = document.getElementById('password');
+  const show  = input.type === 'password';
+  input.type  = show ? 'text' : 'password';
+  this.textContent = show ? '🙈' : '👁';
+});
 
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btn-login');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>';
+  btn.innerHTML = '<span class="spinner"></span> Connexion...';
   hideError();
 
   const email    = document.getElementById('email').value;
   const password = document.getElementById('password').value;
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) { showError(error.message); btn.disabled = false; btn.textContent = 'Se connecter'; return; }
+  if (error) {
+    const msgs = {
+      'Invalid login credentials':        'Email ou mot de passe incorrect.',
+      'Email not confirmed':              'Veuillez confirmer votre email avant de vous connecter.',
+      'Too many requests':                'Trop de tentatives. Réessayez dans quelques minutes.',
+    };
+    showError(msgs[error.message] || 'Une erreur est survenue. Veuillez réessayer.');
+    btn.disabled = false; btn.textContent = 'Se connecter';
+    return;
+  }
   redirectAfterLogin(data.user);
 });
 
 document.getElementById('btn-google').addEventListener('click', async () => {
-  await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/' } });
+  await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + (redirect || '/') } });
 });
 
 async function redirectAfterLogin(user) {
   const { data: profile } = await supabase.from('profiles').select('role').eq('user_id', user.id).single();
+  if (redirect) { location.href = redirect; return; }
   if (profile?.role === 'artist') { location.href = '/dashboard/artist.html'; return; }
-  location.href = redirect;
+  location.href = '/dashboard/client.html';
 }
 
 function showError(msg) {
