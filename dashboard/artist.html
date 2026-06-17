@@ -82,6 +82,39 @@
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     @media(max-width:500px){ .form-row { grid-template-columns: 1fr; } }
 
+    /* Mon espace */
+    .palette-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
+    .palette-chip {
+      border-radius:12px; padding:14px 8px; text-align:center; cursor:pointer;
+      border:3px solid transparent; transition:all .2s; position:relative;
+    }
+    .palette-chip.selected { border-color:#1A0A12; transform:scale(1.05); }
+    .palette-chip .chip-dot { width:32px; height:32px; border-radius:50%; margin:0 auto 6px; }
+    .palette-chip .chip-name { font-size:.68rem; font-weight:700; }
+    .section-toggle {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px; background:#fff; border-radius:10px; margin-bottom:8px;
+      box-shadow:0 1px 4px rgba(0,0,0,.06);
+    }
+    .section-toggle .toggle-label { font-size:.9rem; font-weight:600; }
+    .section-toggle .toggle-desc  { font-size:.75rem; color:var(--gris); }
+    .switch { position:relative; display:inline-block; width:42px; height:24px; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; cursor:pointer; inset:0; background:#ccc; border-radius:24px; transition:.3s; }
+    .slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s; }
+    input:checked + .slider { background:var(--rose); }
+    input:checked + .slider:before { transform:translateX(18px); }
+
+    .espace-preview {
+      border-radius:16px; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,.15);
+      margin-bottom:24px; border:2px solid var(--bord);
+    }
+    .preview-cover { height:80px; display:flex; align-items:flex-end; padding:8px 12px; }
+    .preview-avatar { width:40px; height:40px; border-radius:50%; border:2px solid #fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.9rem; color:#fff; margin-top:20px; }
+    .preview-body { background:#fff; padding:10px 12px; }
+    .preview-name { font-weight:800; font-size:.85rem; margin-bottom:2px; }
+    .preview-btn { display:inline-block; padding:6px 14px; border-radius:8px; font-size:.72rem; font-weight:700; color:#fff; margin-top:8px; }
+
     /* Upload photo */
     .upload-zone {
       border: 2px dashed var(--bord); border-radius: var(--radius-sm);
@@ -111,6 +144,7 @@
     <a class="nav-item" onclick="showTab('profil')">✏️ Mon profil</a>
     <a class="nav-item" onclick="showTab('photos')">📸 Portfolio</a>
     <a class="nav-item" onclick="showTab('services')">💰 Prestations & Tarifs</a>
+    <a class="nav-item" onclick="showTab('espace')">🎨 Mon espace</a>
     <div class="nav-section">Compte</div>
     <a class="nav-item" href="/artist.html?id=me" target="_blank">👁️ Voir mon profil public</a>
     <a class="nav-item" id="btn-logout" style="color:rgba(255,100,100,.7);">⬅️ Déconnexion</a>
@@ -247,6 +281,79 @@
         <button class="btn btn-primary btn-sm" id="btn-add-service">Ajouter</button>
       </div>
     </div>
+    <!-- ═══ ONGLET MON ESPACE ═══ -->
+    <div id="tab-espace" style="display:none;">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Mon espace</h2>
+      <p style="font-size:.85rem;color:var(--gris);margin-bottom:24px;">Personnalisez l'apparence de votre profil public</p>
+
+      <!-- Aperçu live -->
+      <div class="espace-preview" id="live-preview">
+        <div class="preview-cover" id="prev-cover">
+          <div class="preview-avatar" id="prev-avatar">N</div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-name" id="prev-name">Votre nom</div>
+          <div style="font-size:.72rem;color:#888;margin-bottom:4px;">📍 Votre ville</div>
+          <div style="font-size:.7rem;color:#888;">★★★★★ · Maquillage mariée · Soirée</div>
+          <div class="preview-btn" id="prev-btn">Réserver ce créneau</div>
+        </div>
+      </div>
+
+      <!-- Palette -->
+      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
+        <p style="font-weight:800;margin-bottom:14px;">🎨 Palette de couleurs</p>
+        <div class="palette-grid" id="palette-grid"></div>
+      </div>
+
+      <!-- Photo de couverture -->
+      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
+        <p style="font-weight:800;margin-bottom:6px;">🖼️ Photo de couverture</p>
+        <p style="font-size:.8rem;color:var(--gris);margin-bottom:14px;">La grande bannière en haut de votre profil</p>
+        <label class="upload-zone" for="cover-input" style="padding:20px;">
+          <input type="file" id="cover-input" accept="image/*"/>
+          <div style="font-size:1.5rem;margin-bottom:6px;">📷</div>
+          <p style="font-weight:700;font-size:.85rem;margin-bottom:2px;">Choisir une photo de couverture</p>
+          <p style="font-size:.75rem;color:var(--gris);">JPG, PNG — max 5 Mo</p>
+        </label>
+        <div id="cover-preview-wrap" style="display:none;margin-top:12px;position:relative;">
+          <img id="cover-preview-img" src="" style="width:100%;height:120px;object-fit:cover;border-radius:10px;" alt=""/>
+          <button onclick="removeCover()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:.75rem;cursor:pointer;">✕ Supprimer</button>
+        </div>
+      </div>
+
+      <!-- Sections visibles -->
+      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
+        <p style="font-weight:800;margin-bottom:14px;">📋 Sections affichées</p>
+        <div class="section-toggle">
+          <div><div class="toggle-label">📸 Portfolio photos</div><div class="toggle-desc">Galerie de vos réalisations</div></div>
+          <label class="switch"><input type="checkbox" id="sec-portfolio" checked/><span class="slider"></span></label>
+        </div>
+        <div class="section-toggle">
+          <div><div class="toggle-label">💰 Prestations & Tarifs</div><div class="toggle-desc">Liste de vos services avec prix</div></div>
+          <label class="switch"><input type="checkbox" id="sec-services" checked/><span class="slider"></span></label>
+        </div>
+        <div class="section-toggle">
+          <div><div class="toggle-label">⭐ Avis clients</div><div class="toggle-desc">Les évaluations de vos clientes</div></div>
+          <label class="switch"><input type="checkbox" id="sec-avis" checked/><span class="slider"></span></label>
+        </div>
+        <div class="section-toggle">
+          <div><div class="toggle-label">🔗 Réseaux sociaux</div><div class="toggle-desc">Instagram, TikTok, YouTube...</div></div>
+          <label class="switch"><input type="checkbox" id="sec-social" checked/><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <!-- CTA personnalisé -->
+      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:20px;">
+        <p style="font-weight:800;margin-bottom:6px;">✏️ Texte du bouton de réservation</p>
+        <p style="font-size:.8rem;color:var(--gris);margin-bottom:12px;">Ce que voient vos clientes sur le bouton principal</p>
+        <input type="text" id="cta-text" placeholder="Réserver ce créneau" maxlength="40" style="width:100%;padding:10px 12px;border:1.5px solid var(--bord);border-radius:8px;font-size:.9rem;"/>
+        <div style="font-size:.72rem;color:var(--gris);margin-top:4px;text-align:right;" id="cta-counter">0/40</div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-save-espace">Enregistrer mon espace</button>
+      <a href="/artist.html?id=me" target="_blank" class="btn btn-ghost" style="margin-left:10px;">Voir mon profil public →</a>
+    </div>
+
   </main>
 </div>
 
@@ -475,13 +582,149 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
   await supabase.auth.signOut(); location.href = '/';
 });
 
+// ═══ MON ESPACE ═══
+const PALETTES = [
+  { id:'rose',      name:'Rose Signature', accent:'#E8547A', light:'#FDE8EF', cover:'linear-gradient(135deg,#3D0A20,#1A0A12)' },
+  { id:'or_noir',   name:'Noir & Or',      accent:'#D4AF37', light:'#FDF8E7', cover:'linear-gradient(135deg,#0D0D0D,#2a2a2a)' },
+  { id:'nude',      name:'Nude Beige',     accent:'#C8956C', light:'#FAF0E6', cover:'linear-gradient(135deg,#5C3D2E,#C8956C)' },
+  { id:'bordeaux',  name:'Bordeaux',       accent:'#8B1A2A', light:'#F9E8EA', cover:'linear-gradient(135deg,#8B1A2A,#2D0A0E)' },
+  { id:'bleu_nuit', name:'Bleu Nuit',      accent:'#4A6FA5', light:'#E8F0FA', cover:'linear-gradient(135deg,#0D1B2A,#1B3A6B)' },
+  { id:'emeraude',  name:'Émeraude',       accent:'#2E8B57', light:'#E8F5EE', cover:'linear-gradient(135deg,#0D2B1E,#1E5C3A)' },
+  { id:'violet',    name:'Violet',         accent:'#7B2D8B', light:'#F4E8FA', cover:'linear-gradient(135deg,#1A0A20,#4A1A5C)' },
+  { id:'corail',    name:'Corail',         accent:'#E8614A', light:'#FFE8E4', cover:'linear-gradient(135deg,#C0392B,#E8614A)' },
+];
+
+let currentPalette = PALETTES[0];
+let currentCoverUrl = null;
+let themeSettings = {};
+
+function initEspace() {
+  // Render palette chips
+  const grid = document.getElementById('palette-grid');
+  grid.innerHTML = PALETTES.map(p => `
+    <div class="palette-chip ${p.id === currentPalette.id ? 'selected' : ''}"
+         style="background:${p.light};" onclick="selectPalette('${p.id}')">
+      <div class="chip-dot" style="background:${p.accent};"></div>
+      <div class="chip-name" style="color:${p.accent};">${p.name}</div>
+    </div>`).join('');
+
+  // Load saved settings
+  const saved = artistData?.profile_settings || {};
+  themeSettings = saved;
+
+  if (saved.palette) {
+    const p = PALETTES.find(x => x.id === saved.palette);
+    if (p) { currentPalette = p; refreshPaletteGrid(); }
+  }
+  if (saved.cover_url) {
+    currentCoverUrl = saved.cover_url;
+    showCoverPreview(saved.cover_url);
+  }
+  if (saved.sections) {
+    document.getElementById('sec-portfolio').checked = saved.sections.portfolio !== false;
+    document.getElementById('sec-services').checked  = saved.sections.services  !== false;
+    document.getElementById('sec-avis').checked      = saved.sections.avis      !== false;
+    document.getElementById('sec-social').checked    = saved.sections.social    !== false;
+  }
+  if (saved.cta_text) document.getElementById('cta-text').value = saved.cta_text;
+
+  updateLivePreview();
+
+  // CTA counter
+  document.getElementById('cta-text').addEventListener('input', function() {
+    document.getElementById('cta-counter').textContent = this.value.length + '/40';
+    document.getElementById('prev-btn').textContent = this.value || 'Réserver ce créneau';
+  });
+}
+
+window.selectPalette = function(id) {
+  const p = PALETTES.find(x => x.id === id);
+  if (!p) return;
+  currentPalette = p;
+  refreshPaletteGrid();
+  updateLivePreview();
+};
+
+function refreshPaletteGrid() {
+  document.querySelectorAll('.palette-chip').forEach(chip => {
+    const id = chip.getAttribute('onclick').match(/'(\w+)'/)[1];
+    chip.classList.toggle('selected', id === currentPalette.id);
+  });
+}
+
+function updateLivePreview() {
+  const p = currentPalette;
+  const cover = document.getElementById('prev-cover');
+  const btn   = document.getElementById('prev-btn');
+  const avatar = document.getElementById('prev-avatar');
+
+  if (currentCoverUrl) {
+    cover.style.cssText = `height:80px;display:flex;align-items:flex-end;padding:8px 12px;background:url(${currentCoverUrl}) center/cover;`;
+  } else {
+    cover.style.cssText = `height:80px;display:flex;align-items:flex-end;padding:8px 12px;${p.cover.includes('gradient') ? 'background:' + p.cover : 'background:' + p.cover};`;
+    cover.style.background = p.cover;
+  }
+  avatar.style.background = p.accent;
+  btn.style.background    = p.accent;
+
+  const name = profileData?.full_name || 'Votre nom';
+  document.getElementById('prev-name').textContent = name.split(' ')[0] + ' ' + (name.split(' ')[1]?.[0] || '') + '.';
+  avatar.textContent = name[0] || 'A';
+}
+
+function showCoverPreview(url) {
+  document.getElementById('cover-preview-wrap').style.display = 'block';
+  document.getElementById('cover-preview-img').src = url;
+  currentCoverUrl = url;
+  updateLivePreview();
+}
+
+window.removeCover = function() {
+  currentCoverUrl = null;
+  document.getElementById('cover-preview-wrap').style.display = 'none';
+  document.getElementById('cover-preview-img').src = '';
+  updateLivePreview();
+};
+
+document.getElementById('cover-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ext  = file.name.split('.').pop();
+  const path = `${artistData?.id}/cover.${ext}`;
+  const { data: up } = await supabase.storage.from('portfolio').upload(path, file, { upsert: true });
+  if (up) {
+    const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
+    showCoverPreview(publicUrl);
+    showToast('Photo de couverture uploadée !');
+  }
+});
+
+document.getElementById('btn-save-espace').addEventListener('click', async () => {
+  const settings = {
+    palette:   currentPalette.id,
+    cover_url: currentCoverUrl || null,
+    sections: {
+      portfolio: document.getElementById('sec-portfolio').checked,
+      services:  document.getElementById('sec-services').checked,
+      avis:      document.getElementById('sec-avis').checked,
+      social:    document.getElementById('sec-social').checked,
+    },
+    cta_text: document.getElementById('cta-text').value || 'Réserver ce créneau',
+  };
+  const { error } = await supabase.from('artists').update({ profile_settings: settings }).eq('user_id', user.id);
+  if (error) { showToast('Erreur lors de la sauvegarde', 'error'); return; }
+  artistData.profile_settings = settings;
+  showToast('Votre espace a été enregistré !');
+});
+
 // Navigation onglets
 window.showTab = function(name) {
-  ['reservations','disponibilites','avis','profil','photos','services'].forEach(t => {
+  ['reservations','disponibilites','avis','profil','photos','services','espace'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
   });
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   event.currentTarget.classList.add('active');
+  if (name === 'espace') initEspace();
 };
 
 function showToast(msg) {

@@ -148,7 +148,7 @@
     </div>
 
     <!-- Portfolio -->
-    <div style="margin-bottom:32px;">
+    <div style="margin-bottom:32px;" data-section="portfolio">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Portfolio</h2>
       <div class="photo-grid" id="photo-grid">
         <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gris);">Chargement du portfolio...</div>
@@ -156,7 +156,7 @@
     </div>
 
     <!-- Avis -->
-    <div>
+    <div data-section="avis">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Avis clients <span id="review-count-title" style="color:var(--gris);font-weight:400;font-size:.9rem;"></span></h2>
       <div id="reviews-list">
         <div style="color:var(--gris);text-align:center;padding:24px;">Aucun avis pour l'instant.</div>
@@ -220,13 +220,44 @@ async function load() {
 
   if (!a) { document.getElementById('artist-name').textContent = 'Artiste introuvable'; return; }
 
+  // Appliquer les settings de personnalisation
+  const PALETTES = {
+    rose:      { accent:'#E8547A', light:'#FDE8EF', cover:'linear-gradient(135deg,#3D0A20,#1A0A12)' },
+    or_noir:   { accent:'#D4AF37', light:'#FDF8E7', cover:'linear-gradient(135deg,#0D0D0D,#2a2a2a)' },
+    nude:      { accent:'#C8956C', light:'#FAF0E6', cover:'linear-gradient(135deg,#5C3D2E,#C8956C)' },
+    bordeaux:  { accent:'#8B1A2A', light:'#F9E8EA', cover:'linear-gradient(135deg,#8B1A2A,#2D0A0E)' },
+    bleu_nuit: { accent:'#4A6FA5', light:'#E8F0FA', cover:'linear-gradient(135deg,#0D1B2A,#1B3A6B)' },
+    emeraude:  { accent:'#2E8B57', light:'#E8F5EE', cover:'linear-gradient(135deg,#0D2B1E,#1E5C3A)' },
+    violet:    { accent:'#7B2D8B', light:'#F4E8FA', cover:'linear-gradient(135deg,#1A0A20,#4A1A5C)' },
+    corail:    { accent:'#E8614A', light:'#FFE8E4', cover:'linear-gradient(135deg,#C0392B,#E8614A)' },
+  };
+  const s = a.profile_settings || {};
+  const palette = PALETTES[s.palette] || PALETTES.rose;
+  const sections = s.sections || {};
+  const ctaText  = s.cta_text || 'Réserver ce créneau';
+
+  // Injecter CSS variables
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `:root { --rose: ${palette.accent}; --rose-cl: ${palette.light}; }`;
+  document.head.appendChild(styleEl);
+
+  // Bouton CTA
+  document.getElementById('btn-book').textContent = ctaText;
+
+  // Sections conditionnelles
+  if (sections.portfolio === false) document.querySelector('[data-section="portfolio"]')?.remove();
+  if (sections.services  === false) document.getElementById('booking-card')?.remove();
+  if (sections.avis      === false) document.querySelector('[data-section="avis"]')?.remove();
+  if (sections.social    === false) document.getElementById('social-links')?.style && (document.getElementById('social-links').style.display='none');
+
   const p = a.profiles || {};
   document.title = `${p.full_name} — GlamBook`;
 
   // Cover
   const coverEl = document.getElementById('cover-img');
-  if (a.cover_url) coverEl.src = a.cover_url;
-  else coverEl.style.cssText = 'height:200px;background:linear-gradient(135deg,#FDE8EF,#F9FAFB);';
+  if (s.cover_url) { coverEl.src = s.cover_url; }
+  else if (a.cover_url) { coverEl.src = a.cover_url; }
+  else { coverEl.style.cssText = `height:240px;display:block;background:${palette.cover};`; }
 
   // Avatar
   const avatarEl = document.getElementById('avatar');
