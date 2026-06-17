@@ -100,6 +100,11 @@
           <p style="font-size:.82rem;color:var(--rose);font-weight:600;">✨ Profil artiste — Vous pourrez compléter votre profil (bio, photos, tarifs) depuis votre tableau de bord.</p>
         </div>
         <div class="field">
+          <label>Nom d'artiste <span style="color:var(--gris);font-weight:400;font-size:.8rem;">(nom de scène, pseudo)</span></label>
+          <input type="text" id="artist-name" placeholder="Ex : Nadia Beauty, Studio Glam..." autocomplete="off"/>
+          <div class="hint">Le nom affiché sur votre profil public. Laissez vide pour utiliser votre vrai nom.</div>
+        </div>
+        <div class="field">
           <label>Téléphone</label>
           <input type="tel" id="phone" placeholder="+33 6 00 00 00 00"/>
         </div>
@@ -158,19 +163,22 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Création...';
   hideMessages();
 
-  const email    = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const firstName = document.getElementById('firstname').value;
-  const lastName  = document.getElementById('lastname').value;
-  const city      = document.getElementById('city').value;
-  const phone     = document.getElementById('phone')?.value || '';
-  const region    = document.getElementById('region')?.value || '';
+  const email      = document.getElementById('email').value;
+  const password   = document.getElementById('password').value;
+  const firstName  = document.getElementById('firstname').value;
+  const lastName   = document.getElementById('lastname').value;
+  const city       = document.getElementById('city').value;
+  const phone      = document.getElementById('phone')?.value || '';
+  const region     = document.getElementById('region')?.value || '';
+  const artistName = document.getElementById('artist-name')?.value.trim() || '';
+  const displayName = (currentRole === 'artist' && artistName) ? artistName : `${firstName} ${lastName}`;
 
   const { data, error } = await supabase.auth.signUp({
     email, password,
     options: {
       data: {
         full_name: `${firstName} ${lastName}`,
+        display_name: displayName,
         role: currentRole,
         city, phone, region
       }
@@ -199,13 +207,14 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
       city, phone, region
     });
 
-    // Si artiste, créer la ligne dans artists
+    // Si artiste, créer la ligne dans artists avec le nom d'artiste
     if (currentRole === 'artist') {
       await supabase.from('artists').upsert({
-        user_id:    data.user.id,
-        is_active:  false,
-        is_verified: false,
-        rating_avg: 5,
+        user_id:      data.user.id,
+        display_name: artistName || `${firstName} ${lastName}`,
+        is_active:    false,
+        is_verified:  false,
+        rating_avg:   5,
         review_count: 0
       });
     }
