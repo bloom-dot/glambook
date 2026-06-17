@@ -48,12 +48,12 @@
 
     <!-- Rôle -->
     <div class="role-toggle">
-      <div class="role-btn active" id="role-client" onclick="setRole('client')">
+      <div class="role-btn active" id="role-client" data-role="client">
         <div class="role-icon">💄</div>
         <div class="role-name">Je suis cliente</div>
         <div class="role-desc">Je cherche une maquilleuse</div>
       </div>
-      <div class="role-btn" id="role-artist" onclick="setRole('artist')">
+      <div class="role-btn" id="role-artist" data-role="artist">
         <div class="role-icon">✨</div>
         <div class="role-name">Je suis artiste</div>
         <div class="role-desc">Je propose mes services</div>
@@ -132,14 +132,19 @@
 import { supabase } from '/js/supabase.js';
 
 let currentRole = new URLSearchParams(location.search).get('role') || 'client';
-setRole(currentRole);
 
-window.setRole = function(role) {
+function setRole(role) {
   currentRole = role;
   document.getElementById('role-client').classList.toggle('active', role === 'client');
   document.getElementById('role-artist').classList.toggle('active', role === 'artist');
   document.getElementById('artist-fields').classList.toggle('show', role === 'artist');
-};
+}
+
+document.querySelectorAll('.role-btn').forEach(btn => {
+  btn.addEventListener('click', () => setRole(btn.dataset.role));
+});
+
+setRole(currentRole);
 
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
