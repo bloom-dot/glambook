@@ -84,7 +84,13 @@
       </div>
       <div class="field">
         <label>Mot de passe</label>
-        <input type="password" id="password" placeholder="8 caractères minimum" required minlength="8" autocomplete="new-password"/>
+        <div style="position:relative;">
+          <input type="password" id="password" placeholder="8 caractères minimum" required minlength="8" autocomplete="new-password" style="padding-right:44px;"/>
+          <button type="button" id="toggle-password" aria-label="Afficher le mot de passe"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--gris);font-size:1.1rem;line-height:1;">
+            👁
+          </button>
+        </div>
         <div class="hint">Au moins 8 caractères</div>
       </div>
 
@@ -203,6 +209,13 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     if (currentRole === 'artist') location.href = '/dashboard/artist.html';
     else location.href = '/';
   }, 2500);
+});
+
+document.getElementById('toggle-password').addEventListener('click', function() {
+  const input = document.getElementById('password');
+  const show  = input.type === 'password';
+  input.type  = show ? 'text' : 'password';
+  this.textContent = show ? '🙈' : '👁';
 });
 
 function showError(msg) { const el = document.getElementById('error-msg'); el.textContent = msg; el.style.display = 'block'; }
