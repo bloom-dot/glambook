@@ -81,7 +81,38 @@
     .slot-btn:hover, .slot-btn.selected { border-color:var(--rose); background:var(--rose-cl); color:var(--rose); }
     .slot-btn.taken { opacity:.4; pointer-events:none; text-decoration:line-through; }
 
-    /* Lightbox */
+    /* Bannière unlock */
+  .unlock-banner {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: linear-gradient(135deg, #1A0A12, #3D0A20);
+    color: #fff; padding: 16px 20px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    box-shadow: 0 -4px 24px rgba(0,0,0,.3);
+  }
+  .unlock-banner .unlock-text { flex: 1; min-width: 200px; }
+  .unlock-banner strong { display: block; font-size: .95rem; font-weight: 800; margin-bottom: 2px; }
+  .unlock-banner span   { font-size: .78rem; color: rgba(255,255,255,.65); }
+  .unlock-banner .unlock-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  /* Portfolio flou pour guest */
+  .photo-blur-overlay {
+    position: relative; border-radius: 8px; overflow: hidden;
+  }
+  .photo-blur-overlay img { filter: blur(6px); transform: scale(1.05); pointer-events: none; }
+  .photo-blur-overlay::after {
+    content: '🔒'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; background: rgba(0,0,0,.25);
+  }
+
+  /* Booking guest */
+  .guest-booking-card {
+    background: #fff; border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 28px 24px; text-align: center; position: sticky; top: 80px;
+  }
+  .guest-dispo { display: inline-flex; align-items: center; gap: 6px; background: #D1FAE5; color: #065F46; border-radius: 20px; padding: 6px 14px; font-size: .82rem; font-weight: 700; margin-bottom: 16px; }
+
+  /* Lightbox */
     .lightbox {
       position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:500;
       display:none; align-items:center; justify-content:center;
@@ -211,6 +242,10 @@ if (!artistId) { location.href = '/artists.html'; }
 
 let selectedService = null, selectedSlot = null, selectedDate = null;
 
+// Vérifie si la cliente est connectée
+const currentUser = await getCurrentUser();
+const isGuest = !currentUser;
+
 async function load() {
   // Artiste
   const { data: a } = await supabase
@@ -287,20 +322,25 @@ async function load() {
   document.getElementById('specialties-tags').innerHTML = (a.specialties || [])
     .map(s => `<span class="tag">${s}</span>`).join('');
 
-  // Réseaux sociaux
-  const socials = [];
-  if (a.instagram) socials.push(`<a class="social-link" href="${a.instagram}" target="_blank">📸 Instagram</a>`);
-  if (a.tiktok)    socials.push(`<a class="social-link" href="${a.tiktok}"    target="_blank">🎵 TikTok</a>`);
-  if (a.youtube)   socials.push(`<a class="social-link" href="${a.youtube}"   target="_blank">▶️ YouTube</a>`);
-  if (a.website)   socials.push(`<a class="social-link" href="${a.website}"   target="_blank">🌐 Site web</a>`);
-  document.getElementById('social-links').innerHTML = socials.join('');
+  // Réseaux sociaux — masqués pour les guests
+  if (!isGuest) {
+    const socials = [];
+    if (a.instagram) socials.push(`<a class="social-link" href="${a.instagram}" target="_blank">📸 Instagram</a>`);
+    if (a.tiktok)    socials.push(`<a class="social-link" href="${a.tiktok}"    target="_blank">🎵 TikTok</a>`);
+    if (a.youtube)   socials.push(`<a class="social-link" href="${a.youtube}"   target="_blank">▶️ YouTube</a>`);
+    if (a.website)   socials.push(`<a class="social-link" href="${a.website}"   target="_blank">🌐 Site web</a>`);
+    document.getElementById('social-links').innerHTML = socials.join('');
+  } else {
+    document.getElementById('social-links').innerHTML =
+      `<span style="font-size:.78rem;color:var(--gris);">🔒 Réseaux sociaux — <a href="/auth/register.html" style="color:var(--rose);font-weight:700;">Créer un compte</a> pour voir</span>`;
+  }
 
-  // Services
+  // Services — visibles pour tous (pour donner envie), mais réservation bloquée
   const { data: services } = await supabase.from('services').select('*').eq('artist_id', artistId).order('price_cents');
   const sl = document.getElementById('services-list');
   if (services && services.length > 0) {
     sl.innerHTML = services.map(s => `
-      <div class="service-option" data-id="${s.id}" data-price="${s.price_cents}" data-name="${s.name}" onclick="selectService(this)">
+      <div class="service-option" data-id="${s.id}" data-price="${s.price_cents}" data-name="${s.name}" onclick="${isGuest ? 'showGuestPrompt()' : 'selectService(this)'}">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span class="svc-name">${s.name}</span>
           <span class="svc-price">${(s.price_cents/100).toFixed(0)}€</span>
@@ -311,26 +351,36 @@ async function load() {
     sl.innerHTML = '<p style="color:var(--gris);font-size:.85rem;">Tarifs sur demande</p>';
   }
 
-  // Portfolio
+  // Portfolio — 2 photos visibles + reste flouté pour les guests
   const { data: photos } = await supabase.from('artist_photos').select('*').eq('artist_id', artistId).order('created_at', { ascending: false }).limit(12);
   const pg = document.getElementById('photo-grid');
   if (photos && photos.length > 0) {
-    pg.innerHTML = photos.map(ph => `<img src="${ph.url}" alt="${ph.caption||''}" loading="lazy" onclick="openLightbox('${ph.url}')" onerror="this.style.background='#FDE8EF'">`).join('');
+    if (isGuest) {
+      const visible = photos.slice(0, 2);
+      const locked  = photos.slice(2);
+      pg.innerHTML =
+        visible.map(ph => `<img src="${ph.url}" alt="" loading="lazy" onerror="this.style.background='#FDE8EF'">`).join('') +
+        locked.map(ph  => `<div class="photo-blur-overlay"><img src="${ph.url}" alt="" loading="lazy"/></div>`).join('') +
+        (locked.length > 0 ? `<div style="grid-column:1/-1;text-align:center;padding:14px 0;">
+          <a href="/auth/register.html?redirect=${encodeURIComponent(location.href)}" class="btn btn-primary btn-sm">
+            Voir les ${locked.length} autres photos →
+          </a></div>` : '');
+    } else {
+      pg.innerHTML = photos.map(ph => `<img src="${ph.url}" alt="${ph.caption||''}" loading="lazy" onclick="openLightbox('${ph.url}')" onerror="this.style.background='#FDE8EF'">`).join('');
+    }
   } else {
     pg.innerHTML = '<p style="grid-column:1/-1;color:var(--gris);text-align:center;padding:24px;">Portfolio en cours de construction</p>';
   }
 
-  // Avis
+  // Avis — 1 avis visible pour les guests
   const { data: reviews } = await supabase
-    .from('reviews')
-    .select(`*, profiles(full_name)`)
-    .eq('artist_id', artistId)
-    .order('created_at', { ascending: false })
-    .limit(10);
+    .from('reviews').select(`*, profiles(full_name)`)
+    .eq('artist_id', artistId).order('created_at', { ascending: false })
+    .limit(isGuest ? 1 : 10);
 
   const rl = document.getElementById('reviews-list');
   if (reviews && reviews.length > 0) {
-    document.getElementById('review-count-title').textContent = `(${reviews.length})`;
+    document.getElementById('review-count-title').textContent = `(${a.review_count || reviews.length})`;
     rl.innerHTML = reviews.map(r => `
       <div class="review-card">
         <div class="review-header">
@@ -340,10 +390,55 @@ async function load() {
         <div style="margin-bottom:6px;" class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
         <p class="review-text">${r.comment || ''}</p>
       </div>`).join('');
+    if (isGuest && a.review_count > 1) {
+      rl.innerHTML += `<div style="text-align:center;padding:16px;background:var(--rose-cl);border-radius:10px;margin-top:8px;">
+        <p style="font-size:.85rem;font-weight:600;margin-bottom:8px;">+ ${a.review_count - 1} avis supplémentaires</p>
+        <a href="/auth/register.html?redirect=${encodeURIComponent(location.href)}" class="btn btn-primary btn-sm">Voir tous les avis</a>
+      </div>`;
+    }
   } else {
     rl.innerHTML = '<p style="color:var(--gris);text-align:center;padding:24px;">Soyez la première à laisser un avis !</p>';
   }
+
+  // Colonne réservation — remplacée pour les guests
+  if (isGuest) {
+    document.getElementById('booking-card').outerHTML = `
+      <div class="guest-booking-card">
+        <div class="guest-dispo">✓ Disponible</div>
+        <p style="font-weight:800;font-size:1.05rem;margin-bottom:8px;">Prenez rendez-vous avec ${(p.full_name||'').split(' ')[0]}</p>
+        <p style="font-size:.82rem;color:var(--gris);margin-bottom:20px;">Créez un compte gratuit pour voir les créneaux disponibles et réserver en ligne.</p>
+        <a href="/auth/register.html?redirect=${encodeURIComponent(location.href)}" class="btn btn-primary btn-full" style="display:block;text-align:center;margin-bottom:10px;">
+          Créer un compte gratuit
+        </a>
+        <a href="/auth/login.html?redirect=${encodeURIComponent(location.href)}" class="btn btn-ghost btn-full" style="display:block;text-align:center;">
+          J'ai déjà un compte
+        </a>
+        <p style="font-size:.72rem;color:var(--gris);text-align:center;margin-top:12px;">Inscription gratuite · Sans CB requise</p>
+      </div>`;
+  }
+
+  // Bannière unlock pour les guests
+  if (isGuest) {
+    const banner = document.createElement('div');
+    banner.className = 'unlock-banner';
+    banner.innerHTML = `
+      <div class="unlock-text">
+        <strong>Débloquez le profil complet</strong>
+        <span>Créneaux, tous les avis, réseaux sociaux et réservation en ligne</span>
+      </div>
+      <div class="unlock-actions">
+        <a href="/auth/login.html?redirect=${encodeURIComponent(location.href)}" class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3);">Connexion</a>
+        <a href="/auth/register.html?redirect=${encodeURIComponent(location.href)}" class="btn btn-primary btn-sm">Créer un compte</a>
+      </div>`;
+    document.body.appendChild(banner);
+    // Ajouter padding bas pour que le contenu ne soit pas caché sous la bannière
+    document.body.style.paddingBottom = '80px';
+  }
 }
+
+window.showGuestPrompt = function() {
+  location.href = `/auth/register.html?redirect=${encodeURIComponent(location.href)}`;
+};
 
 // Sélection service
 window.selectService = function(el) {
