@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>GlamBook — Réservez votre maquilleuse professionnelle</title>
+  <meta name="description" content="Trouvez et réservez une maquilleuse professionnelle près de chez vous. Photos de réalisations, avis clients, disponibilités en temps réel."/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="icon" href="/icons/icon-192.png"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1A0A12 0%, #3D0A20 50%, #1A0A12 100%);
+      padding: 80px 20px 60px;
+      text-align: center; color: #fff;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 60% 40%, rgba(232,84,122,.25) 0%, transparent 70%);
+    }
+    .hero-badge {
+      display: inline-block; background: rgba(212,175,55,.15);
+      border: 1px solid rgba(212,175,55,.4); color: #D4AF37;
+      font-size: .78rem; font-weight: 700; letter-spacing: .1em;
+      padding: 5px 14px; border-radius: 20px; margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 900; line-height: 1.15; margin-bottom: 16px;
+    }
+    .hero h1 span { color: #E8547A; }
+    .hero p { font-size: 1.05rem; color: rgba(255,255,255,.7); margin-bottom: 40px; max-width: 560px; margin-left: auto; margin-right: auto; }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+      margin-top: 40px; padding-top: 40px;
+      border-top: 1px solid rgba(255,255,255,.1);
+    }
+    .hero-stat .num { font-size: 1.7rem; font-weight: 900; color: #E8547A; }
+    .hero-stat .lbl { font-size: .78rem; color: rgba(255,255,255,.5); letter-spacing: .06em; }
+
+    /* ── SEARCH BOX ── */
+    .search-box {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.25);
+      padding: 24px 28px; max-width: 700px;
+      margin: 0 auto; position: relative; z-index: 2;
+    }
+    .search-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .search-row .field { flex: 1; min-width: 160px; margin: 0; }
+    .search-row .field label { font-size: .78rem; color: #6B7280; margin-bottom: 5px; }
+    .search-row .field input, .search-row .field select {
+      padding: 11px 12px; font-size: .9rem;
+    }
+    .search-sep { width: 1px; background: #E5E7EB; align-self: stretch; margin: 4px 0; }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 28px; }
+    .step-card { text-align: center; padding: 32px 20px; }
+    .step-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: var(--rose-cl); color: var(--rose);
+      font-size: 1.5rem; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 16px;
+    }
+    .step-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .step-card p { font-size: .88rem; color: var(--gris); }
+
+    /* ── FEATURED ── */
+    .section-white { background: #fff; }
+
+    /* ── CTA ARTISTE ── */
+    .cta-artiste {
+      background: linear-gradient(135deg, var(--rose) 0%, var(--rose-f) 100%);
+      border-radius: 20px; padding: 52px 40px; text-align: center; color: #fff;
+    }
+    .cta-artiste h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 12px; }
+    .cta-artiste p { font-size: 1rem; opacity: .85; margin-bottom: 28px; }
+    .cta-artiste .btn-gold { font-size: 1rem; padding: 15px 32px; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+    <div class="nav-links">
+      <a href="/artists.html" class="hide-mobile">Trouver une maquilleuse</a>
+      <a href="/auth/login.html">Connexion</a>
+      <a href="/auth/register.html" class="btn-nav btn">Inscription</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div style="position:relative;z-index:2;">
+    <div class="hero-badge">✨ LA PLATEFORME N°1 DES MAKEUP ARTISTS</div>
+    <h1>Trouvez votre<br/><span>maquilleuse idéale</span><br/>en quelques clics</h1>
+    <p>Parcourez les profils, consultez les réalisations et réservez directement en ligne. Simple, rapide, sécurisé.</p>
+
+    <!-- Search -->
+    <div class="search-box">
+      <div class="search-row">
+        <div class="field">
+          <label>Ville ou région</label>
+          <input type="text" id="search-city" placeholder="Paris, Lyon, Marseille..."/>
+        </div>
+        <div class="search-sep"></div>
+        <div class="field">
+          <label>Date souhaitée</label>
+          <input type="date" id="search-date"/>
+        </div>
+        <div class="field">
+          <label>Prestation</label>
+          <select id="search-service">
+            <option value="">Toutes</option>
+            <option value="mariage">Mariage</option>
+            <option value="soiree">Soirée</option>
+            <option value="quotidien">Quotidien</option>
+            <option value="editorial">Éditorial / Shooting</option>
+            <option value="scene">Scène / Spectacle</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="doSearch()">
+        Rechercher une maquilleuse
+      </button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num" id="stat-artists">–</div><div class="lbl">MAKEUP ARTISTS</div></div>
+      <div class="hero-stat"><div class="num" id="stat-bookings">–</div><div class="lbl">RÉSERVATIONS</div></div>
+      <div class="hero-stat"><div class="num" id="stat-rating">4.9★</div><div class="lbl">NOTE MOYENNE</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMENT ÇA MARCHE -->
+<section class="section">
+  <div class="container">
+    <div style="text-align:center; margin-bottom:40px;">
+      <h2 class="section-title">Comment ça marche ?</h2>
+      <p class="section-sub">Réserver une maquilleuse professionnelle n'a jamais été aussi simple</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-icon">🔍</div>
+        <h3>Recherchez</h3>
+        <p>Entrez votre ville et la date souhaitée pour voir les maquilleuses disponibles près de vous.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">💜</div>
+        <h3>Comparez</h3>
+        <p>Consultez les profils, les portfolios photos, les avis clients et les tarifs.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">📅</div>
+        <h3>Réservez</h3>
+        <p>Choisissez un créneau disponible et confirmez votre réservation en ligne en toute sécurité.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">✨</div>
+        <h3>Profitez</h3>
+        <p>Votre maquilleuse vous contacte pour confirmer les détails. Il ne reste plus qu'à briller !</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARTISTES EN VEDETTE -->
+<section class="section section-white">
+  <div class="container">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:12px;">
+      <div>
+        <h2 class="section-title" style="margin-bottom:4px;">Maquilleuses en vedette</h2>
+        <p style="color:var(--gris); font-size:.9rem;">Les plus appréciées de notre plateforme</p>
+      </div>
+      <a href="/artists.html" class="btn btn-ghost btn-sm">Voir toutes →</a>
+    </div>
+    <div class="artists-grid" id="featured-grid">
+      <!-- Chargé dynamiquement -->
+      <div class="card" style="padding:60px 20px; text-align:center; color:var(--gris); grid-column:1/-1;">
+        <div class="spinner" style="margin:0 auto 12px; border-color:rgba(232,84,122,.2); border-top-color:var(--rose);"></div>
+        Chargement...
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA ARTISTE -->
+<section class="section">
+  <div class="container">
+    <div class="cta-artiste">
+      <h2>Vous êtes makeup artist ?</h2>
+      <p>Rejoignez GlamBook et développez votre clientèle. Créez votre profil gratuitement, gérez vos disponibilités et recevez des réservations directement en ligne.</p>
+      <a href="/auth/register.html?role=artist" class="btn btn-gold">Créer mon profil artiste gratuitement</a>
+    </div>
+  </div>
+</section>
+
+<footer style="background:var(--noir); color:rgba(255,255,255,.5); text-align:center; padding:28px 20px; font-size:.82rem;">
+  <div style="color:#E8547A; font-weight:800; font-size:1.1rem; margin-bottom:8px;">Glam<span style="color:#D4AF37;">Book</span></div>
+  © 2026 GlamBook — La plateforme des makeup artists professionnels
+  <div style="margin-top:8px;font-size:.75rem;">
+    <a href="#" style="color:rgba(255,255,255,.4); text-decoration:none; margin:0 8px;">Mentions légales</a>
+    <a href="#" style="color:rgba(255,255,255,.4); text-decoration:none; margin:0 8px;">CGU</a>
+    <a href="#" style="color:rgba(255,255,255,.4); text-decoration:none; margin:0 8px;">Contact</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { supabase } from '/js/supabase.js';
+
+  // Date min = aujourd'hui
+  document.getElementById('search-date').min = new Date().toISOString().split('T')[0];
+
+  // Stats
+  async function loadStats() {
+    const { count: artistCount } = await supabase.from('artists').select('*', { count: 'exact', head: true });
+    const { count: bookingCount } = await supabase.from('bookings').select('*', { count: 'exact', head: true });
+    document.getElementById('stat-artists').textContent = (artistCount || 0) + '+';
+    document.getElementById('stat-bookings').textContent = (bookingCount || 0) + '+';
+  }
+
+  // Artistes en vedette
+  async function loadFeatured() {
+    const { data: artists } = await supabase
+      .from('artists')
+      .select(`*, profiles(full_name, avatar_url, city)`)
+      .eq('is_active', true)
+      .order('rating_avg', { ascending: false })
+      .limit(6);
+
+    const grid = document.getElementById('featured-grid');
+    if (!artists || artists.length === 0) {
+      grid.innerHTML = '<p style="color:var(--gris);grid-column:1/-1;text-align:center;padding:40px 0;">Bientôt disponible — soyez la première à rejoindre GlamBook !</p>';
+      return;
+    }
+    grid.innerHTML = artists.map(a => artistCardHTML(a)).join('');
+  }
+
+  function artistCardHTML(a) {
+    const p = a.profiles || {};
+    const stars = '★'.repeat(Math.round(a.rating_avg || 5)) + '☆'.repeat(5 - Math.round(a.rating_avg || 5));
+    return `
+      <a href="/artist.html?id=${a.id}" class="artist-card">
+        <img class="artist-card-cover" src="${a.cover_url || '/img/placeholder-cover.jpg'}" alt="Réalisations de ${p.full_name}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#FDE8EF,#F9FAFB)'"/>
+        <div class="artist-card-body">
+          <div class="artist-card-header">
+            <img class="artist-avatar" src="${p.avatar_url || ''}" alt="${p.full_name}" onerror="this.outerHTML='<div class=\'artist-avatar avatar-placeholder\'>${(p.full_name||'?')[0]}</div>'"/>
+            <div>
+              <div class="artist-name">${p.full_name || 'Maquilleuse'}</div>
+              <div class="artist-city">📍 ${p.city || 'France'}</div>
+            </div>
+          </div>
+          <div class="tags">${(a.specialties || []).slice(0,3).map(s => `<span class="tag">${s}</span>`).join('')}</div>
+          <div class="artist-card-meta">
+            <div><span class="stars">${stars}</span> <span style="font-size:.8rem;color:var(--gris);">(${a.review_count || 0})</span></div>
+            <div class="artist-price">À partir de ${a.price_from || '–'}€</div>
+          </div>
+        </div>
+      </a>`;
+  }
+
+  window.doSearch = function() {
+    const city    = document.getElementById('search-city').value;
+    const date    = document.getElementById('search-date').value;
+    const service = document.getElementById('search-service').value;
+    const params  = new URLSearchParams();
+    if (city)    params.set('city', city);
+    if (date)    params.set('date', date);
+    if (service) params.set('service', service);
+    window.location.href = '/artists.html?' + params.toString();
+  };
+
+  loadStats();
+  loadFeatured();
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+</script>
+</body>
+</html>

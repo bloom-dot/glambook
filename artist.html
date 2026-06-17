@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Profil maquilleuse — GlamBook</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    .cover { width:100%; height:320px; object-fit:cover; background:linear-gradient(135deg,#FDE8EF,#F9FAFB); display:block; }
+    .profile-header {
+      background:#fff; border-bottom:1px solid var(--bord);
+      padding:0 20px 24px;
+    }
+    .profile-header-inner { max-width:1100px; margin:0 auto; }
+    .profile-top { display:flex; align-items:flex-end; gap:20px; margin-top:-48px; flex-wrap:wrap; }
+    .profile-avatar {
+      width:96px; height:96px; border-radius:50%; object-fit:cover;
+      border:4px solid #fff; box-shadow:0 4px 16px rgba(0,0,0,.15); flex-shrink:0;
+      background:linear-gradient(135deg,#FDE8EF,#E8547A);
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-size:2rem; font-weight:800;
+    }
+    .profile-info { flex:1; padding-top:52px; }
+    .profile-name { font-size:1.6rem; font-weight:900; margin-bottom:4px; }
+    .profile-city { color:var(--gris); font-size:.9rem; margin-bottom:8px; }
+    .profile-meta { display:flex; gap:16px; flex-wrap:wrap; align-items:center; }
+    .profile-rating { font-size:1rem; font-weight:700; }
+    .profile-actions { display:flex; gap:10px; padding-top:52px; flex-shrink:0; flex-wrap:wrap; }
+    .social-link {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 14px; border-radius:20px; font-size:.8rem; font-weight:600;
+      text-decoration:none; border:1.5px solid var(--bord); color:var(--gris);
+      transition:all .15s;
+    }
+    .social-link:hover { border-color:var(--rose); color:var(--rose); }
+
+    .profile-body { max-width:1100px; margin:0 auto; padding:32px 20px; display:grid; grid-template-columns:1fr 340px; gap:32px; }
+    @media(max-width:768px){ .profile-body { grid-template-columns:1fr; } }
+
+    /* Portfolio */
+    .photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .photo-grid img {
+      width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer;
+      transition:transform .2s; background:#FDE8EF;
+    }
+    .photo-grid img:hover { transform:scale(1.03); }
+
+    /* Avis */
+    .review-card { padding:16px; border:1px solid var(--bord); border-radius:var(--radius-sm); margin-bottom:12px; }
+    .review-header { display:flex; justify-content:space-between; margin-bottom:8px; }
+    .review-author { font-weight:700; font-size:.9rem; }
+    .review-date   { font-size:.78rem; color:var(--gris); }
+    .review-text   { font-size:.88rem; color:#4B5563; line-height:1.5; }
+
+    /* Booking sidebar */
+    .booking-card {
+      background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:24px; position:sticky; top:80px;
+    }
+    .booking-card h3 { font-size:1.1rem; font-weight:800; margin-bottom:4px; }
+    .booking-price { font-size:1.5rem; font-weight:900; color:var(--rose); margin-bottom:20px; }
+    .service-option {
+      border:1.5px solid var(--bord); border-radius:var(--radius-sm);
+      padding:12px 14px; margin-bottom:8px; cursor:pointer; transition:all .15s;
+    }
+    .service-option:hover, .service-option.selected {
+      border-color:var(--rose); background:var(--rose-cl);
+    }
+    .service-option .svc-name { font-weight:700; font-size:.9rem; }
+    .service-option .svc-price { font-size:.82rem; color:var(--rose); font-weight:700; }
+    .service-option .svc-dur   { font-size:.78rem; color:var(--gris); }
+
+    .slots-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:12px 0; }
+    .slot-btn {
+      padding:8px 4px; border:1.5px solid var(--bord); border-radius:6px;
+      font-size:.78rem; font-weight:600; cursor:pointer; text-align:center;
+      background:#fff; transition:all .15s;
+    }
+    .slot-btn:hover, .slot-btn.selected { border-color:var(--rose); background:var(--rose-cl); color:var(--rose); }
+    .slot-btn.taken { opacity:.4; pointer-events:none; text-decoration:line-through; }
+
+    /* Lightbox */
+    .lightbox {
+      position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:500;
+      display:none; align-items:center; justify-content:center;
+    }
+    .lightbox.open { display:flex; }
+    .lightbox img { max-width:90vw; max-height:90vh; border-radius:8px; }
+    .lightbox-close {
+      position:absolute; top:20px; right:24px; color:#fff; font-size:2rem;
+      cursor:pointer; background:none; border:none; line-height:1;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+    <div class="nav-links">
+      <a href="/artists.html" class="hide-mobile">← Retour</a>
+      <a href="/auth/login.html">Connexion</a>
+      <a href="/auth/register.html" class="btn-nav btn">Inscription</a>
+    </div>
+  </div>
+</nav>
+
+<img class="cover" id="cover-img" src="" alt="Portfolio"/>
+
+<div class="profile-header">
+  <div class="profile-header-inner">
+    <div class="profile-top">
+      <div class="profile-avatar" id="avatar">?</div>
+      <div class="profile-info">
+        <h1 class="profile-name" id="artist-name">Chargement...</h1>
+        <div class="profile-city" id="artist-city"></div>
+        <div class="profile-meta">
+          <div class="profile-rating">
+            <span class="stars" id="stars-display"></span>
+            <span id="rating-text" style="font-size:.85rem;color:var(--gris);margin-left:6px;"></span>
+          </div>
+          <div id="badges-zone"></div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;" id="social-links"></div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-share">Partager</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="profile-body">
+  <!-- COLONNE GAUCHE -->
+  <div>
+    <!-- Bio -->
+    <div style="margin-bottom:32px;">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:12px;">À propos</h2>
+      <p id="artist-bio" style="color:#4B5563;line-height:1.7;"></p>
+    </div>
+
+    <!-- Spécialités -->
+    <div style="margin-bottom:32px;">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:12px;">Spécialités</h2>
+      <div class="tags" id="specialties-tags"></div>
+    </div>
+
+    <!-- Portfolio -->
+    <div style="margin-bottom:32px;">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Portfolio</h2>
+      <div class="photo-grid" id="photo-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gris);">Chargement du portfolio...</div>
+      </div>
+    </div>
+
+    <!-- Avis -->
+    <div>
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Avis clients <span id="review-count-title" style="color:var(--gris);font-weight:400;font-size:.9rem;"></span></h2>
+      <div id="reviews-list">
+        <div style="color:var(--gris);text-align:center;padding:24px;">Aucun avis pour l'instant.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLONNE DROITE — RÉSERVATION -->
+  <div>
+    <div class="booking-card" id="booking-card">
+      <h3>Réserver</h3>
+      <div class="booking-price" id="booking-price">À partir de –€</div>
+
+      <div class="field">
+        <label>Choisir une prestation</label>
+        <div id="services-list"></div>
+      </div>
+
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="book-date" style="width:100%;padding:10px 12px;border:1.5px solid var(--bord);border-radius:8px;font-size:.9rem;"/>
+      </div>
+
+      <div id="slots-section" style="display:none;">
+        <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:8px;">Créneaux disponibles</label>
+        <div class="slots-grid" id="slots-grid"></div>
+      </div>
+
+      <button class="btn btn-primary btn-full" id="btn-book" disabled style="margin-top:16px;">
+        Réserver ce créneau
+      </button>
+      <p style="font-size:.75rem;color:var(--gris);text-align:center;margin-top:10px;">
+        Paiement sécurisé · Annulation 48h avant
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt=""/>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { supabase, getCurrentUser } from '/js/supabase.js';
+
+const artistId = new URLSearchParams(location.search).get('id');
+if (!artistId) { location.href = '/artists.html'; }
+
+let selectedService = null, selectedSlot = null, selectedDate = null;
+
+async function load() {
+  // Artiste
+  const { data: a } = await supabase
+    .from('artists')
+    .select(`*, profiles(full_name, avatar_url, city, region, phone)`)
+    .eq('id', artistId).single();
+
+  if (!a) { document.getElementById('artist-name').textContent = 'Artiste introuvable'; return; }
+
+  const p = a.profiles || {};
+  document.title = `${p.full_name} — GlamBook`;
+
+  // Cover
+  const coverEl = document.getElementById('cover-img');
+  if (a.cover_url) coverEl.src = a.cover_url;
+  else coverEl.style.cssText = 'height:200px;background:linear-gradient(135deg,#FDE8EF,#F9FAFB);';
+
+  // Avatar
+  const avatarEl = document.getElementById('avatar');
+  if (p.avatar_url) {
+    avatarEl.innerHTML = `<img src="${p.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="${p.full_name}"/>`;
+  } else {
+    avatarEl.textContent = (p.full_name || '?')[0];
+  }
+
+  document.getElementById('artist-name').textContent = p.full_name || 'Maquilleuse';
+  document.getElementById('artist-city').textContent = '📍 ' + (p.city || p.region || 'France');
+  document.getElementById('artist-bio').textContent = a.bio || 'Maquilleuse professionnelle passionnée.';
+  document.getElementById('booking-price').textContent = a.price_from ? `À partir de ${a.price_from}€` : 'Sur devis';
+
+  // Rating
+  const rating = (a.rating_avg || 5).toFixed(1);
+  const full   = Math.round(a.rating_avg || 5);
+  document.getElementById('stars-display').textContent = '★'.repeat(full) + '☆'.repeat(5 - full);
+  document.getElementById('rating-text').textContent   = `${rating} (${a.review_count || 0} avis)`;
+
+  // Badges
+  const bz = document.getElementById('badges-zone');
+  if (a.is_verified) bz.innerHTML += '<span class="badge badge-vert">✓ Vérifiée</span> ';
+  if (a.review_count >= 10) bz.innerHTML += '<span class="badge badge-or">⭐ Top artiste</span>';
+
+  // Spécialités
+  document.getElementById('specialties-tags').innerHTML = (a.specialties || [])
+    .map(s => `<span class="tag">${s}</span>`).join('');
+
+  // Réseaux sociaux
+  const socials = [];
+  if (a.instagram) socials.push(`<a class="social-link" href="${a.instagram}" target="_blank">📸 Instagram</a>`);
+  if (a.tiktok)    socials.push(`<a class="social-link" href="${a.tiktok}"    target="_blank">🎵 TikTok</a>`);
+  if (a.youtube)   socials.push(`<a class="social-link" href="${a.youtube}"   target="_blank">▶️ YouTube</a>`);
+  if (a.website)   socials.push(`<a class="social-link" href="${a.website}"   target="_blank">🌐 Site web</a>`);
+  document.getElementById('social-links').innerHTML = socials.join('');
+
+  // Services
+  const { data: services } = await supabase.from('services').select('*').eq('artist_id', artistId).order('price_cents');
+  const sl = document.getElementById('services-list');
+  if (services && services.length > 0) {
+    sl.innerHTML = services.map(s => `
+      <div class="service-option" data-id="${s.id}" data-price="${s.price_cents}" data-name="${s.name}" onclick="selectService(this)">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="svc-name">${s.name}</span>
+          <span class="svc-price">${(s.price_cents/100).toFixed(0)}€</span>
+        </div>
+        <div class="svc-dur">${s.duration_min} min · ${s.description || ''}</div>
+      </div>`).join('');
+  } else {
+    sl.innerHTML = '<p style="color:var(--gris);font-size:.85rem;">Tarifs sur demande</p>';
+  }
+
+  // Portfolio
+  const { data: photos } = await supabase.from('artist_photos').select('*').eq('artist_id', artistId).order('created_at', { ascending: false }).limit(12);
+  const pg = document.getElementById('photo-grid');
+  if (photos && photos.length > 0) {
+    pg.innerHTML = photos.map(ph => `<img src="${ph.url}" alt="${ph.caption||''}" loading="lazy" onclick="openLightbox('${ph.url}')" onerror="this.style.background='#FDE8EF'">`).join('');
+  } else {
+    pg.innerHTML = '<p style="grid-column:1/-1;color:var(--gris);text-align:center;padding:24px;">Portfolio en cours de construction</p>';
+  }
+
+  // Avis
+  const { data: reviews } = await supabase
+    .from('reviews')
+    .select(`*, profiles(full_name)`)
+    .eq('artist_id', artistId)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const rl = document.getElementById('reviews-list');
+  if (reviews && reviews.length > 0) {
+    document.getElementById('review-count-title').textContent = `(${reviews.length})`;
+    rl.innerHTML = reviews.map(r => `
+      <div class="review-card">
+        <div class="review-header">
+          <span class="review-author">${r.profiles?.full_name || 'Cliente'}</span>
+          <span class="review-date">${new Date(r.created_at).toLocaleDateString('fr-FR')}</span>
+        </div>
+        <div style="margin-bottom:6px;" class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+        <p class="review-text">${r.comment || ''}</p>
+      </div>`).join('');
+  } else {
+    rl.innerHTML = '<p style="color:var(--gris);text-align:center;padding:24px;">Soyez la première à laisser un avis !</p>';
+  }
+}
+
+// Sélection service
+window.selectService = function(el) {
+  document.querySelectorAll('.service-option').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedService = { id: el.dataset.id, price: el.dataset.price, name: el.dataset.name };
+  checkCanBook();
+};
+
+// Sélection date → charger créneaux
+document.getElementById('book-date').addEventListener('change', async function() {
+  selectedDate = this.value;
+  selectedSlot = null;
+  const sec  = document.getElementById('slots-section');
+  const grid = document.getElementById('slots-grid');
+  grid.innerHTML = '<span style="color:var(--gris);font-size:.82rem;">Chargement...</span>';
+  sec.style.display = 'block';
+
+  const { data: avail } = await supabase
+    .from('availabilities')
+    .select('*')
+    .eq('artist_id', artistId)
+    .eq('date', selectedDate);
+
+  if (!avail || avail.length === 0) {
+    grid.innerHTML = '<span style="color:var(--gris);font-size:.82rem;grid-column:1/-1;">Aucun créneau ce jour-là</span>';
+  } else {
+    grid.innerHTML = avail.map(slot =>
+      `<button class="slot-btn ${slot.is_booked ? 'taken' : ''}" data-id="${slot.id}" data-time="${slot.time_slot}" onclick="selectSlot(this)">
+         ${slot.time_slot}
+       </button>`
+    ).join('');
+  }
+  checkCanBook();
+});
+
+window.selectSlot = function(el) {
+  document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSlot = { id: el.dataset.id, time: el.dataset.time };
+  checkCanBook();
+};
+
+function checkCanBook() {
+  document.getElementById('btn-book').disabled = !(selectedService && selectedDate && selectedSlot);
+}
+
+document.getElementById('btn-book').addEventListener('click', async () => {
+  const user = await getCurrentUser();
+  if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.href)}`; return; }
+  const params = new URLSearchParams({
+    artist: artistId,
+    service: selectedService.id,
+    slot: selectedSlot.id,
+    date: selectedDate,
+    time: selectedSlot.time
+  });
+  location.href = '/booking.html?' + params.toString();
+});
+
+document.getElementById('btn-share').addEventListener('click', () => {
+  if (navigator.share) navigator.share({ title: document.title, url: location.href });
+  else { navigator.clipboard.writeText(location.href); showToast('Lien copié !'); }
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Lightbox
+window.openLightbox = function(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+};
+window.closeLightbox = function() {
+  document.getElementById('lightbox').classList.remove('open');
+};
+
+document.getElementById('book-date').min = new Date().toISOString().split('T')[0];
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mes réservations — GlamBook</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    body { background: #F3F4F6; }
+    .dash-wrap { max-width: 800px; margin: 0 auto; padding: 28px 20px; }
+    .dash-title { font-size: 1.4rem; font-weight: 900; margin-bottom: 4px; }
+    .dash-sub   { font-size: .88rem; color: var(--gris); margin-bottom: 28px; }
+    .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--bord); margin-bottom: 24px; }
+    .tab { padding: 10px 18px; font-size: .88rem; font-weight: 700; color: var(--gris); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab.active { color: var(--rose); border-bottom-color: var(--rose); }
+    .booking-card {
+      background: #fff; border-radius: var(--radius); padding: 20px; margin-bottom: 14px;
+      box-shadow: var(--shadow); display: flex; gap: 16px; align-items: flex-start;
+    }
+    .bk-date { background: var(--rose-cl); color: var(--rose); border-radius: 10px; padding: 10px 14px; text-align: center; flex-shrink: 0; min-width: 56px; }
+    .bk-date .day { font-size: 1.4rem; font-weight: 900; line-height: 1; }
+    .bk-date .mon { font-size: .65rem; font-weight: 700; text-transform: uppercase; }
+    .bk-info { flex: 1; }
+    .bk-artist { font-weight: 800; font-size: .95rem; color: var(--noir); }
+    .bk-service { font-size: .82rem; color: var(--gris); margin-top: 2px; }
+    .bk-meta { font-size: .78rem; color: var(--gris); margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .bk-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .bk-price { font-size: 1rem; font-weight: 900; color: var(--rose); }
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 700; }
+    .status-confirmed { background: #D1FAE5; color: #065F46; }
+    .status-pending   { background: #FEF3C7; color: #92400E; }
+    .status-cancelled { background: #FEE2E2; color: #991B1B; }
+    .status-done      { background: #EDE9FE; color: #5B21B6; }
+
+    /* Review modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; display: none; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .stars-input { display: flex; gap: 6px; margin: 12px 0; }
+    .star-btn { font-size: 1.8rem; cursor: pointer; color: #D1D5DB; transition: color .1s; }
+    .star-btn.active { color: var(--or); }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--gris); }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:16px;">
+      <a href="/artists.html">Trouver une artiste</a>
+      <button class="btn btn-ghost btn-sm" id="btn-logout">Déconnexion</button>
+    </div>
+  </div>
+</nav>
+
+<div class="dash-wrap">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+    <div style="width:52px;height:52px;border-radius:50%;background:var(--rose-cl);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:var(--rose);" id="avatar-initials">?</div>
+    <div>
+      <h1 class="dash-title" id="client-name">Mon espace</h1>
+      <p class="dash-sub" style="margin:0;" id="client-email"></p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('upcoming',this)">A venir</div>
+    <div class="tab" onclick="showTab('past',this)">Historique</div>
+    <div class="tab" onclick="showTab('cancelled',this)">Annulées</div>
+  </div>
+
+  <div id="bookings-container"><div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div></div>
+</div>
+
+<!-- Modal avis -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal">
+    <h3 style="font-weight:800;margin-bottom:6px;">Laisser un avis</h3>
+    <p style="font-size:.85rem;color:var(--gris);margin-bottom:12px;">Comment s'est passée votre séance avec <strong id="review-artist-name"></strong> ?</p>
+    <div class="stars-input" id="stars-input">
+      <span class="star-btn" data-v="1">★</span>
+      <span class="star-btn" data-v="2">★</span>
+      <span class="star-btn" data-v="3">★</span>
+      <span class="star-btn" data-v="4">★</span>
+      <span class="star-btn" data-v="5">★</span>
+    </div>
+    <div class="field">
+      <label>Votre commentaire</label>
+      <textarea id="review-comment" rows="3" placeholder="Partagez votre expérience..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeReviewModal()">Annuler</button>
+      <button class="btn btn-primary" id="btn-submit-review">Publier mon avis</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { supabase, getCurrentUser } from '/js/supabase.js';
+
+const user = await getCurrentUser();
+if (!user) { location.href = '/auth/login.html'; }
+
+let reviewBookingId = null, reviewArtistId = null, selectedRating = 0;
+
+async function init() {
+  const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
+  const name = profile?.full_name || user.email;
+  document.getElementById('client-name').textContent  = name;
+  document.getElementById('client-email').textContent = user.email;
+  document.getElementById('avatar-initials').textContent = name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+  loadBookings('upcoming');
+}
+
+async function loadBookings(filter) {
+  const now = new Date().toISOString().split('T')[0];
+  let q = supabase.from('bookings')
+    .select('*, artists!bookings_artist_id_fkey(id, profiles(full_name)), services(name, price_cents)')
+    .eq('client_id', user.id)
+    .order('date', { ascending: filter === 'upcoming' });
+
+  if (filter === 'upcoming')  q = q.gte('date', now).in('status', ['confirmed','pending']);
+  if (filter === 'past')      q = q.lt('date', now).eq('status','confirmed');
+  if (filter === 'cancelled') q = q.eq('status', 'cancelled');
+
+  const { data } = await q;
+  const el = document.getElementById('bookings-container');
+  if (!data || data.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">📅</div>
+      <p style="font-weight:700;margin-bottom:8px;">Aucune réservation</p>
+      <a href="/artists.html" class="btn btn-primary btn-sm">Trouver une maquilleuse</a></div>`;
+    return;
+  }
+
+  el.innerHTML = data.map(b => {
+    const d = new Date(b.date);
+    const artistName = b.artists?.profiles?.full_name || 'Artiste';
+    const isPast  = b.date < now;
+    const canReview = isPast && b.status === 'confirmed';
+    return `<div class="booking-card">
+      <div class="bk-date"><div class="day">${d.getDate()}</div><div class="mon">${d.toLocaleDateString('fr-FR',{month:'short'})}</div></div>
+      <div class="bk-info">
+        <div class="bk-artist">${artistName}</div>
+        <div class="bk-service">${b.services?.name||'–'}</div>
+        <div class="bk-meta">
+          <span>🕐 ${b.time_slot}</span>
+          <span>📍 ${d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</span>
+        </div>
+        ${b.note ? `<div style="font-size:.78rem;color:var(--gris);margin-top:6px;font-style:italic;">"${b.note}"</div>` : ''}
+      </div>
+      <div class="bk-right">
+        <span class="bk-price">${b.services ? (b.services.price_cents/100).toFixed(0)+'€' : '–'}</span>
+        <span class="status-badge status-${isPast&&b.status==='confirmed'?'done':b.status}">${{confirmed: isPast?'Terminée':'Confirmée', pending:'En attente', cancelled:'Annulée'}[b.status]||b.status}</span>
+        ${canReview && !b.reviewed ? `<button class="btn btn-ghost btn-sm" onclick="openReview('${b.id}','${b.artists?.id}','${artistName}')">Laisser un avis</button>` : ''}
+        ${b.reviewed ? `<span style="font-size:.75rem;color:var(--gris);">Avis publié ✓</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.showTab = function(filter, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadBookings(filter);
+};
+
+// Review
+window.openReview = function(bookingId, artistId, artistName) {
+  reviewBookingId = bookingId;
+  reviewArtistId  = artistId;
+  selectedRating  = 0;
+  document.getElementById('review-artist-name').textContent = artistName;
+  document.getElementById('review-comment').value = '';
+  document.querySelectorAll('.star-btn').forEach(s => s.classList.remove('active'));
+  document.getElementById('review-modal').classList.add('show');
+};
+window.closeReviewModal = function() { document.getElementById('review-modal').classList.remove('show'); };
+
+document.querySelectorAll('.star-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedRating = parseInt(btn.dataset.v);
+    document.querySelectorAll('.star-btn').forEach((s,i) => s.classList.toggle('active', i < selectedRating));
+  });
+});
+
+document.getElementById('btn-submit-review').addEventListener('click', async () => {
+  if (!selectedRating) { showToast('Choisissez une note'); return; }
+  const comment = document.getElementById('review-comment').value;
+  await supabase.from('reviews').insert({
+    booking_id: reviewBookingId,
+    artist_id:  reviewArtistId,
+    client_id:  user.id,
+    rating: selectedRating,
+    comment
+  });
+  await supabase.from('bookings').update({ reviewed: true }).eq('id', reviewBookingId);
+  // Recalculer note moyenne artiste
+  const { data: reviews } = await supabase.from('reviews').select('rating').eq('artist_id', reviewArtistId);
+  if (reviews?.length) {
+    const avg = reviews.reduce((s,r)=>s+r.rating,0)/reviews.length;
+    await supabase.from('artists').update({ rating_avg: avg, review_count: reviews.length }).eq('id', reviewArtistId);
+  }
+  closeReviewModal();
+  showToast('Merci pour votre avis !');
+  loadBookings('past');
+});
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await supabase.auth.signOut(); location.href = '/';
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>

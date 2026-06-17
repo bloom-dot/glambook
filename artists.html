@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Maquilleuses disponibles — GlamBook</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    .page-header { background: var(--noir); color: #fff; padding: 40px 20px 32px; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+    .page-header p  { font-size: .9rem; color: rgba(255,255,255,.55); }
+
+    .filters-bar {
+      background: #fff; border-bottom: 1px solid var(--bord);
+      padding: 14px 20px; position: sticky; top: 60px; z-index: 50;
+    }
+    .filters-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    }
+    .filter-pill {
+      padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--bord);
+      font-size: .82rem; font-weight: 600; cursor: pointer;
+      background: #fff; color: var(--noir); transition: all .15s;
+    }
+    .filter-pill:hover, .filter-pill.active {
+      border-color: var(--rose); background: var(--rose-cl); color: var(--rose);
+    }
+    .filter-input {
+      padding: 7px 14px; border: 1.5px solid var(--bord); border-radius: 20px;
+      font-size: .82rem; min-width: 160px; color: var(--noir);
+    }
+    .filter-input:focus { outline: none; border-color: var(--rose); }
+
+    .results-meta { color: var(--gris); font-size: .85rem; margin-bottom: 20px; }
+    .no-results { text-align: center; padding: 80px 20px; color: var(--gris); }
+    .no-results .icon { font-size: 3rem; margin-bottom: 12px; }
+    .no-results h3 { font-size: 1.1rem; font-weight: 700; color: var(--noir); margin-bottom: 8px; }
+
+    .sort-select {
+      margin-left: auto; padding: 7px 12px; border: 1.5px solid var(--bord);
+      border-radius: 20px; font-size: .82rem; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+    <div class="nav-links">
+      <a href="/auth/login.html">Connexion</a>
+      <a href="/auth/register.html" class="btn-nav btn">Inscription</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>Maquilleuses professionnelles</h1>
+    <p id="header-sub">Recherche en cours...</p>
+  </div>
+</div>
+
+<div class="filters-bar">
+  <div class="filters-inner">
+    <input class="filter-input" id="f-city" placeholder="🔍 Ville ou région" type="text"/>
+    <input class="filter-input" id="f-date" type="date"/>
+    <button class="filter-pill active" data-service="">Toutes</button>
+    <button class="filter-pill" data-service="mariage">Mariage</button>
+    <button class="filter-pill" data-service="soiree">Soirée</button>
+    <button class="filter-pill" data-service="editorial">Shooting</button>
+    <button class="filter-pill" data-service="scene">Scène</button>
+    <select class="sort-select" id="f-sort">
+      <option value="rating">Mieux notées</option>
+      <option value="price_asc">Prix croissant</option>
+      <option value="price_desc">Prix décroissant</option>
+      <option value="recent">Récentes</option>
+    </select>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="results-meta" id="results-meta"></div>
+    <div class="artists-grid" id="artists-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:60px 0;">
+        <div class="spinner" style="margin:0 auto 12px;border-color:rgba(232,84,122,.2);border-top-color:var(--rose);"></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+      <button class="btn btn-ghost" id="btn-load-more" style="display:none;">Voir plus de maquilleuses</button>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { supabase } from '/js/supabase.js';
+
+const params  = new URLSearchParams(location.search);
+let filters   = {
+  city:    params.get('city')    || '',
+  date:    params.get('date')    || '',
+  service: params.get('service') || '',
+  sort:    'rating'
+};
+let page = 0;
+const PAGE_SIZE = 12;
+
+// Init filtres depuis URL
+document.getElementById('f-city').value = filters.city;
+document.getElementById('f-date').value = filters.date;
+document.getElementById('f-date').min   = new Date().toISOString().split('T')[0];
+if (filters.service) {
+  document.querySelectorAll('.filter-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.service === filters.service);
+  });
+}
+
+// Events
+document.getElementById('f-city').addEventListener('input', debounce(() => { filters.city = document.getElementById('f-city').value; reload(); }, 400));
+document.getElementById('f-date').addEventListener('change', () => { filters.date = document.getElementById('f-date').value; reload(); });
+document.getElementById('f-sort').addEventListener('change', () => { filters.sort = document.getElementById('f-sort').value; reload(); });
+document.querySelectorAll('.filter-pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.filter-pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    filters.service = p.dataset.service;
+    reload();
+  });
+});
+document.getElementById('btn-load-more').addEventListener('click', () => loadArtists(false));
+
+function reload() { page = 0; document.getElementById('artists-grid').innerHTML = ''; loadArtists(true); }
+
+async function loadArtists(reset) {
+  if (reset) page = 0;
+  const from = page * PAGE_SIZE;
+  const to   = from + PAGE_SIZE - 1;
+
+  let q = supabase
+    .from('artists')
+    .select(`id, rating_avg, review_count, price_from, specialties, cover_url, is_active,
+             profiles!inner(full_name, avatar_url, city, region)`, { count: 'exact' })
+    .eq('is_active', true)
+    .range(from, to);
+
+  if (filters.city) q = q.ilike('profiles.city', `%${filters.city}%`);
+  if (filters.service) q = q.contains('specialties', [filters.service]);
+  if (filters.date) q = q.in('id',
+    (await supabase.from('availabilities').select('artist_id').eq('date', filters.date).eq('is_available', true)).data?.map(r => r.artist_id) || []
+  );
+
+  if (filters.sort === 'rating')      q = q.order('rating_avg', { ascending: false });
+  if (filters.sort === 'price_asc')   q = q.order('price_from', { ascending: true });
+  if (filters.sort === 'price_desc')  q = q.order('price_from', { ascending: false });
+  if (filters.sort === 'recent')      q = q.order('created_at', { ascending: false });
+
+  const { data, count, error } = await q;
+
+  const grid = document.getElementById('artists-grid');
+  if (reset) grid.innerHTML = '';
+
+  if (error || !data || data.length === 0) {
+    if (reset) grid.innerHTML = `
+      <div class="no-results" style="grid-column:1/-1;">
+        <div class="icon">💄</div>
+        <h3>Aucune maquilleuse trouvée</h3>
+        <p>Essayez d'élargir votre recherche ou de changer la date.</p>
+      </div>`;
+    document.getElementById('btn-load-more').style.display = 'none';
+    return;
+  }
+
+  data.forEach(a => {
+    const p   = a.profiles || {};
+    const stars = '★'.repeat(Math.round(a.rating_avg || 5)) + '☆'.repeat(5 - Math.round(a.rating_avg || 5));
+    const el  = document.createElement('a');
+    el.href   = `/artist.html?id=${a.id}`;
+    el.className = 'artist-card';
+    el.innerHTML = `
+      <img class="artist-card-cover" src="${a.cover_url || ''}" alt="${p.full_name}" loading="lazy"
+           onerror="this.style.cssText='height:200px;display:flex;background:linear-gradient(135deg,#FDE8EF,#F9FAFB)'"/>
+      <div class="artist-card-body">
+        <div class="artist-card-header">
+          <div class="artist-avatar avatar-placeholder" style="width:52px;height:52px;font-size:1.1rem;margin-top:-30px;border:3px solid #fff;flex-shrink:0;">
+            ${(p.full_name || '?')[0]}
+          </div>
+          <div>
+            <div class="artist-name">${p.full_name || 'Maquilleuse'}</div>
+            <div class="artist-city">📍 ${p.city || p.region || 'France'}</div>
+          </div>
+        </div>
+        <div class="tags">${(a.specialties || []).slice(0,3).map(s => `<span class="tag">${s}</span>`).join('')}</div>
+        <div class="artist-card-meta">
+          <div><span class="stars">${stars}</span> <span style="font-size:.8rem;color:var(--gris);">(${a.review_count || 0})</span></div>
+          <div class="artist-price">À partir de ${a.price_from || '–'}€</div>
+        </div>
+      </div>`;
+    grid.appendChild(el);
+  });
+
+  page++;
+  document.getElementById('btn-load-more').style.display = page * PAGE_SIZE < count ? 'inline-flex' : 'none';
+
+  const sub = filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses';
+  document.getElementById('header-sub').textContent = sub + (filters.date ? ` — ${new Date(filters.date).toLocaleDateString('fr-FR')}` : '');
+  document.getElementById('results-meta').textContent = `${count} maquilleuse${count > 1 ? 's' : ''} trouvée${count > 1 ? 's' : ''}`;
+}
+
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+loadArtists(true);
+</script>
+</body>
+</html>

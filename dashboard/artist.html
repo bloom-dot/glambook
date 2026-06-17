@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mon tableau de bord — GlamBook</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    body { background: #F3F4F6; }
+    .dash-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+    @media(max-width:768px){ .dash-layout { grid-template-columns: 1fr; } }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--noir); color: #fff; padding: 24px 0;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .sidebar-logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 12px; }
+    .sidebar-logo a { font-size: 1.2rem; font-weight: 900; color: var(--rose); text-decoration: none; }
+    .sidebar-logo a span { color: var(--or); }
+    .sidebar-user { padding: 12px 20px 16px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 8px; }
+    .sidebar-user .name { font-weight: 700; font-size: .9rem; }
+    .sidebar-user .sub  { font-size: .75rem; color: rgba(255,255,255,.45); }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 11px 20px;
+      font-size: .88rem; font-weight: 600; cursor: pointer; color: rgba(255,255,255,.65);
+      border-left: 3px solid transparent; transition: all .15s; text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+    .nav-item.active { background: rgba(232,84,122,.15); color: var(--rose); border-left-color: var(--rose); }
+    .nav-section { font-size: .68rem; font-weight: 700; letter-spacing: .1em; color: rgba(255,255,255,.25); padding: 16px 20px 6px; text-transform: uppercase; }
+    @media(max-width:768px){ .sidebar { display: none; } }
+
+    /* Main */
+    .dash-main { padding: 28px 24px; max-width: 960px; }
+    .dash-title { font-size: 1.4rem; font-weight: 900; margin-bottom: 4px; }
+    .dash-sub   { font-size: .88rem; color: var(--gris); margin-bottom: 28px; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: #fff; border-radius: var(--radius-sm); padding: 18px; box-shadow: var(--shadow); }
+    .stat-card .num { font-size: 1.8rem; font-weight: 900; color: var(--rose); }
+    .stat-card .lbl { font-size: .78rem; color: var(--gris); font-weight: 600; margin-top: 2px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--bord); margin-bottom: 24px; }
+    .tab { padding: 10px 18px; font-size: .88rem; font-weight: 700; color: var(--gris); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab.active { color: var(--rose); border-bottom-color: var(--rose); }
+
+    /* Booking list */
+    .booking-row {
+      background: #fff; border-radius: var(--radius-sm); padding: 16px;
+      display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .booking-date { background: var(--rose-cl); color: var(--rose); border-radius: 8px; padding: 8px 12px; text-align: center; flex-shrink: 0; min-width: 54px; }
+    .booking-date .day { font-size: 1.2rem; font-weight: 900; line-height: 1; }
+    .booking-date .mon { font-size: .65rem; font-weight: 700; text-transform: uppercase; }
+    .booking-info { flex: 1; }
+    .booking-info .client-name { font-weight: 700; font-size: .92rem; }
+    .booking-info .booking-meta { font-size: .78rem; color: var(--gris); margin-top: 2px; }
+    .booking-status { padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 700; }
+    .status-confirmed { background: #D1FAE5; color: #065F46; }
+    .status-pending   { background: #FEF3C7; color: #92400E; }
+    .status-cancelled { background: #FEE2E2; color: #991B1B; }
+
+    /* Calendrier dispo */
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin-bottom: 16px; }
+    .cal-day {
+      aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; font-size: .8rem; font-weight: 700; cursor: pointer;
+      border: 1.5px solid var(--bord); background: #fff; transition: all .15s;
+    }
+    .cal-day.available { background: #D1FAE5; border-color: #10B981; color: #065F46; }
+    .cal-day.today { border-color: var(--rose); color: var(--rose); }
+    .cal-day.past { opacity: .35; pointer-events: none; }
+
+    /* Profil form */
+    .profile-form { background: #fff; border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:500px){ .form-row { grid-template-columns: 1fr; } }
+
+    /* Upload photo */
+    .upload-zone {
+      border: 2px dashed var(--bord); border-radius: var(--radius-sm);
+      padding: 32px; text-align: center; cursor: pointer; transition: all .15s;
+    }
+    .upload-zone:hover { border-color: var(--rose); background: var(--rose-cl); }
+    .upload-zone input { display: none; }
+    .photos-preview { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 12px; }
+    .photos-preview img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="dash-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo"><a href="/">Glam<span>Book</span></a></div>
+    <div class="sidebar-user">
+      <div class="name" id="sb-name">Chargement...</div>
+      <div class="sub">Makeup Artist</div>
+    </div>
+    <div class="nav-section">Principal</div>
+    <a class="nav-item active" onclick="showTab('reservations')">📅 Réservations</a>
+    <a class="nav-item" onclick="showTab('disponibilites')">🗓️ Disponibilités</a>
+    <a class="nav-item" onclick="showTab('avis')">⭐ Avis clients</a>
+    <div class="nav-section">Profil</div>
+    <a class="nav-item" onclick="showTab('profil')">✏️ Mon profil</a>
+    <a class="nav-item" onclick="showTab('photos')">📸 Portfolio</a>
+    <a class="nav-item" onclick="showTab('services')">💰 Prestations & Tarifs</a>
+    <div class="nav-section">Compte</div>
+    <a class="nav-item" href="/artist.html?id=me" target="_blank">👁️ Voir mon profil public</a>
+    <a class="nav-item" id="btn-logout" style="color:rgba(255,100,100,.7);">⬅️ Déconnexion</a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h1 class="dash-title" id="dash-greeting">Bonjour !</h1>
+        <p class="dash-sub" id="dash-date"></p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <span class="badge" id="active-badge">⬤ Profil inactif</span>
+        <button class="btn btn-primary btn-sm" id="btn-toggle-active">Activer mon profil</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="num" id="stat-reservations">–</div><div class="lbl">Réservations ce mois</div></div>
+      <div class="stat-card"><div class="num" id="stat-revenue">–</div><div class="lbl">Revenus ce mois</div></div>
+      <div class="stat-card"><div class="num" id="stat-rating">–</div><div class="lbl">Note moyenne</div></div>
+      <div class="stat-card"><div class="num" id="stat-views">–</div><div class="lbl">Vues profil</div></div>
+    </div>
+
+    <!-- ═══ ONGLET RÉSERVATIONS ═══ -->
+    <div id="tab-reservations">
+      <div class="tabs">
+        <div class="tab active" onclick="filterBookings('all',this)">Toutes</div>
+        <div class="tab" onclick="filterBookings('confirmed',this)">Confirmées</div>
+        <div class="tab" onclick="filterBookings('pending',this)">En attente</div>
+        <div class="tab" onclick="filterBookings('cancelled',this)">Annulées</div>
+      </div>
+      <div id="bookings-list"><div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div></div>
+    </div>
+
+    <!-- ═══ ONGLET DISPONIBILITÉS ═══ -->
+    <div id="tab-disponibilites" style="display:none;">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Gérer mes disponibilités</h2>
+      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <strong id="cal-month-label"></strong>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)">‹</button>
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;">
+          ${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(d=>`<div style="text-align:center;font-size:.7rem;color:var(--gris);font-weight:700;padding:4px;">${d}</div>`).join('')}
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div style="margin-top:14px;">
+          <p style="font-size:.8rem;color:var(--gris);margin-bottom:10px;">Cliquez sur un jour pour définir vos créneaux horaires</p>
+          <div id="slots-editor" style="display:none;background:var(--rose-cl);border-radius:10px;padding:14px;">
+            <p style="font-weight:700;font-size:.88rem;color:var(--rose);margin-bottom:10px;">Créneaux pour le <span id="slot-date-label"></span></p>
+            <div id="slots-checkboxes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSlots()">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ONGLET AVIS ═══ -->
+    <div id="tab-avis" style="display:none;">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Avis de mes clientes</h2>
+      <div id="reviews-dash"></div>
+    </div>
+
+    <!-- ═══ ONGLET PROFIL ═══ -->
+    <div id="tab-profil" style="display:none;">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Mon profil public</h2>
+      <div class="profile-form">
+        <div class="form-row">
+          <div class="field"><label>Prénom & Nom</label><input type="text" id="p-name"/></div>
+          <div class="field"><label>Ville</label><input type="text" id="p-city"/></div>
+        </div>
+        <div class="field"><label>Bio / Présentation</label><textarea id="p-bio" rows="4" placeholder="Parlez de votre parcours, style, spécialités..."></textarea></div>
+        <div class="form-row">
+          <div class="field"><label>Instagram</label><input type="url" id="p-instagram" placeholder="https://instagram.com/..."/></div>
+          <div class="field"><label>TikTok</label><input type="url" id="p-tiktok" placeholder="https://tiktok.com/..."/></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>YouTube</label><input type="url" id="p-youtube"/></div>
+          <div class="field"><label>Site web</label><input type="url" id="p-website"/></div>
+        </div>
+        <div class="field">
+          <label>Spécialités</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="specialties-check">
+            ${['Mariage','Soirée','Quotidien','Éditorial / Shooting','Scène / Spectacle','Coiffure','Ongles','Airbrush'].map(s =>
+              `<label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;">
+                <input type="checkbox" value="${s}" class="spec-cb"/> ${s}
+               </label>`).join('')}
+          </div>
+        </div>
+        <button class="btn btn-primary" id="btn-save-profile">Enregistrer le profil</button>
+      </div>
+    </div>
+
+    <!-- ═══ ONGLET PHOTOS ═══ -->
+    <div id="tab-photos" style="display:none;">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Mon portfolio</h2>
+      <label class="upload-zone" for="photo-input">
+        <input type="file" id="photo-input" accept="image/*" multiple/>
+        <div style="font-size:2rem;margin-bottom:8px;">📸</div>
+        <p style="font-weight:700;margin-bottom:4px;">Ajouter des photos</p>
+        <p style="font-size:.8rem;color:var(--gris);">JPG, PNG — max 5 Mo par photo</p>
+      </label>
+      <div class="photos-preview" id="photos-preview"></div>
+    </div>
+
+    <!-- ═══ ONGLET SERVICES ═══ -->
+    <div id="tab-services" style="display:none;">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Mes prestations</h2>
+      <div id="services-list-dash"></div>
+      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-top:16px;">
+        <p style="font-weight:800;margin-bottom:14px;">Ajouter une prestation</p>
+        <div class="form-row">
+          <div class="field"><label>Nom</label><input type="text" id="svc-name" placeholder="Maquillage mariée"/></div>
+          <div class="field"><label>Prix (€)</label><input type="number" id="svc-price" placeholder="150" min="0"/></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Durée (min)</label><input type="number" id="svc-duration" placeholder="90" min="15" step="15"/></div>
+          <div class="field"><label>Catégorie</label>
+            <select id="svc-category">
+              <option value="mariage">Mariage</option><option value="soiree">Soirée</option>
+              <option value="quotidien">Quotidien</option><option value="editorial">Éditorial</option>
+              <option value="scene">Scène</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Description</label><textarea id="svc-desc" rows="2" placeholder="Ce qui est inclus..."></textarea></div>
+        <button class="btn btn-primary btn-sm" id="btn-add-service">Ajouter</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { supabase, getCurrentUser } from '/js/supabase.js';
+
+// Auth check
+const user = await getCurrentUser();
+if (!user) { location.href = '/auth/login.html'; }
+
+let artistData = null, profileData = null;
+let calDate = new Date(); calDate.setDate(1);
+let selectedCalDay = null, slotsToSave = [];
+
+const ALL_SLOTS = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
+
+// Init
+async function init() {
+  const today = new Date();
+  document.getElementById('dash-date').textContent = today.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
+  profileData = profile;
+  document.getElementById('sb-name').textContent   = profile?.full_name || 'Artiste';
+  document.getElementById('dash-greeting').textContent = `Bonjour ${(profile?.full_name||'').split(' ')[0]} !`;
+  document.getElementById('p-name').value  = profile?.full_name || '';
+  document.getElementById('p-city').value  = profile?.city || '';
+
+  const { data: artist } = await supabase.from('artists').select('*').eq('user_id', user.id).single();
+  artistData = artist;
+  if (artist) {
+    document.getElementById('stat-rating').textContent = (artist.rating_avg||5).toFixed(1)+'★';
+    document.getElementById('btn-toggle-active').textContent = artist.is_active ? 'Désactiver' : 'Activer mon profil';
+    document.getElementById('active-badge').textContent = artist.is_active ? '⬤ Profil actif' : '⬤ Profil inactif';
+    document.getElementById('active-badge').style.background = artist.is_active ? '#D1FAE5' : '#FEE2E2';
+    document.getElementById('active-badge').style.color = artist.is_active ? '#065F46' : '#991B1B';
+    document.getElementById('p-bio').value       = artist.bio || '';
+    document.getElementById('p-instagram').value = artist.instagram || '';
+    document.getElementById('p-tiktok').value    = artist.tiktok || '';
+    document.getElementById('p-youtube').value   = artist.youtube || '';
+    document.getElementById('p-website').value   = artist.website || '';
+    (artist.specialties||[]).forEach(s => {
+      document.querySelectorAll('.spec-cb').forEach(cb => { if(cb.value===s) cb.checked=true; });
+    });
+  }
+  loadBookings('all');
+  renderCalendar();
+  loadReviews();
+  loadPhotos();
+  loadServices();
+}
+
+// Bookings
+async function loadBookings(filter) {
+  let q = supabase.from('bookings').select('*, profiles!bookings_client_id_fkey(full_name), services(name, price_cents)')
+    .eq('artist_id', artistData?.id).order('date', { ascending: false });
+  if (filter !== 'all') q = q.eq('status', filter);
+  const { data } = await q;
+  const list = document.getElementById('bookings-list');
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Aucune réservation</p>';
+    document.getElementById('stat-reservations').textContent = '0';
+    document.getElementById('stat-revenue').textContent      = '0€';
+    return;
+  }
+  const thisMonth = new Date().getMonth();
+  const monthBookings = data.filter(b => new Date(b.date).getMonth() === thisMonth);
+  document.getElementById('stat-reservations').textContent = monthBookings.length;
+  document.getElementById('stat-revenue').textContent = monthBookings.reduce((s,b) => s + (b.services?.price_cents||0), 0)/100 + '€';
+  list.innerHTML = data.map(b => {
+    const d = new Date(b.date);
+    return `<div class="booking-row">
+      <div class="booking-date"><div class="day">${d.getDate()}</div><div class="mon">${d.toLocaleDateString('fr-FR',{month:'short'})}</div></div>
+      <div class="booking-info">
+        <div class="client-name">${b.profiles?.full_name || b.client_name || 'Cliente'}</div>
+        <div class="booking-meta">${b.services?.name || '–'} · ${b.time_slot} · ${b.client_phone||''}</div>
+      </div>
+      <span class="booking-status status-${b.status}">${{confirmed:'Confirmée',pending:'En attente',cancelled:'Annulée'}[b.status]||b.status}</span>
+    </div>`;
+  }).join('');
+}
+window.filterBookings = function(f, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  loadBookings(f);
+};
+
+// Calendrier
+function renderCalendar() {
+  const year = calDate.getFullYear(), month = calDate.getMonth();
+  document.getElementById('cal-month-label').textContent = calDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  let html = Array(firstDay).fill('<div></div>').join('');
+  for (let d=1; d<=daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    const isPast = date < today;
+    const isToday = date.getTime() === today.getTime();
+    html += `<div class="cal-day ${isPast?'past':''} ${isToday?'today':''}" onclick="openSlots('${date.toISOString().split('T')[0]}')">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+}
+window.changeMonth = (dir) => { calDate.setMonth(calDate.getMonth()+dir); renderCalendar(); };
+window.openSlots = async function(dateStr) {
+  selectedCalDay = dateStr;
+  document.getElementById('slot-date-label').textContent = new Date(dateStr).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  const { data } = await supabase.from('availabilities').select('time_slot,is_booked').eq('artist_id',artistData?.id).eq('date',dateStr);
+  const booked = (data||[]).filter(s=>s.is_booked).map(s=>s.time_slot);
+  const available = (data||[]).map(s=>s.time_slot);
+  document.getElementById('slots-checkboxes').innerHTML = ALL_SLOTS.map(s =>
+    `<label style="display:flex;align-items:center;gap:5px;font-size:.82rem;cursor:pointer;${booked.includes(s)?'opacity:.5;pointer-events:none;':''}" title="${booked.includes(s)?'Déjà réservé':''}">
+      <input type="checkbox" value="${s}" ${available.includes(s)?'checked':''} ${booked.includes(s)?'disabled':''}/> ${s}
+     </label>`).join('');
+  document.getElementById('slots-editor').style.display = 'block';
+};
+window.saveSlots = async function() {
+  const checked = [...document.querySelectorAll('#slots-checkboxes input:checked')].map(c=>c.value);
+  await supabase.from('availabilities').delete().eq('artist_id',artistData?.id).eq('date',selectedCalDay).eq('is_booked',false);
+  if (checked.length) {
+    await supabase.from('availabilities').insert(checked.map(t=>({ artist_id:artistData?.id, date:selectedCalDay, time_slot:t, is_available:true, is_booked:false })));
+  }
+  showToast('Créneaux enregistrés !');
+};
+
+// Avis
+async function loadReviews() {
+  const { data } = await supabase.from('reviews').select('*,profiles(full_name)').eq('artist_id',artistData?.id).order('created_at',{ascending:false});
+  const el = document.getElementById('reviews-dash');
+  if (!data||data.length===0) { el.innerHTML='<p style="color:var(--gris);text-align:center;padding:40px;">Aucun avis pour l\'instant.</p>'; return; }
+  el.innerHTML = data.map(r=>`
+    <div style="background:#fff;border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <strong style="font-size:.9rem;">${r.profiles?.full_name||'Cliente'}</strong>
+        <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+      </div>
+      <p style="font-size:.85rem;color:#4B5563;">${r.comment||''}</p>
+      <p style="font-size:.72rem;color:var(--gris);margin-top:6px;">${new Date(r.created_at).toLocaleDateString('fr-FR')}</p>
+    </div>`).join('');
+}
+
+// Photos
+async function loadPhotos() {
+  const { data } = await supabase.from('artist_photos').select('*').eq('artist_id',artistData?.id).order('created_at',{ascending:false});
+  const prev = document.getElementById('photos-preview');
+  prev.innerHTML = (data||[]).map(ph=>`<img src="${ph.url}" alt="" loading="lazy">`).join('');
+}
+document.getElementById('photo-input').addEventListener('change', async (e) => {
+  const files = [...e.target.files];
+  for (const file of files) {
+    const ext  = file.name.split('.').pop();
+    const path = `${artistData?.id}/${Date.now()}.${ext}`;
+    const { data: up } = await supabase.storage.from('portfolio').upload(path, file, { upsert: true });
+    if (up) {
+      const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
+      await supabase.from('artist_photos').insert({ artist_id: artistData?.id, url: publicUrl });
+    }
+  }
+  loadPhotos(); showToast('Photos ajoutées !');
+});
+
+// Services
+async function loadServices() {
+  const { data } = await supabase.from('services').select('*').eq('artist_id',artistData?.id).order('price_cents');
+  const el = document.getElementById('services-list-dash');
+  el.innerHTML = (data||[]).map(s=>`
+    <div style="background:#fff;border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+      <div>
+        <span style="font-weight:700;font-size:.92rem;">${s.name}</span>
+        <span style="font-size:.78rem;color:var(--gris);margin-left:10px;">${s.duration_min} min</span>
+        <p style="font-size:.78rem;color:var(--gris);margin-top:2px;">${s.description||''}</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <strong style="color:var(--rose);">${(s.price_cents/100).toFixed(0)}€</strong>
+        <button class="btn btn-ghost btn-sm" onclick="deleteService('${s.id}')">✕</button>
+      </div>
+    </div>`).join('') || '<p style="color:var(--gris);font-size:.85rem;padding:8px 0;">Aucune prestation définie</p>';
+}
+document.getElementById('btn-add-service').addEventListener('click', async () => {
+  const name     = document.getElementById('svc-name').value;
+  const price    = parseFloat(document.getElementById('svc-price').value) * 100;
+  const duration = parseInt(document.getElementById('svc-duration').value);
+  const category = document.getElementById('svc-category').value;
+  const desc     = document.getElementById('svc-desc').value;
+  if (!name || !price) { showToast('Remplissez le nom et le prix'); return; }
+  await supabase.from('services').insert({ artist_id: artistData?.id, name, price_cents: price, duration_min: duration, category, description: desc });
+  ['svc-name','svc-price','svc-duration','svc-desc'].forEach(id => document.getElementById(id).value='');
+  loadServices(); showToast('Prestation ajoutée !');
+  if (!artistData.price_from || price/100 < artistData.price_from) {
+    await supabase.from('artists').update({ price_from: price/100 }).eq('id', artistData.id);
+  }
+});
+window.deleteService = async (id) => { await supabase.from('services').delete().eq('id',id); loadServices(); };
+
+// Save profil
+document.getElementById('btn-save-profile').addEventListener('click', async () => {
+  const specialties = [...document.querySelectorAll('.spec-cb:checked')].map(c=>c.value);
+  await supabase.from('profiles').update({ full_name: document.getElementById('p-name').value, city: document.getElementById('p-city').value }).eq('user_id', user.id);
+  await supabase.from('artists').update({
+    bio:         document.getElementById('p-bio').value,
+    instagram:   document.getElementById('p-instagram').value,
+    tiktok:      document.getElementById('p-tiktok').value,
+    youtube:     document.getElementById('p-youtube').value,
+    website:     document.getElementById('p-website').value,
+    specialties
+  }).eq('user_id', user.id);
+  showToast('Profil enregistré !');
+});
+
+// Toggle actif
+document.getElementById('btn-toggle-active').addEventListener('click', async () => {
+  const newVal = !artistData.is_active;
+  await supabase.from('artists').update({ is_active: newVal }).eq('id', artistData.id);
+  artistData.is_active = newVal;
+  document.getElementById('btn-toggle-active').textContent = newVal ? 'Désactiver' : 'Activer mon profil';
+  document.getElementById('active-badge').textContent = newVal ? '⬤ Profil actif' : '⬤ Profil inactif';
+  document.getElementById('active-badge').style.background = newVal ? '#D1FAE5' : '#FEE2E2';
+  document.getElementById('active-badge').style.color = newVal ? '#065F46' : '#991B1B';
+  showToast(newVal ? 'Profil activé — vous êtes visible !' : 'Profil désactivé');
+});
+
+// Logout
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await supabase.auth.signOut(); location.href = '/';
+});
+
+// Navigation onglets
+window.showTab = function(name) {
+  ['reservations','disponibilites','avis','profil','photos','services'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+};
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
