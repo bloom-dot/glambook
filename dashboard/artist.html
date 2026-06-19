@@ -137,8 +137,8 @@
       <div class="sub">Makeup Artist</div>
     </div>
     <div class="nav-section">Principal</div>
-    <a class="nav-item active" onclick="showTab('reservations',this)">📅 Réservations</a>
-    <a class="nav-item" onclick="showTab('disponibilites',this)">🗓️ Disponibilités</a>
+    <a class="nav-item" onclick="showTab('reservations',this)">📅 Réservations</a>
+    <a class="nav-item active" onclick="showTab('disponibilites',this)">🗓️ Disponibilités</a>
     <a class="nav-item" onclick="showTab('avis',this)">⭐ Avis clients</a>
     <div class="nav-section">Profil</div>
     <a class="nav-item" onclick="showTab('profil',this)">✏️ Mon profil</a>
@@ -173,7 +173,7 @@
     </div>
 
     <!-- ═══ ONGLET RÉSERVATIONS ═══ -->
-    <div id="tab-reservations">
+    <div id="tab-reservations" style="display:none;">
       <div class="tabs">
         <div class="tab active" onclick="filterBookings('all',this)">Toutes</div>
         <div class="tab" onclick="filterBookings('confirmed',this)">Confirmées</div>
@@ -184,7 +184,7 @@
     </div>
 
     <!-- ═══ ONGLET DISPONIBILITÉS ═══ -->
-    <div id="tab-disponibilites" style="display:none;">
+    <div id="tab-disponibilites">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Gérer mes disponibilités</h2>
       <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -195,7 +195,13 @@
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;">
-          ${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(d=>`<div style="text-align:center;font-size:.7rem;color:var(--gris);font-weight:700;padding:4px;">${d}</div>`).join('')}
+          <div style="text-align:center;font-size:.7rem;color:var(--gris);font-weight:700;padding:4px;">Lun</div>
+          <div style="text-align:center;font-size:.7rem;color:var(--gris);font-weight:700;padding:4px;">Mar</div>
+          <div style="text-align:center;font-size:.7rem;color:var(--gris);font-weight:700;padding:4px;">Mer</div>
+          <div style="text-align:center;font-size:.7rem;color:var(--gris);font-weight:700;padding:4px;">Jeu</div>
+          <div style="text-align:center;font-size:.7rem;color:var(--gris);font-weight:700;padding:4px;">Ven</div>
+          <div style="text-align:center;font-size:.7rem;color:var(--gris);font-weight:700;padding:4px;">Sam</div>
+          <div style="text-align:center;font-size:.7rem;color:var(--gris);font-weight:700;padding:4px;">Dim</div>
         </div>
         <div class="cal-grid" id="cal-grid"></div>
         <div style="margin-top:14px;">
