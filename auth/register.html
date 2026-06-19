@@ -201,7 +201,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
         'For security purposes': 'Trop de tentatives. Attendez quelques minutes avant de réessayer.',
         'signup_disabled': 'Les inscriptions sont temporairement désactivées.',
       };
-      const found = Object.entries(msgs).find(([k]) => msg.includes(k));
+      const found = Object.entries(msgs).find(([k]) => msg.toLowerCase().includes(k.toLowerCase()));
       const displayMsg = found ? found[1]
         : isEmpty ? 'Trop de tentatives d\'inscription. Attendez 1 heure ou utilisez une autre adresse email.'
         : (msg ? `Erreur : ${msg}` : 'Une erreur est survenue. Veuillez réessayer.');
