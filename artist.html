@@ -250,10 +250,18 @@ async function load() {
   // Artiste
   const { data: a } = await supabase
     .from('artists')
-    .select(`*, profiles(full_name, avatar_url, city, region, phone)`)
-    .eq('id', artistId).single();
+    .select('*')
+    .eq('id', artistId)
+    .maybeSingle();
 
   if (!a) { document.getElementById('artist-name').textContent = 'Artiste introuvable'; return; }
+
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('full_name, avatar_url, city, region, phone')
+    .eq('user_id', a.user_id)
+    .maybeSingle();
+  a.profiles = profileData || {};
 
   // Appliquer les settings de personnalisation
   const PALETTES = {
