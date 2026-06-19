@@ -234,11 +234,11 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
       }
     }
 
-    showSuccess('Compte créé ! Vérifiez votre email pour confirmer votre inscription.');
+    showSuccess('Compte créé avec succès ! Redirection en cours...');
     setTimeout(() => {
       if (currentRole === 'artist') location.href = '/dashboard/artist.html';
-      else location.href = '/';
-    }, 2500);
+      else location.href = '/dashboard/client.html';
+    }, 1500);
 
   } catch (err) {
     showError('Une erreur inattendue est survenue. Veuillez réessayer.');
