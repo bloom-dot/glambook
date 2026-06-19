@@ -18,3 +18,23 @@ export async function getProfile(userId) {
     .single();
   return data;
 }
+
+/** Échappe les caractères HTML pour prévenir le XSS */
+export function esc(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** Valide qu'une URL commence par https:// */
+export function safeUrl(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' ? url : null;
+  } catch { return null; }
+}

@@ -137,16 +137,16 @@
       <div class="sub">Makeup Artist</div>
     </div>
     <div class="nav-section">Principal</div>
-    <a class="nav-item active" onclick="showTab('reservations')">📅 Réservations</a>
-    <a class="nav-item" onclick="showTab('disponibilites')">🗓️ Disponibilités</a>
-    <a class="nav-item" onclick="showTab('avis')">⭐ Avis clients</a>
+    <a class="nav-item active" onclick="showTab('reservations',this)">📅 Réservations</a>
+    <a class="nav-item" onclick="showTab('disponibilites',this)">🗓️ Disponibilités</a>
+    <a class="nav-item" onclick="showTab('avis',this)">⭐ Avis clients</a>
     <div class="nav-section">Profil</div>
-    <a class="nav-item" onclick="showTab('profil')">✏️ Mon profil</a>
-    <a class="nav-item" onclick="showTab('photos')">📸 Portfolio</a>
-    <a class="nav-item" onclick="showTab('services')">💰 Prestations & Tarifs</a>
-    <a class="nav-item" onclick="showTab('espace')">🎨 Mon espace</a>
+    <a class="nav-item" onclick="showTab('profil',this)">✏️ Mon profil</a>
+    <a class="nav-item" onclick="showTab('photos',this)">📸 Portfolio</a>
+    <a class="nav-item" onclick="showTab('services',this)">💰 Prestations & Tarifs</a>
+    <a class="nav-item" onclick="showTab('espace',this)">🎨 Mon espace</a>
     <div class="nav-section">Compte</div>
-    <a class="nav-item" href="/artist.html?id=me" target="_blank">👁️ Voir mon profil public</a>
+    <a class="nav-item" id="link-public-profile" href="/artists.html" target="_blank">👁️ Voir mon profil public</a>
     <a class="nav-item" id="btn-logout" style="color:rgba(255,100,100,.7);">⬅️ Déconnexion</a>
   </aside>
 
@@ -351,7 +351,7 @@
       </div>
 
       <button class="btn btn-primary" id="btn-save-espace">Enregistrer mon espace</button>
-      <a href="/artist.html?id=me" target="_blank" class="btn btn-ghost" style="margin-left:10px;">Voir mon profil public →</a>
+      <a id="btn-public-profile" href="/artists.html" target="_blank" class="btn btn-ghost" style="margin-left:10px;">Voir mon profil public →</a>
     </div>
 
   </main>
@@ -360,7 +360,7 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { supabase, getCurrentUser } from '/js/supabase.js';
+import { supabase, getCurrentUser, esc } from '/js/supabase.js';
 
 // Auth check
 const user = await getCurrentUser();
@@ -386,6 +386,13 @@ async function init() {
 
   const { data: artist } = await supabase.from('artists').select('*').eq('user_id', user.id).single();
   artistData = artist;
+  if (artist?.id) {
+    const url = `/artist.html?id=${artist.id}`;
+    const link = document.getElementById('link-public-profile');
+    if (link) link.href = url;
+    const btn = document.getElementById('btn-public-profile');
+    if (btn) btn.href = url;
+  }
   if (artist) {
     document.getElementById('stat-rating').textContent = (artist.rating_avg||5).toFixed(1)+'★';
     document.getElementById('btn-toggle-active').textContent = artist.is_active ? 'Désactiver' : 'Activer mon profil';
@@ -425,15 +432,17 @@ async function loadBookings(filter) {
   const monthBookings = data.filter(b => new Date(b.date).getMonth() === thisMonth);
   document.getElementById('stat-reservations').textContent = monthBookings.length;
   document.getElementById('stat-revenue').textContent = monthBookings.reduce((s,b) => s + (b.services?.price_cents||0), 0)/100 + '€';
+  const statusLabel = {confirmed:'Confirmée',pending:'En attente',cancelled:'Annulée'};
   list.innerHTML = data.map(b => {
     const d = new Date(b.date);
+    const st = ['confirmed','pending','cancelled'].includes(b.status) ? b.status : 'pending';
     return `<div class="booking-row">
       <div class="booking-date"><div class="day">${d.getDate()}</div><div class="mon">${d.toLocaleDateString('fr-FR',{month:'short'})}</div></div>
       <div class="booking-info">
-        <div class="client-name">${b.profiles?.full_name || b.client_name || 'Cliente'}</div>
-        <div class="booking-meta">${b.services?.name || '–'} · ${b.time_slot} · ${b.client_phone||''}</div>
+        <div class="client-name">${esc(b.profiles?.full_name || b.client_name || 'Cliente')}</div>
+        <div class="booking-meta">${esc(b.services?.name || '–')} · ${esc(b.time_slot)} · ${esc(b.client_phone||'')}</div>
       </div>
-      <span class="booking-status status-${b.status}">${{confirmed:'Confirmée',pending:'En attente',cancelled:'Annulée'}[b.status]||b.status}</span>
+      <span class="booking-status status-${st}">${statusLabel[st]}</span>
     </div>`;
   }).join('');
 }
@@ -489,10 +498,10 @@ async function loadReviews() {
   el.innerHTML = data.map(r=>`
     <div style="background:#fff;border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-        <strong style="font-size:.9rem;">${r.profiles?.full_name||'Cliente'}</strong>
+        <strong style="font-size:.9rem;">${esc(r.profiles?.full_name||'Cliente')}</strong>
         <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
       </div>
-      <p style="font-size:.85rem;color:#4B5563;">${r.comment||''}</p>
+      <p style="font-size:.85rem;color:#4B5563;">${esc(r.comment||'')}</p>
       <p style="font-size:.72rem;color:var(--gris);margin-top:6px;">${new Date(r.created_at).toLocaleDateString('fr-FR')}</p>
     </div>`).join('');
 }
@@ -524,13 +533,13 @@ async function loadServices() {
   el.innerHTML = (data||[]).map(s=>`
     <div style="background:#fff;border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06);">
       <div>
-        <span style="font-weight:700;font-size:.92rem;">${s.name}</span>
-        <span style="font-size:.78rem;color:var(--gris);margin-left:10px;">${s.duration_min} min</span>
-        <p style="font-size:.78rem;color:var(--gris);margin-top:2px;">${s.description||''}</p>
+        <span style="font-weight:700;font-size:.92rem;">${esc(s.name)}</span>
+        <span style="font-size:.78rem;color:var(--gris);margin-left:10px;">${esc(String(s.duration_min))} min</span>
+        <p style="font-size:.78rem;color:var(--gris);margin-top:2px;">${esc(s.description||'')}</p>
       </div>
       <div style="display:flex;align-items:center;gap:12px;">
         <strong style="color:var(--rose);">${(s.price_cents/100).toFixed(0)}€</strong>
-        <button class="btn btn-ghost btn-sm" onclick="deleteService('${s.id}')">✕</button>
+        <button class="btn btn-ghost btn-sm" data-sid="${esc(s.id)}" onclick="deleteService(this.dataset.sid)">✕</button>
       </div>
     </div>`).join('') || '<p style="color:var(--gris);font-size:.85rem;padding:8px 0;">Aucune prestation définie</p>';
 }
@@ -718,12 +727,12 @@ document.getElementById('btn-save-espace').addEventListener('click', async () =>
 });
 
 // Navigation onglets
-window.showTab = function(name) {
+window.showTab = function(name, triggerEl) {
   ['reservations','disponibilites','avis','profil','photos','services','espace'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
   });
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if (triggerEl) triggerEl.classList.add('active');
   if (name === 'espace') initEspace();
 };
 

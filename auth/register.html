@@ -143,6 +143,8 @@
 import { supabase } from '/js/supabase.js';
 
 let currentRole = new URLSearchParams(location.search).get('role') || 'client';
+// Sécurité : n'autoriser que les rôles connus
+if (!['client','artist'].includes(currentRole)) currentRole = 'client';
 
 function setRole(role) {
   currentRole = role;
@@ -163,69 +165,79 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Création...';
   hideMessages();
 
-  const email      = document.getElementById('email').value;
+  const email      = document.getElementById('email').value.trim();
   const password   = document.getElementById('password').value;
-  const firstName  = document.getElementById('firstname').value;
-  const lastName   = document.getElementById('lastname').value;
-  const city       = document.getElementById('city').value;
-  const phone      = document.getElementById('phone')?.value || '';
+  const firstName  = document.getElementById('firstname').value.trim();
+  const lastName   = document.getElementById('lastname').value.trim();
+  const city       = document.getElementById('city').value.trim();
+  const phone      = document.getElementById('phone')?.value.trim() || '';
   const region     = document.getElementById('region')?.value || '';
   const artistName = document.getElementById('artist-name')?.value.trim() || '';
   const displayName = (currentRole === 'artist' && artistName) ? artistName : `${firstName} ${lastName}`;
 
-  const { data, error } = await supabase.auth.signUp({
-    email, password,
-    options: {
-      data: {
-        full_name: `${firstName} ${lastName}`,
-        display_name: displayName,
-        role: currentRole,
-        city, phone, region
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email, password,
+      options: {
+        data: {
+          full_name: `${firstName} ${lastName}`,
+          display_name: displayName,
+          role: currentRole,
+          city, phone, region
+        }
       }
-    }
-  });
-
-  if (error) {
-    console.error('GLAMBOOK SIGNUP ERROR:', error, 'message:', error?.message, 'status:', error?.status, 'name:', error?.name);
-    const msgs = {
-      'User already registered': 'Cette adresse email est déjà utilisée. <a href="/auth/login.html" style="color:var(--rose);font-weight:700;">Se connecter ?</a>',
-      'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 8 caractères.',
-      'Unable to validate email address: invalid format': 'Adresse email invalide.',
-      'Email rate limit exceeded': 'Trop de tentatives. Réessayez dans quelques minutes.',
-    };
-    const msg = msgs[error.message] || `Erreur : ${String(error.message || error.status || error.name || error)}`;
-    showError(msg);
-    btn.disabled = false; btn.textContent = 'Créer mon compte';
-    return;
-  }
-
-  // Créer le profil dans la table profiles
-  if (data.user) {
-    await supabase.from('profiles').upsert({
-      user_id:   data.user.id,
-      full_name: `${firstName} ${lastName}`,
-      role:      currentRole,
-      city, phone, region
     });
 
-    // Si artiste, créer la ligne dans artists avec le nom d'artiste
-    if (currentRole === 'artist') {
-      await supabase.from('artists').upsert({
-        user_id:      data.user.id,
-        display_name: artistName || `${firstName} ${lastName}`,
-        is_active:    false,
-        is_verified:  false,
-        rating_avg:   5,
-        review_count: 0
-      });
+    if (error) {
+      const msg = error.message || '';
+      const msgs = {
+        'User already registered': 'Cette adresse email est déjà utilisée. <a href="/auth/login.html" style="color:var(--rose);font-weight:700;">Se connecter ?</a>',
+        'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 8 caractères.',
+        'Unable to validate email address: invalid format': 'Adresse email invalide.',
+        'Email rate limit exceeded': 'Trop de tentatives. Réessayez dans quelques minutes.',
+        'over_email_send_rate_limit': 'Limite d\'envoi d\'emails atteinte. Attendez quelques minutes.',
+        'signup_disabled': 'Les inscriptions sont temporairement désactivées.',
+      };
+      const found = Object.entries(msgs).find(([k]) => msg.includes(k));
+      showError(found ? found[1] : (msg ? `Erreur : ${msg}` : 'Une erreur est survenue. Veuillez réessayer.'));
+      btn.disabled = false; btn.textContent = 'Créer mon compte';
+      return;
     }
-  }
 
-  showSuccess('Compte créé ! Vérifiez votre email pour confirmer votre inscription.');
-  setTimeout(() => {
-    if (currentRole === 'artist') location.href = '/dashboard/artist.html';
-    else location.href = '/';
-  }, 2500);
+    // signUp réussi — data.user peut être null si confirmation email requise
+    const userId = data?.user?.id;
+    if (userId) {
+      const { error: profileErr } = await supabase.from('profiles').upsert({
+        user_id:   userId,
+        full_name: `${firstName} ${lastName}`,
+        role:      currentRole,
+        city, phone, region
+      });
+      if (profileErr) console.warn('Profile upsert:', profileErr.message);
+
+      if (currentRole === 'artist') {
+        const { error: artistErr } = await supabase.from('artists').upsert({
+          user_id:      userId,
+          display_name: artistName || `${firstName} ${lastName}`,
+          is_active:    false,
+          is_verified:  false,
+          rating_avg:   5,
+          review_count: 0
+        });
+        if (artistErr) console.warn('Artist upsert:', artistErr.message);
+      }
+    }
+
+    showSuccess('Compte créé ! Vérifiez votre email pour confirmer votre inscription.');
+    setTimeout(() => {
+      if (currentRole === 'artist') location.href = '/dashboard/artist.html';
+      else location.href = '/';
+    }, 2500);
+
+  } catch (err) {
+    showError('Une erreur inattendue est survenue. Veuillez réessayer.');
+    btn.disabled = false; btn.textContent = 'Créer mon compte';
+  }
 });
 
 document.getElementById('toggle-password').addEventListener('click', function() {

@@ -235,7 +235,7 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { supabase, getCurrentUser } from '/js/supabase.js';
+import { supabase, getCurrentUser, esc, safeUrl } from '/js/supabase.js';
 
 const artistId = new URLSearchParams(location.search).get('id');
 if (!artistId) { location.href = '/artists.html'; }
@@ -320,15 +320,16 @@ async function load() {
 
   // Spécialités
   document.getElementById('specialties-tags').innerHTML = (a.specialties || [])
-    .map(s => `<span class="tag">${s}</span>`).join('');
+    .map(s => `<span class="tag">${esc(s)}</span>`).join('');
 
   // Réseaux sociaux — masqués pour les guests
   if (!isGuest) {
     const socials = [];
-    if (a.instagram) socials.push(`<a class="social-link" href="${a.instagram}" target="_blank">📸 Instagram</a>`);
-    if (a.tiktok)    socials.push(`<a class="social-link" href="${a.tiktok}"    target="_blank">🎵 TikTok</a>`);
-    if (a.youtube)   socials.push(`<a class="social-link" href="${a.youtube}"   target="_blank">▶️ YouTube</a>`);
-    if (a.website)   socials.push(`<a class="social-link" href="${a.website}"   target="_blank">🌐 Site web</a>`);
+    const igUrl = safeUrl(a.instagram), ttUrl = safeUrl(a.tiktok), ytUrl = safeUrl(a.youtube), wsUrl = safeUrl(a.website);
+    if (igUrl) socials.push(`<a class="social-link" href="${esc(igUrl)}" target="_blank" rel="noopener noreferrer">📸 Instagram</a>`);
+    if (ttUrl) socials.push(`<a class="social-link" href="${esc(ttUrl)}" target="_blank" rel="noopener noreferrer">🎵 TikTok</a>`);
+    if (ytUrl) socials.push(`<a class="social-link" href="${esc(ytUrl)}" target="_blank" rel="noopener noreferrer">▶️ YouTube</a>`);
+    if (wsUrl) socials.push(`<a class="social-link" href="${esc(wsUrl)}" target="_blank" rel="noopener noreferrer">🌐 Site web</a>`);
     document.getElementById('social-links').innerHTML = socials.join('');
   } else {
     document.getElementById('social-links').innerHTML =
@@ -340,12 +341,12 @@ async function load() {
   const sl = document.getElementById('services-list');
   if (services && services.length > 0) {
     sl.innerHTML = services.map(s => `
-      <div class="service-option" data-id="${s.id}" data-price="${s.price_cents}" data-name="${s.name}" onclick="${isGuest ? 'showGuestPrompt()' : 'selectService(this)'}">
+      <div class="service-option" data-id="${esc(s.id)}" data-price="${esc(s.price_cents)}" data-name="${esc(s.name)}" onclick="${isGuest ? 'showGuestPrompt()' : 'selectService(this)'}">
         <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="svc-name">${s.name}</span>
+          <span class="svc-name">${esc(s.name)}</span>
           <span class="svc-price">${(s.price_cents/100).toFixed(0)}€</span>
         </div>
-        <div class="svc-dur">${s.duration_min} min · ${s.description || ''}</div>
+        <div class="svc-dur">${esc(String(s.duration_min))} min · ${esc(s.description || '')}</div>
       </div>`).join('');
   } else {
     sl.innerHTML = '<p style="color:var(--gris);font-size:.85rem;">Tarifs sur demande</p>';
@@ -359,14 +360,14 @@ async function load() {
       const visible = photos.slice(0, 2);
       const locked  = photos.slice(2);
       pg.innerHTML =
-        visible.map(ph => `<img src="${ph.url}" alt="" loading="lazy" onerror="this.style.background='#FDE8EF'">`).join('') +
-        locked.map(ph  => `<div class="photo-blur-overlay"><img src="${ph.url}" alt="" loading="lazy"/></div>`).join('') +
+        visible.map(ph => `<img src="${esc(ph.url)}" alt="" loading="lazy" onerror="this.style.background='#FDE8EF'">`).join('') +
+        locked.map(ph  => `<div class="photo-blur-overlay"><img src="${esc(ph.url)}" alt="" loading="lazy"/></div>`).join('') +
         (locked.length > 0 ? `<div style="grid-column:1/-1;text-align:center;padding:14px 0;">
           <a href="/auth/register.html?redirect=${encodeURIComponent(location.href)}" class="btn btn-primary btn-sm">
             Voir les ${locked.length} autres photos →
           </a></div>` : '');
     } else {
-      pg.innerHTML = photos.map(ph => `<img src="${ph.url}" alt="${ph.caption||''}" loading="lazy" onclick="openLightbox('${ph.url}')" onerror="this.style.background='#FDE8EF'">`).join('');
+      pg.innerHTML = photos.map(ph => `<img src="${esc(ph.url)}" alt="${esc(ph.caption||'')}" loading="lazy" onclick="openLightbox('${esc(ph.url)}')" onerror="this.style.background='#FDE8EF'">`).join('');
     }
   } else {
     pg.innerHTML = '<p style="grid-column:1/-1;color:var(--gris);text-align:center;padding:24px;">Portfolio en cours de construction</p>';
@@ -384,11 +385,11 @@ async function load() {
     rl.innerHTML = reviews.map(r => `
       <div class="review-card">
         <div class="review-header">
-          <span class="review-author">${r.profiles?.full_name || 'Cliente'}</span>
+          <span class="review-author">${esc(r.profiles?.full_name || 'Cliente')}</span>
           <span class="review-date">${new Date(r.created_at).toLocaleDateString('fr-FR')}</span>
         </div>
         <div style="margin-bottom:6px;" class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-        <p class="review-text">${r.comment || ''}</p>
+        <p class="review-text">${esc(r.comment || '')}</p>
       </div>`).join('');
     if (isGuest && a.review_count > 1) {
       rl.innerHTML += `<div style="text-align:center;padding:16px;background:var(--rose-cl);border-radius:10px;margin-top:8px;">

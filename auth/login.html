@@ -81,7 +81,9 @@
 <script type="module">
 import { supabase } from '/js/supabase.js';
 
-const redirect = new URLSearchParams(location.search).get('redirect') || null;
+// Valider le redirect : seulement les chemins internes (pas d'open redirect)
+const rawRedirect = new URLSearchParams(location.search).get('redirect') || null;
+const redirect = (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')) ? rawRedirect : null;
 
 // Déjà connecté → rediriger vers le bon dashboard
 const { data: { user: existingUser } } = await supabase.auth.getUser();

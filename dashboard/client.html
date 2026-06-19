@@ -101,7 +101,7 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { supabase, getCurrentUser } from '/js/supabase.js';
+import { supabase, getCurrentUser, esc } from '/js/supabase.js';
 
 const user = await getCurrentUser();
 if (!user) { location.href = '/auth/login.html'; }
@@ -140,23 +140,27 @@ async function loadBookings(filter) {
   el.innerHTML = data.map(b => {
     const d = new Date(b.date);
     const artistName = b.artists?.profiles?.full_name || 'Artiste';
+    const artistId   = b.artists?.id || '';
     const isPast  = b.date < now;
     const canReview = isPast && b.status === 'confirmed';
+    const stKey = isPast && b.status === 'confirmed' ? 'done' : b.status;
+    const stLabel = {confirmed: isPast?'Terminée':'Confirmée', pending:'En attente', cancelled:'Annulée', done:'Terminée'}[stKey] || b.status;
+    const stClass = ['confirmed','pending','cancelled','done'].includes(stKey) ? stKey : 'pending';
     return `<div class="booking-card">
       <div class="bk-date"><div class="day">${d.getDate()}</div><div class="mon">${d.toLocaleDateString('fr-FR',{month:'short'})}</div></div>
       <div class="bk-info">
-        <div class="bk-artist">${artistName}</div>
-        <div class="bk-service">${b.services?.name||'–'}</div>
+        <div class="bk-artist">${esc(artistName)}</div>
+        <div class="bk-service">${esc(b.services?.name||'–')}</div>
         <div class="bk-meta">
-          <span>🕐 ${b.time_slot}</span>
+          <span>🕐 ${esc(b.time_slot)}</span>
           <span>📍 ${d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</span>
         </div>
-        ${b.note ? `<div style="font-size:.78rem;color:var(--gris);margin-top:6px;font-style:italic;">"${b.note}"</div>` : ''}
+        ${b.note ? `<div style="font-size:.78rem;color:var(--gris);margin-top:6px;font-style:italic;">"${esc(b.note)}"</div>` : ''}
       </div>
       <div class="bk-right">
         <span class="bk-price">${b.services ? (b.services.price_cents/100).toFixed(0)+'€' : '–'}</span>
-        <span class="status-badge status-${isPast&&b.status==='confirmed'?'done':b.status}">${{confirmed: isPast?'Terminée':'Confirmée', pending:'En attente', cancelled:'Annulée'}[b.status]||b.status}</span>
-        ${canReview && !b.reviewed ? `<button class="btn btn-ghost btn-sm" onclick="openReview('${b.id}','${b.artists?.id}','${artistName}')">Laisser un avis</button>` : ''}
+        <span class="status-badge status-${stClass}">${stLabel}</span>
+        ${canReview && !b.reviewed ? `<button class="btn btn-ghost btn-sm" data-bid="${esc(b.id)}" data-aid="${esc(artistId)}" data-aname="${esc(artistName)}" onclick="openReview(this.dataset.bid,this.dataset.aid,this.dataset.aname)">Laisser un avis</button>` : ''}
         ${b.reviewed ? `<span style="font-size:.75rem;color:var(--gris);">Avis publié ✓</span>` : ''}
       </div>
     </div>`;
