@@ -596,8 +596,10 @@ document.getElementById('btn-save-profile').addEventListener('click', async () =
 
 // Toggle actif
 document.getElementById('btn-toggle-active').addEventListener('click', async () => {
+  if (!artistData?.id) { showToast('Profil artiste introuvable'); return; }
   const newVal = !artistData.is_active;
-  await supabase.from('artists').update({ is_active: newVal }).eq('id', artistData.id);
+  const { error } = await supabase.from('artists').update({ is_active: newVal }).eq('id', artistData.id);
+  if (error) { showToast('Erreur : ' + error.message); return; }
   artistData.is_active = newVal;
   document.getElementById('btn-toggle-active').textContent = newVal ? 'Désactiver' : 'Activer mon profil';
   document.getElementById('active-badge').textContent = newVal ? '⬤ Profil actif' : '⬤ Profil inactif';
