@@ -229,6 +229,7 @@
           <div class="field"><label>Prénom & Nom</label><input type="text" id="p-name"/></div>
           <div class="field"><label>Ville</label><input type="text" id="p-city"/></div>
         </div>
+        <div class="field"><label>Nom de scène <span style="color:var(--gris);font-weight:400;font-size:.8rem;">(affiché sur votre profil public)</span></label><input type="text" id="p-display-name" placeholder="Ex : Nadia Beauty, Studio Glam..."/></div>
         <div class="field"><label>Bio / Présentation</label><textarea id="p-bio" rows="4" placeholder="Parlez de votre parcours, style, spécialités..."></textarea></div>
         <div class="form-row">
           <div class="field"><label>Instagram</label><input type="url" id="p-instagram" placeholder="https://instagram.com/..."/></div>
@@ -421,6 +422,7 @@ async function init() {
     document.getElementById('active-badge').textContent = artist.is_active ? '⬤ Profil actif' : '⬤ Profil inactif';
     document.getElementById('active-badge').style.background = artist.is_active ? '#D1FAE5' : '#FEE2E2';
     document.getElementById('active-badge').style.color = artist.is_active ? '#065F46' : '#991B1B';
+    document.getElementById('p-display-name').value = artist.display_name || '';
     document.getElementById('p-bio').value       = artist.bio || '';
     document.getElementById('p-instagram').value = artist.instagram || '';
     document.getElementById('p-tiktok').value    = artist.tiktok || '';
@@ -585,15 +587,18 @@ window.deleteService = async (id) => { await supabase.from('services').delete().
 document.getElementById('btn-save-profile').addEventListener('click', async () => {
   const specialties = [...document.querySelectorAll('.spec-cb:checked')].map(c=>c.value);
   await supabase.from('profiles').update({ full_name: document.getElementById('p-name').value, city: document.getElementById('p-city').value }).eq('user_id', user.id);
+  const displayName = document.getElementById('p-display-name').value.trim();
   await supabase.from('artists').update({
-    bio:         document.getElementById('p-bio').value,
-    instagram:   document.getElementById('p-instagram').value,
-    tiktok:      document.getElementById('p-tiktok').value,
-    youtube:     document.getElementById('p-youtube').value,
-    website:     document.getElementById('p-website').value,
+    bio:          document.getElementById('p-bio').value,
+    display_name: displayName || document.getElementById('p-name').value,
+    instagram:    document.getElementById('p-instagram').value,
+    tiktok:       document.getElementById('p-tiktok').value,
+    youtube:      document.getElementById('p-youtube').value,
+    website:      document.getElementById('p-website').value,
     specialties
   }).eq('user_id', user.id);
   showToast('Profil enregistré !');
+  setTimeout(() => showTab('disponibilites', document.querySelector('[onclick*="disponibilites"]')), 1200);
 });
 
 // Toggle actif
