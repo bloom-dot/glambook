@@ -241,10 +241,14 @@
         <div class="field">
           <label>Spécialités</label>
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="specialties-check">
-            ${['Mariage','Soirée','Quotidien','Éditorial / Shooting','Scène / Spectacle','Coiffure','Ongles','Airbrush'].map(s =>
-              `<label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;">
-                <input type="checkbox" value="${s}" class="spec-cb"/> ${s}
-               </label>`).join('')}
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Mariage" class="spec-cb"/> Mariage</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Soirée" class="spec-cb"/> Soirée</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Quotidien" class="spec-cb"/> Quotidien</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Éditorial / Shooting" class="spec-cb"/> Éditorial / Shooting</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Scène / Spectacle" class="spec-cb"/> Scène / Spectacle</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Coiffure" class="spec-cb"/> Coiffure</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Ongles" class="spec-cb"/> Ongles</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Airbrush" class="spec-cb"/> Airbrush</label>
           </div>
         </div>
         <button class="btn btn-primary" id="btn-save-profile">Enregistrer le profil</button>
