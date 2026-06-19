@@ -192,7 +192,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
       'Unable to validate email address: invalid format': 'Adresse email invalide.',
       'Email rate limit exceeded': 'Trop de tentatives. Réessayez dans quelques minutes.',
     };
-    const msg = msgs[error.message] || 'Une erreur est survenue. Veuillez réessayer.';
+    const msg = msgs[error.message] || `Erreur : ${error.message}`;
     showError(msg);
     btn.disabled = false; btn.textContent = 'Créer mon compte';
     return;
