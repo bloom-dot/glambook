@@ -400,10 +400,12 @@ async function init() {
   document.getElementById('p-name').value  = profile?.full_name || '';
   document.getElementById('p-city').value  = profile?.city || '';
 
-  let { data: artist } = await supabase.from('artists').select('*').eq('user_id', user.id).single();
+  let { data: artist, error: artistErr } = await supabase.from('artists').select('*').eq('user_id', user.id).maybeSingle();
+  if (artistErr) console.warn('artist select error:', artistErr.message, artistErr.code);
   if (!artist) {
-    await supabase.from('artists').upsert({ user_id: user.id, display_name: profile?.full_name || user.email.split('@')[0], is_active: false, is_verified: false, rating_avg: 5, review_count: 0 });
-    ({ data: artist } = await supabase.from('artists').select('*').eq('user_id', user.id).single());
+    const { error: upsertErr } = await supabase.from('artists').upsert({ user_id: user.id, display_name: profile?.full_name || user.email.split('@')[0], is_active: false, is_verified: false, rating_avg: 5, review_count: 0 });
+    if (upsertErr) console.warn('artist upsert error:', upsertErr.message);
+    ({ data: artist } = await supabase.from('artists').select('*').eq('user_id', user.id).maybeSingle());
   }
   artistData = artist;
   if (artist?.id) {
