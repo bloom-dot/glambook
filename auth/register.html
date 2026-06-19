@@ -186,6 +186,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   });
 
   if (error) {
+    console.error('GLAMBOOK SIGNUP ERROR:', error, 'message:', error?.message, 'status:', error?.status, 'name:', error?.name);
     const msgs = {
       'User already registered': 'Cette adresse email est déjà utilisée. <a href="/auth/login.html" style="color:var(--rose);font-weight:700;">Se connecter ?</a>',
       'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 8 caractères.',
