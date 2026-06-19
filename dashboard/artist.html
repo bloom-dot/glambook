@@ -377,14 +377,23 @@ async function init() {
   const today = new Date();
   document.getElementById('dash-date').textContent = today.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
+  let { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
+  if (!profile) {
+    const name = user.user_metadata?.full_name || user.email.split('@')[0];
+    await supabase.from('profiles').upsert({ user_id: user.id, full_name: name, role: 'artist' });
+    ({ data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single());
+  }
   profileData = profile;
-  document.getElementById('sb-name').textContent   = profile?.full_name || 'Artiste';
-  document.getElementById('dash-greeting').textContent = `Bonjour ${(profile?.full_name||'').split(' ')[0]} !`;
+  document.getElementById('sb-name').textContent   = profile?.full_name || user.email;
+  document.getElementById('dash-greeting').textContent = `Bonjour ${(profile?.full_name||user.email).split(' ')[0]} !`;
   document.getElementById('p-name').value  = profile?.full_name || '';
   document.getElementById('p-city').value  = profile?.city || '';
 
-  const { data: artist } = await supabase.from('artists').select('*').eq('user_id', user.id).single();
+  let { data: artist } = await supabase.from('artists').select('*').eq('user_id', user.id).single();
+  if (!artist) {
+    await supabase.from('artists').upsert({ user_id: user.id, display_name: profile?.full_name || user.email.split('@')[0], is_active: false, is_verified: false, rating_avg: 5, review_count: 0 });
+    ({ data: artist } = await supabase.from('artists').select('*').eq('user_id', user.id).single());
+  }
   artistData = artist;
   if (artist?.id) {
     const url = `/artist.html?id=${artist.id}`;
