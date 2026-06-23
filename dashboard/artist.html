@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="/css/main.css"/>
   <style>
     body { background: var(--gris-cl); }
-    .dash-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    .dash-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
     @media(max-width:768px){ .dash-layout { grid-template-columns: 1fr; } }
 
     /* Sidebar */
@@ -61,7 +61,7 @@
     }
 
     /* Main */
-    .dash-main { padding: 32px 28px; max-width: 960px; overflow: hidden; }
+    .dash-main { padding: 32px 28px; max-width: 960px; overflow: hidden; min-width: 0; }
     .dash-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; letter-spacing: -.02em; }
     .dash-sub   { font-size: .85rem; color: var(--gris); margin-bottom: 28px; }
 
