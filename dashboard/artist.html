@@ -448,10 +448,14 @@ async function init() {
   document.getElementById('dash-date').textContent = today.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
   // Charger profil + artiste en parallèle
-  const [{ data: profile }, { data: artist }] = await Promise.all([
+  const [profileRes, artistRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle(),
     supabase.from('artists').select('*').eq('user_id', user.id).maybeSingle()
   ]);
+  if (profileRes.error) console.warn('profiles error:', profileRes.error.message);
+  if (artistRes.error) console.warn('artists error:', artistRes.error.message);
+  const profile = profileRes.data;
+  const artist = artistRes.data;
 
   // Auto-créer profil si absent (INSERT seulement, pas upsert)
   if (!profile) {
