@@ -104,15 +104,15 @@
     .status-cancelled { background: #FEF2F2; color: #991B1B; }
 
     /* Calendrier dispo */
-    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin-bottom: 16px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 16px; }
     .cal-day {
-      aspect-ratio: 1; border-radius: var(--radius-sm); display: flex; align-items: center;
-      justify-content: center; font-size: .8rem; font-weight: 600; cursor: pointer;
+      padding: 8px 4px; border-radius: var(--radius-xs); display: flex; align-items: center;
+      justify-content: center; font-size: .75rem; font-weight: 600; cursor: pointer;
       border: 1.5px solid var(--bord); background: var(--blanc); transition: all var(--transition);
     }
     .cal-day:hover:not(.past) { border-color: var(--rose); background: var(--rose-cl); }
     .cal-day.available { background: #ECFDF5; border-color: #34D399; color: #065F46; }
-    .cal-day.today { border-color: var(--rose); color: var(--rose); font-weight: 800; }
+    .cal-day.today { border-color: var(--rose); color: var(--rose); background: var(--rose-cl); font-weight: 800; }
     .cal-day.past { opacity: .3; pointer-events: none; }
 
     /* Profil form */
