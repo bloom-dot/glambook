@@ -839,7 +839,11 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-init();
+init().catch(err => {
+  console.error('init() failed:', err);
+  document.getElementById('sb-name').textContent = user?.email || '?';
+  document.getElementById('dash-greeting').textContent = 'Bonjour !';
+});
 </script>
 </body>
 </html>
