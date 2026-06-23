@@ -8,20 +8,21 @@
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <style>
-    body { background: linear-gradient(135deg, #1A0A12 0%, #3D0A20 100%); min-height: 100vh; display: flex; flex-direction: column; }
+    body { background: linear-gradient(160deg, #0F0610 0%, #2D0818 40%, #1A0A12 100%); min-height: 100vh; display: flex; flex-direction: column; }
     .auth-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-    .auth-card { background: #fff; border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .auth-card { background: var(--blanc); border-radius: 24px; padding: 44px 36px; width: 100%; max-width: 440px; box-shadow: 0 24px 80px rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.06); }
     .auth-logo { text-align: center; margin-bottom: 28px; }
-    .auth-logo a { font-size: 1.6rem; font-weight: 900; color: var(--rose); text-decoration: none; }
+    .auth-logo a { font-size: 1.5rem; font-weight: 900; color: var(--rose); text-decoration: none; letter-spacing: -.03em; }
     .auth-logo a span { color: var(--or); }
-    .auth-title { font-size: 1.4rem; font-weight: 800; text-align: center; margin-bottom: 6px; }
+    .auth-title { font-size: 1.35rem; font-weight: 800; text-align: center; margin-bottom: 6px; letter-spacing: -.02em; }
     .auth-sub { text-align: center; color: var(--gris); font-size: .88rem; margin-bottom: 28px; }
-    .divider { text-align: center; color: var(--gris); font-size: .8rem; margin: 20px 0; position: relative; }
+    .divider { text-align: center; color: var(--gris); font-size: .78rem; margin: 24px 0; position: relative; }
     .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: var(--bord); }
     .divider::before { left: 0; } .divider::after { right: 0; }
     .auth-footer { text-align: center; font-size: .85rem; color: var(--gris); margin-top: 20px; }
-    .auth-footer a { color: var(--rose); font-weight: 600; text-decoration: none; }
-    .error-msg { background: #FEE2E2; color: #991B1B; border-radius: 8px; padding: 10px 14px; font-size: .85rem; margin-bottom: 16px; display: none; }
+    .auth-footer a { color: var(--rose); font-weight: 600; text-decoration: none; transition: opacity .15s; }
+    .auth-footer a:hover { opacity: .75; }
+    .error-msg { background: #FEF2F2; color: #991B1B; border-radius: var(--radius-sm); padding: 12px 16px; font-size: .85rem; margin-bottom: 16px; display: none; border: 1px solid #FECACA; }
   </style>
 </head>
 <body>

@@ -16,74 +16,128 @@
   <style>
     /* ── HERO ── */
     .hero {
-      background: linear-gradient(135deg, #1A0A12 0%, #3D0A20 50%, #1A0A12 100%);
-      padding: 80px 20px 60px;
+      background: linear-gradient(160deg, #0F0610 0%, #2D0818 40%, #1A0A12 100%);
+      padding: 100px 20px 72px;
       text-align: center; color: #fff;
       position: relative; overflow: hidden;
     }
     .hero::before {
       content: '';
       position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 60% 40%, rgba(232,84,122,.25) 0%, transparent 70%);
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(232,84,122,.18) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, rgba(212,175,55,.1) 0%, transparent 50%);
+    }
+    .hero::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 80px;
+      background: linear-gradient(to top, var(--gris-cl), transparent);
     }
     .hero-badge {
-      display: inline-block; background: rgba(212,175,55,.15);
-      border: 1px solid rgba(212,175,55,.4); color: #D4AF37;
-      font-size: .78rem; font-weight: 700; letter-spacing: .1em;
-      padding: 5px 14px; border-radius: 20px; margin-bottom: 22px;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(212,175,55,.1);
+      border: 1px solid rgba(212,175,55,.25); color: #D4AF37;
+      font-size: .75rem; font-weight: 600; letter-spacing: .08em;
+      padding: 6px 16px; border-radius: 24px; margin-bottom: 24px;
+      backdrop-filter: blur(8px);
     }
     .hero h1 {
-      font-size: clamp(2rem, 6vw, 3.2rem);
-      font-weight: 900; line-height: 1.15; margin-bottom: 16px;
+      font-size: clamp(2.2rem, 5.5vw, 3.4rem);
+      font-weight: 900; line-height: 1.1; margin-bottom: 18px;
+      letter-spacing: -.03em;
     }
-    .hero h1 span { color: #E8547A; }
-    .hero p { font-size: 1.05rem; color: rgba(255,255,255,.7); margin-bottom: 40px; max-width: 560px; margin-left: auto; margin-right: auto; }
+    .hero h1 span {
+      background: linear-gradient(135deg, #E8547A, #F5A0B8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.05rem; color: rgba(255,255,255,.6); margin-bottom: 40px;
+      max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.65;
+    }
     .hero-stats {
-      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
-      margin-top: 40px; padding-top: 40px;
-      border-top: 1px solid rgba(255,255,255,.1);
+      display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+      margin-top: 48px; padding-top: 36px;
+      border-top: 1px solid rgba(255,255,255,.08);
     }
-    .hero-stat .num { font-size: 1.7rem; font-weight: 900; color: #E8547A; }
-    .hero-stat .lbl { font-size: .78rem; color: rgba(255,255,255,.5); letter-spacing: .06em; }
+    .hero-stat .num { font-size: 1.8rem; font-weight: 900; color: var(--rose); }
+    .hero-stat .lbl { font-size: .72rem; color: rgba(255,255,255,.4); letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
 
     /* ── SEARCH BOX ── */
     .search-box {
-      background: #fff; border-radius: 16px;
-      box-shadow: 0 8px 40px rgba(0,0,0,.25);
-      padding: 24px 28px; max-width: 700px;
+      background: var(--blanc); border-radius: 20px;
+      box-shadow: 0 16px 60px rgba(0,0,0,.3);
+      padding: 28px 28px 24px; max-width: 720px;
       margin: 0 auto; position: relative; z-index: 2;
     }
     .search-row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .search-row .field { flex: 1; min-width: 160px; margin: 0; }
-    .search-row .field label { font-size: .78rem; color: #6B7280; margin-bottom: 5px; }
+    .search-row .field { flex: 1; min-width: 150px; margin: 0; }
+    .search-row .field label { font-size: .75rem; color: var(--gris); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
     .search-row .field input, .search-row .field select {
-      padding: 11px 12px; font-size: .9rem;
+      padding: 12px 14px; font-size: .88rem; border-radius: var(--radius-sm);
     }
-    .search-sep { width: 1px; background: #E5E7EB; align-self: stretch; margin: 4px 0; }
+    .search-sep { width: 1px; background: var(--bord); align-self: stretch; margin: 4px 0; }
 
     /* ── HOW IT WORKS ── */
-    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 28px; }
-    .step-card { text-align: center; padding: 32px 20px; }
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+    .step-card {
+      text-align: center; padding: 36px 24px; border-radius: var(--radius);
+      background: var(--blanc); border: 1px solid rgba(0,0,0,.04);
+      transition: all var(--transition);
+    }
+    .step-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
     .step-icon {
-      width: 60px; height: 60px; border-radius: 50%;
+      width: 56px; height: 56px; border-radius: 14px;
       background: var(--rose-cl); color: var(--rose);
-      font-size: 1.5rem; display: flex; align-items: center;
+      font-size: 1.4rem; display: flex; align-items: center;
       justify-content: center; margin: 0 auto 16px;
     }
-    .step-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-    .step-card p { font-size: .88rem; color: var(--gris); }
+    .step-num {
+      font-size: .65rem; font-weight: 800; color: var(--rose);
+      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .step-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 8px; }
+    .step-card p { font-size: .85rem; color: var(--gris); line-height: 1.55; }
 
     /* ── FEATURED ── */
-    .section-white { background: #fff; }
+    .section-white { background: var(--blanc); }
 
     /* ── CTA ARTISTE ── */
     .cta-artiste {
-      background: linear-gradient(135deg, var(--rose) 0%, var(--rose-f) 100%);
-      border-radius: 20px; padding: 52px 40px; text-align: center; color: #fff;
+      background: linear-gradient(135deg, #1A0A12 0%, #3D0A20 100%);
+      border-radius: 24px; padding: 60px 40px; text-align: center; color: #fff;
+      position: relative; overflow: hidden;
     }
-    .cta-artiste h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 12px; }
-    .cta-artiste p { font-size: 1rem; opacity: .85; margin-bottom: 28px; }
-    .cta-artiste .btn-gold { font-size: 1rem; padding: 15px 32px; }
+    .cta-artiste::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(232,84,122,.2), transparent 70%);
+    }
+    .cta-artiste h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 12px; position: relative; }
+    .cta-artiste p { font-size: 1rem; opacity: .7; margin-bottom: 32px; max-width: 520px; margin-left: auto; margin-right: auto; position: relative; }
+    .cta-artiste .btn-gold { font-size: .95rem; padding: 16px 36px; position: relative; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: #0A0A0A; color: rgba(255,255,255,.4); padding: 40px 20px 28px;
+    }
+    .footer-inner {
+      max-width: 1120px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;
+    }
+    .footer-brand { font-size: 1.1rem; font-weight: 800; }
+    .footer-brand span:first-child { color: var(--rose); }
+    .footer-brand span:last-child { color: var(--or); }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-links a { color: rgba(255,255,255,.35); text-decoration: none; font-size: .8rem; transition: color var(--transition); }
+    .footer-links a:hover { color: rgba(255,255,255,.7); }
+    .footer-copy { width: 100%; text-align: center; font-size: .75rem; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.06); }
+
+    @media (max-width: 640px) {
+      .hero { padding: 80px 16px 56px; }
+      .search-row { flex-direction: column; }
+      .search-sep { display: none; }
+      .hero-stats { gap: 28px; }
+      .cta-artiste { padding: 44px 24px; border-radius: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -146,30 +200,34 @@
 <!-- COMMENT ÇA MARCHE -->
 <section class="section">
   <div class="container">
-    <div style="text-align:center; margin-bottom:40px;">
+    <div style="text-align:center; margin-bottom:48px;">
       <h2 class="section-title">Comment ça marche ?</h2>
-      <p class="section-sub">Réserver une maquilleuse professionnelle n'a jamais été aussi simple</p>
+      <p class="section-sub" style="margin-bottom:0;">Réserver une maquilleuse pro n'a jamais été aussi simple</p>
     </div>
     <div class="steps-grid">
       <div class="step-card">
         <div class="step-icon">🔍</div>
+        <div class="step-num">Étape 1</div>
         <h3>Recherchez</h3>
-        <p>Entrez votre ville et la date souhaitée pour voir les maquilleuses disponibles près de vous.</p>
+        <p>Entrez votre ville et la date souhaitée pour voir les maquilleuses disponibles.</p>
       </div>
       <div class="step-card">
         <div class="step-icon">💜</div>
+        <div class="step-num">Étape 2</div>
         <h3>Comparez</h3>
-        <p>Consultez les profils, les portfolios photos, les avis clients et les tarifs.</p>
+        <p>Consultez les portfolios, les avis clients et les tarifs en un coup d'œil.</p>
       </div>
       <div class="step-card">
         <div class="step-icon">📅</div>
+        <div class="step-num">Étape 3</div>
         <h3>Réservez</h3>
-        <p>Choisissez un créneau disponible et confirmez votre réservation en ligne en toute sécurité.</p>
+        <p>Choisissez un créneau et confirmez votre réservation en toute sécurité.</p>
       </div>
       <div class="step-card">
         <div class="step-icon">✨</div>
+        <div class="step-num">Étape 4</div>
         <h3>Profitez</h3>
-        <p>Votre maquilleuse vous contacte pour confirmer les détails. Il ne reste plus qu'à briller !</p>
+        <p>Votre maquilleuse confirme les détails. Il ne reste plus qu'à briller !</p>
       </div>
     </div>
   </div>
@@ -206,13 +264,18 @@
   </div>
 </section>
 
-<footer style="background:var(--noir); color:rgba(255,255,255,.5); text-align:center; padding:28px 20px; font-size:.82rem;">
-  <div style="color:#E8547A; font-weight:800; font-size:1.1rem; margin-bottom:8px;">Glam<span style="color:#D4AF37;">Book</span></div>
-  © 2026 GlamBook — La plateforme des makeup artists professionnels
-  <div style="margin-top:8px;font-size:.75rem;">
-    <a href="/legal/mentions-legales.html" style="color:rgba(255,255,255,.4); text-decoration:none; margin:0 8px;">Mentions légales</a>
-    <a href="/legal/cgu.html" style="color:rgba(255,255,255,.4); text-decoration:none; margin:0 8px;">CGU</a>
-    <a href="mailto:contact@glambook.fr" style="color:rgba(255,255,255,.4); text-decoration:none; margin:0 8px;">Contact</a>
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand"><span>Glam</span><span>Book</span></div>
+    <div class="footer-links">
+      <a href="/artists.html">Maquilleuses</a>
+      <a href="/auth/register.html?role=artist">Devenir artiste</a>
+      <a href="/legal/mentions-legales.html">Mentions légales</a>
+      <a href="/legal/cgu.html">CGU</a>
+      <a href="/legal/confidentialite.html">Confidentialité</a>
+      <a href="mailto:contact@glambook.fr">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 GlamBook — La plateforme des makeup artists professionnels</div>
   </div>
 </footer>
 
