@@ -14,342 +14,733 @@
   <meta name="apple-mobile-web-app-title" content="GlamBook"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <style>
-    /* ── HERO ── */
-    .hero {
-      background: linear-gradient(160deg, #0F0610 0%, #2D0818 40%, #1A0A12 100%);
-      padding: 100px 20px 72px;
-      text-align: center; color: #fff;
-      position: relative; overflow: hidden;
+    :root {
+      --bg-deep: #080408;
+      --bg-section: #0E080E;
+      --bg-card: rgba(255,255,255,.04);
+      --border-subtle: rgba(255,255,255,.06);
+      --text-primary: #FFFFFF;
+      --text-secondary: rgba(255,255,255,.55);
+      --text-muted: rgba(255,255,255,.3);
     }
-    .hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse at 30% 20%, rgba(232,84,122,.18) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 80%, rgba(212,175,55,.1) 0%, transparent 50%);
+    body { background: var(--bg-deep); overflow-x: hidden; color: var(--text-primary); }
+
+    /* ── NAV (dark glass) ── */
+    .nav { background: rgba(8,4,8,.7); backdrop-filter: blur(24px); border-bottom: 1px solid rgba(232,84,122,.06); }
+    .nav-logo { color: #fff; }
+    .nav-links a { color: rgba(255,255,255,.55); }
+    .nav-links a:hover { background: rgba(232,84,122,.1); color: #fff; }
+    .nav-links .btn-nav { background: linear-gradient(135deg, var(--rose), #D64070); box-shadow: 0 0 20px rgba(232,84,122,.25); color: #fff; }
+
+    /* ═══════════════════════════════════
+       SECTION 1 — HERO (3D immersif)
+       Only section with WebGL canvas
+       ═══════════════════════════════════ */
+    .hero-wrap {
+      position: relative; min-height: 100vh; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      padding: 90px 20px 60px;
     }
-    .hero::after {
-      content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 80px;
-      background: linear-gradient(to top, var(--gris-cl), transparent);
+    #hero-canvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0;
+    }
+    .hero-content {
+      position: relative; z-index: 2; text-align: center; max-width: 800px;
     }
     .hero-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(212,175,55,.1);
-      border: 1px solid rgba(212,175,55,.25); color: #D4AF37;
-      font-size: .75rem; font-weight: 600; letter-spacing: .08em;
-      padding: 6px 16px; border-radius: 24px; margin-bottom: 24px;
-      backdrop-filter: blur(8px);
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(212,175,55,.08); border: 1px solid rgba(212,175,55,.2);
+      color: #D4AF37; font-size: .7rem; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase;
+      padding: 8px 20px; border-radius: 28px; margin-bottom: 28px;
     }
-    .hero h1 {
-      font-size: clamp(2.2rem, 5.5vw, 3.4rem);
-      font-weight: 900; line-height: 1.1; margin-bottom: 18px;
-      letter-spacing: -.03em;
+    .hero-title {
+      font-size: clamp(2.6rem, 6.5vw, 4.5rem); font-weight: 900;
+      line-height: 1.05; letter-spacing: -.04em; margin-bottom: 22px;
     }
-    .hero h1 span {
-      background: linear-gradient(135deg, #E8547A, #F5A0B8);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .hero-title .glow {
+      background: linear-gradient(135deg, #E8547A 0%, #F5A0B8 40%, #D4AF37 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .hero p {
-      font-size: 1.05rem; color: rgba(255,255,255,.6); margin-bottom: 40px;
-      max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.65;
+    .hero-sub {
+      font-size: 1rem; color: var(--text-secondary); max-width: 520px;
+      margin: 0 auto 28px; line-height: 1.6;
     }
-    .hero-stats {
-      display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
-      margin-top: 48px; padding-top: 36px;
-      border-top: 1px solid rgba(255,255,255,.08);
+    .hero-ctas {
+      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 56px;
     }
-    .hero-stat .num { font-size: 1.8rem; font-weight: 900; color: var(--rose); }
-    .hero-stat .lbl { font-size: .72rem; color: rgba(255,255,255,.4); letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
+    .hero-fade {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+      background: linear-gradient(to top, var(--bg-deep), transparent);
+      z-index: 1;
+    }
 
-    /* ── SEARCH BOX ── */
-    .search-box {
-      background: var(--blanc); border-radius: 20px;
-      box-shadow: 0 16px 60px rgba(0,0,0,.3);
-      padding: 28px 28px 24px; max-width: 720px;
-      margin: 0 auto; position: relative; z-index: 2;
+    /* ── Buttons ── */
+    .btn-glow {
+      background: linear-gradient(135deg, var(--rose), #D64070); color: #fff;
+      padding: 16px 36px; border-radius: 12px; font-size: .95rem; font-weight: 700;
+      border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 0 32px rgba(232,84,122,.3); transition: all .3s; font-family: inherit;
+    }
+    .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(232,84,122,.45); }
+    .btn-outline {
+      background: transparent; color: rgba(255,255,255,.75); padding: 16px 36px;
+      border-radius: 12px; font-size: .95rem; font-weight: 600;
+      border: 1.5px solid rgba(255,255,255,.12); cursor: pointer;
+      text-decoration: none; transition: all .3s; font-family: inherit;
+    }
+    .btn-outline:hover { border-color: rgba(232,84,122,.4); color: #fff; background: rgba(232,84,122,.06); }
+    .btn-gold {
+      background: linear-gradient(135deg, var(--or), #F5D060); color: #1a0a12;
+      padding: 16px 40px; border-radius: 12px; font-size: .95rem; font-weight: 800;
+      border: none; cursor: pointer; text-decoration: none; display: inline-flex;
+      box-shadow: 0 0 32px rgba(212,175,55,.25); transition: all .3s; font-family: inherit;
+    }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(212,175,55,.4); }
+
+    /* ── Scroll indicator ── */
+    .scroll-hint {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px;
+      color: var(--text-muted); font-size: .65rem; letter-spacing: .15em; text-transform: uppercase;
+      animation: bobDown 2s ease-in-out infinite;
+    }
+    .scroll-hint .line { width: 1px; height: 36px; background: linear-gradient(to bottom, rgba(232,84,122,.5), transparent); }
+    @keyframes bobDown { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(8px); } }
+
+    /* ═══════════════════════════════════
+       SEARCH (inside hero)
+       ═══════════════════════════════════ */
+    .hero-search {
+      max-width: 700px; margin: 0 auto;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px; padding: 24px 24px 20px;
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 12px 48px rgba(0,0,0,.4);
     }
     .search-row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .search-row .field { flex: 1; min-width: 150px; margin: 0; }
-    .search-row .field label { font-size: .75rem; color: var(--gris); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-    .search-row .field input, .search-row .field select {
-      padding: 12px 14px; font-size: .88rem; border-radius: var(--radius-sm);
+    .search-row .f { flex: 1; min-width: 150px; }
+    .search-row .f label { display: block; font-size: .68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; letter-spacing: .1em; text-transform: uppercase; }
+    .search-row .f input, .search-row .f select {
+      width: 100%; padding: 13px 14px; border-radius: 10px;
+      border: 1.5px solid rgba(255,255,255,.08); background: rgba(255,255,255,.05);
+      color: #fff; font-size: .88rem; font-family: inherit; transition: all .25s;
     }
-    .search-sep { width: 1px; background: var(--bord); align-self: stretch; margin: 4px 0; }
+    .search-row .f input::placeholder { color: rgba(255,255,255,.2); }
+    .search-row .f select option { background: #1a0a12; }
+    .search-row .f input:focus, .search-row .f select:focus {
+      outline: none; border-color: var(--rose); box-shadow: 0 0 0 3px rgba(232,84,122,.12);
+    }
+    .btn-search {
+      width: 100%; margin-top: 16px; padding: 14px;
+      background: linear-gradient(135deg, var(--rose), #D64070);
+      color: #fff; border: none; border-radius: 12px;
+      font-size: .9rem; font-weight: 700; cursor: pointer;
+      box-shadow: 0 0 24px rgba(232,84,122,.2); transition: all .3s; font-family: inherit;
+    }
+    .btn-search:hover { box-shadow: 0 0 40px rgba(232,84,122,.4); transform: translateY(-1px); }
 
-    /* ── HOW IT WORKS ── */
-    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+    /* ═══════════════════════════════════
+       TRUST SIGNALS
+       Social proof — critical for hesitant clients (mariée, first-timers)
+       ═══════════════════════════════════ */
+    .trust-strip {
+      background: var(--bg-deep); padding: 56px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .trust-row {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center;
+    }
+    .trust-item .num {
+      font-size: 2rem; font-weight: 900; display: block;
+      background: linear-gradient(135deg, var(--rose), var(--or));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .trust-item .lbl { font-size: .7rem; color: var(--text-muted); letter-spacing: .1em; text-transform: uppercase; margin-top: 4px; }
+
+    /* ═══════════════════════════════════
+       HOW IT WORKS
+       Reduces anxiety — shows the process is simple
+       ═══════════════════════════════════ */
+    .how-section {
+      background: var(--bg-section); padding: 80px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .section-head { text-align: center; margin-bottom: 56px; }
+    .section-head h2 { font-size: 2rem; font-weight: 900; letter-spacing: -.03em; margin-bottom: 10px; }
+    .section-head p { color: var(--text-secondary); font-size: 1rem; }
+
+    .steps-grid {
+      max-width: 1000px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+      position: relative;
+    }
+    .steps-grid::before {
+      content: ''; position: absolute; top: 40px; left: 10%; right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(232,84,122,.2), rgba(212,175,55,.2), transparent);
+    }
     .step-card {
-      text-align: center; padding: 36px 24px; border-radius: var(--radius);
-      background: var(--blanc); border: 1px solid rgba(0,0,0,.04);
-      transition: all var(--transition);
+      text-align: center; padding: 32px 16px 28px; border-radius: 20px;
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      transition: all .4s; position: relative;
     }
-    .step-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .step-card:hover { border-color: rgba(232,84,122,.2); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(232,84,122,.08); }
     .step-icon {
-      width: 56px; height: 56px; border-radius: 14px;
-      background: var(--rose-cl); color: var(--rose);
-      font-size: 1.4rem; display: flex; align-items: center;
-      justify-content: center; margin: 0 auto 16px;
+      width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 16px;
+      background: linear-gradient(135deg, rgba(232,84,122,.12), rgba(212,175,55,.08));
+      border: 1px solid rgba(232,84,122,.15);
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+      box-shadow: 0 0 20px rgba(232,84,122,.08);
     }
-    .step-num {
-      font-size: .65rem; font-weight: 800; color: var(--rose);
-      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px;
-    }
+    .step-num { font-size: .6rem; font-weight: 800; color: var(--rose); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
     .step-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 8px; }
-    .step-card p { font-size: .85rem; color: var(--gris); line-height: 1.55; }
+    .step-card p { font-size: .82rem; color: var(--text-secondary); line-height: 1.6; }
 
-    /* ── FEATURED ── */
-    .section-white { background: var(--blanc); }
+    /* ═══════════════════════════════════
+       FEATURED ARTISTS
+       Shows real people — builds trust, inspires
+       ═══════════════════════════════════ */
+    .featured-section {
+      background: var(--bg-deep); padding: 80px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .artists-grid {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;
+    }
+    .a-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: 16px; overflow: hidden; text-decoration: none; color: #fff;
+      display: block; transition: all .4s;
+    }
+    .a-card:hover { border-color: rgba(232,84,122,.25); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(232,84,122,.1); }
+    .a-card .cover { width: 100%; height: 190px; object-fit: cover; background: linear-gradient(135deg, rgba(232,84,122,.06), rgba(212,175,55,.04)); }
+    .a-card .body { padding: 18px; }
+    .a-card .hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .a-card .av {
+      width: 44px; height: 44px; border-radius: 50%; margin-top: -30px;
+      border: 3px solid rgba(14,8,14,.9); flex-shrink: 0;
+      background: linear-gradient(135deg, var(--rose-cl), #FDE8EF);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--rose); font-weight: 800; font-size: .95rem;
+    }
+    .a-card .nm { font-size: .92rem; font-weight: 700; }
+    .a-card .ct { font-size: .78rem; color: var(--text-muted); }
+    .a-card .tg { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+    .a-card .tg span { font-size: .68rem; font-weight: 600; padding: 3px 9px; border-radius: 16px; background: rgba(232,84,122,.08); color: var(--rose); border: 1px solid rgba(232,84,122,.12); }
+    .a-card .mt { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+    .a-card .stars { color: var(--or); font-size: .82rem; }
+    .a-card .pr { font-weight: 700; color: var(--rose); font-size: .88rem; }
 
-    /* ── CTA ARTISTE ── */
-    .cta-artiste {
-      background: linear-gradient(135deg, #1A0A12 0%, #3D0A20 100%);
-      border-radius: 24px; padding: 60px 40px; text-align: center; color: #fff;
+    /* ═══════════════════════════════════
+       DUAL CTA — Client + Artiste
+       Two audiences, two paths — no confusion
+       ═══════════════════════════════════ */
+    .dual-cta {
+      background: var(--bg-section); padding: 80px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .cta-grid {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    }
+    .cta-card {
+      padding: 48px 32px; border-radius: 24px; text-align: center;
+      border: 1px solid var(--border-subtle); transition: all .4s;
       position: relative; overflow: hidden;
     }
-    .cta-artiste::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 50% 100%, rgba(232,84,122,.2), transparent 70%);
+    .cta-card::before {
+      content: ''; position: absolute; inset: 0; opacity: 0;
+      transition: opacity .4s;
     }
-    .cta-artiste h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 12px; position: relative; }
-    .cta-artiste p { font-size: 1rem; opacity: .7; margin-bottom: 32px; max-width: 520px; margin-left: auto; margin-right: auto; position: relative; }
-    .cta-artiste .btn-gold { font-size: .95rem; padding: 16px 36px; position: relative; }
+    .cta-card:hover::before { opacity: 1; }
+    .cta-client {
+      background: linear-gradient(160deg, rgba(232,84,122,.06) 0%, rgba(232,84,122,.02) 100%);
+    }
+    .cta-client::before { background: radial-gradient(ellipse at 50% 100%, rgba(232,84,122,.08), transparent 70%); }
+    .cta-client:hover { border-color: rgba(232,84,122,.2); }
+    .cta-artist {
+      background: linear-gradient(160deg, rgba(212,175,55,.06) 0%, rgba(212,175,55,.02) 100%);
+    }
+    .cta-artist::before { background: radial-gradient(ellipse at 50% 100%, rgba(212,175,55,.08), transparent 70%); }
+    .cta-artist:hover { border-color: rgba(212,175,55,.2); }
+    .cta-card .icon { font-size: 2.5rem; margin-bottom: 20px; display: block; }
+    .cta-card h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; position: relative; }
+    .cta-card p { font-size: .9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 28px; max-width: 300px; margin-left: auto; margin-right: auto; position: relative; }
+    .cta-card .btn { position: relative; }
 
-    /* ── FOOTER ── */
-    .footer {
-      background: #0A0A0A; color: rgba(255,255,255,.4); padding: 40px 20px 28px;
+    /* ═══════════════════════════════════
+       REASSURANCE (why GlamBook)
+       Addresses objections for both audiences
+       ═══════════════════════════════════ */
+    .reassurance {
+      background: var(--bg-deep); padding: 80px 20px;
+      border-bottom: 1px solid var(--border-subtle);
     }
-    .footer-inner {
-      max-width: 1120px; margin: 0 auto;
-      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;
+    .reas-grid {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
     }
-    .footer-brand { font-size: 1.1rem; font-weight: 800; }
-    .footer-brand span:first-child { color: var(--rose); }
-    .footer-brand span:last-child { color: var(--or); }
-    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
-    .footer-links a { color: rgba(255,255,255,.35); text-decoration: none; font-size: .8rem; transition: color var(--transition); }
-    .footer-links a:hover { color: rgba(255,255,255,.7); }
-    .footer-copy { width: 100%; text-align: center; font-size: .75rem; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.06); }
+    .reas-item {
+      padding: 28px 20px; border-radius: 16px;
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      text-align: center; transition: all .3s;
+    }
+    .reas-item:hover { border-color: rgba(232,84,122,.15); }
+    .reas-item .ri { font-size: 1.6rem; margin-bottom: 14px; display: block; }
+    .reas-item h4 { font-size: .9rem; font-weight: 700; margin-bottom: 8px; }
+    .reas-item p { font-size: .8rem; color: var(--text-secondary); line-height: 1.6; }
 
-    @media (max-width: 640px) {
-      .hero { padding: 80px 16px 56px; }
+    /* ═══════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════ */
+    .footer-imm {
+      background: rgba(4,2,4,.95); border-top: 1px solid var(--border-subtle);
+      padding: 44px 20px 28px; color: var(--text-muted);
+    }
+    .footer-imm .inner { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+    .footer-imm .brand { font-size: 1.15rem; font-weight: 900; }
+    .footer-imm .brand span:first-child { color: var(--rose); }
+    .footer-imm .brand span:last-child { color: var(--or); }
+    .footer-imm .links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-imm .links a { color: var(--text-muted); text-decoration: none; font-size: .78rem; transition: color .3s; }
+    .footer-imm .links a:hover { color: var(--rose); }
+    .footer-imm .copy { width: 100%; text-align: center; font-size: .7rem; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-subtle); }
+
+    /* ═══════════════════════════════════
+       RESPONSIVE
+       ═══════════════════════════════════ */
+    @media (max-width: 768px) {
+      .trust-row { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .steps-grid { grid-template-columns: 1fr 1fr; }
+      .steps-grid::before { display: none; }
+      .cta-grid { grid-template-columns: 1fr; }
+      .reas-grid { grid-template-columns: 1fr; }
+      .hero-title { font-size: clamp(2rem, 8vw, 3rem); }
+    }
+    @media (max-width: 480px) {
+      .steps-grid { grid-template-columns: 1fr; }
       .search-row { flex-direction: column; }
-      .search-sep { display: none; }
-      .hero-stats { gap: 28px; }
-      .cta-artiste { padding: 44px 24px; border-radius: 20px; }
+      .hero-ctas { flex-direction: column; align-items: center; }
+      .artists-grid { grid-template-columns: 1fr; }
+      .trust-row { grid-template-columns: 1fr 1fr; }
     }
+
+    /* ═══════════════════════════════════
+       GSAP ANIMATIONS (initial states)
+       ═══════════════════════════════════ */
+    .anim-up { opacity: 0; transform: translateY(30px); }
+    .anim-scale { opacity: 0; transform: scale(.95) translateY(20px); }
   </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav class="nav">
   <div class="nav-inner">
     <a href="/" class="nav-logo">Glam<span>Book</span></a>
     <div class="nav-links">
-      <a href="/artists.html" class="hide-mobile">Trouver une maquilleuse</a>
+      <a href="/artists.html" class="hide-mobile">Explorer</a>
       <a href="/auth/login.html">Connexion</a>
-      <a href="/auth/register.html" class="btn-nav btn">Inscription</a>
+      <a href="/auth/register.html" class="btn-nav btn">Rejoindre</a>
     </div>
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div style="position:relative;z-index:2;">
-    <div class="hero-badge">✨ LA PLATEFORME N°1 DES MAKEUP ARTISTS</div>
-    <h1>Trouvez votre<br/><span>maquilleuse idéale</span><br/>en quelques clics</h1>
-    <p>Parcourez les profils, consultez les réalisations et réservez directement en ligne. Simple, rapide, sécurisé.</p>
-
-    <!-- Search -->
-    <div class="search-box">
+<!-- ═══ HERO — 3D immersif (seul encart avec WebGL) ═══ -->
+<section class="hero-wrap" id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-badge anim-up">&#10024; LA PLATEFORME N&deg;1 DES MAKEUP ARTISTS</div>
+    <h1 class="hero-title anim-up">
+      Trouvez votre<br/><span class="glow">maquilleuse id&eacute;ale</span>
+    </h1>
+    <p class="hero-sub anim-up">
+      Parcourez les profils, consultez les r&eacute;alisations et r&eacute;servez directement en ligne. Simple, rapide, s&eacute;curis&eacute;.
+    </p>
+    <!-- Search intégré dans hero — visible sans scroll -->
+    <div class="hero-search anim-up">
       <div class="search-row">
-        <div class="field">
-          <label>Ville ou région</label>
+        <div class="f">
+          <label>Ville ou r&eacute;gion</label>
           <input type="text" id="search-city" placeholder="Paris, Lyon, Marseille..."/>
         </div>
-        <div class="search-sep"></div>
-        <div class="field">
-          <label>Date souhaitée</label>
+        <div class="f">
+          <label>Date</label>
           <input type="date" id="search-date"/>
         </div>
-        <div class="field">
+        <div class="f">
           <label>Prestation</label>
           <select id="search-service">
             <option value="">Toutes</option>
-            <option value="mariage">Mariage</option>
-            <option value="soiree">Soirée</option>
-            <option value="quotidien">Quotidien</option>
-            <option value="editorial">Éditorial / Shooting</option>
-            <option value="scene">Scène / Spectacle</option>
+            <option value="mariage">&#128141; Mariage</option>
+            <option value="soiree">&#127769; Soir&eacute;e</option>
+            <option value="quotidien">&#9728;&#65039; Quotidien</option>
+            <option value="editorial">&#128247; Shooting</option>
+            <option value="scene">&#127917; Sc&egrave;ne</option>
           </select>
         </div>
       </div>
-      <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="doSearch()">
-        Rechercher une maquilleuse
-      </button>
+      <button class="btn-search" onclick="doSearch()">Rechercher une maquilleuse</button>
     </div>
+    <div style="margin-top:16px;">
+      <a href="/auth/register.html?role=artist" class="btn-outline" style="font-size:.8rem;padding:10px 24px;">Vous &ecirc;tes maquilleuse ? Rejoignez-nous</a>
+    </div>
+  </div>
+  <div class="hero-fade"></div>
+  <div class="scroll-hint"><span>Explorer</span><div class="line"></div></div>
+</section>
 
-    <div class="hero-stats">
-      <div class="hero-stat"><div class="num" id="stat-artists">–</div><div class="lbl">MAKEUP ARTISTS</div></div>
-      <div class="hero-stat"><div class="num" id="stat-bookings">–</div><div class="lbl">RÉSERVATIONS</div></div>
-      <div class="hero-stat"><div class="num" id="stat-rating">4.9★</div><div class="lbl">NOTE MOYENNE</div></div>
+<!-- ═══ TRUST SIGNALS — social proof for anxious brides & first-timers ═══ -->
+<div class="trust-strip">
+  <div class="trust-row">
+    <div class="trust-item anim-up"><span class="num" id="stat-artists">&ndash;</span><span class="lbl">Artistes v&eacute;rifi&eacute;es</span></div>
+    <div class="trust-item anim-up"><span class="num" id="stat-bookings">&ndash;</span><span class="lbl">R&eacute;servations</span></div>
+    <div class="trust-item anim-up"><span class="num">4.9&#9733;</span><span class="lbl">Note moyenne</span></div>
+    <div class="trust-item anim-up"><span class="num">100%</span><span class="lbl">Paiement s&eacute;curis&eacute;</span></div>
+  </div>
+</div>
+
+<!-- ═══ HOW IT WORKS — reduces friction, shows simplicity ═══ -->
+<section class="how-section">
+  <div class="section-head">
+    <h2 class="anim-up">Comment &ccedil;a marche ?</h2>
+    <p class="anim-up">R&eacute;server une maquilleuse pro n'a jamais &eacute;t&eacute; aussi simple</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card anim-up">
+      <div class="step-icon">&#128269;</div>
+      <div class="step-num">&Eacute;tape 1</div>
+      <h3>Explorez</h3>
+      <p>Parcourez les profils par ville, date et sp&eacute;cialit&eacute;.</p>
+    </div>
+    <div class="step-card anim-up">
+      <div class="step-icon">&#128156;</div>
+      <div class="step-num">&Eacute;tape 2</div>
+      <h3>Comparez</h3>
+      <p>Portfolios, avis clients et tarifs en un coup d'&oelig;il.</p>
+    </div>
+    <div class="step-card anim-up">
+      <div class="step-icon">&#128197;</div>
+      <div class="step-num">&Eacute;tape 3</div>
+      <h3>R&eacute;servez</h3>
+      <p>Choisissez votre cr&eacute;neau et confirmez en ligne.</p>
+    </div>
+    <div class="step-card anim-up">
+      <div class="step-icon">&#10024;</div>
+      <div class="step-num">&Eacute;tape 4</div>
+      <h3>Brillez</h3>
+      <p>Votre artiste confirme. Il ne reste plus qu'&agrave; briller.</p>
     </div>
   </div>
 </section>
 
-<!-- COMMENT ÇA MARCHE -->
-<section class="section">
-  <div class="container">
-    <div style="text-align:center; margin-bottom:48px;">
-      <h2 class="section-title">Comment ça marche ?</h2>
-      <p class="section-sub" style="margin-bottom:0;">Réserver une maquilleuse pro n'a jamais été aussi simple</p>
+<!-- ═══ FEATURED ARTISTS — real people = trust ═══ -->
+<section class="featured-section">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="section-head">
+      <h2 class="anim-up">Artistes en vedette</h2>
+      <p class="anim-up">Les maquilleuses les plus appr&eacute;ci&eacute;es</p>
     </div>
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-icon">🔍</div>
-        <div class="step-num">Étape 1</div>
-        <h3>Recherchez</h3>
-        <p>Entrez votre ville et la date souhaitée pour voir les maquilleuses disponibles.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-icon">💜</div>
-        <div class="step-num">Étape 2</div>
-        <h3>Comparez</h3>
-        <p>Consultez les portfolios, les avis clients et les tarifs en un coup d'œil.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-icon">📅</div>
-        <div class="step-num">Étape 3</div>
-        <h3>Réservez</h3>
-        <p>Choisissez un créneau et confirmez votre réservation en toute sécurité.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-icon">✨</div>
-        <div class="step-num">Étape 4</div>
-        <h3>Profitez</h3>
-        <p>Votre maquilleuse confirme les détails. Il ne reste plus qu'à briller !</p>
-      </div>
+    <div class="artists-grid" id="featured-grid"></div>
+    <div style="text-align:center;margin-top:36px;">
+      <a href="/artists.html" class="btn-outline">Voir toutes les artistes &#8594;</a>
     </div>
   </div>
 </section>
 
-<!-- ARTISTES EN VEDETTE -->
-<section class="section section-white">
-  <div class="container">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:12px;">
-      <div>
-        <h2 class="section-title" style="margin-bottom:4px;">Maquilleuses en vedette</h2>
-        <p style="color:var(--gris); font-size:.9rem;">Les plus appréciées de notre plateforme</p>
-      </div>
-      <a href="/artists.html" class="btn btn-ghost btn-sm">Voir toutes →</a>
+<!-- ═══ DUAL CTA — two audiences, two clear paths ═══ -->
+<section class="dual-cta">
+  <div class="section-head">
+    <h2 class="anim-up">Rejoignez GlamBook</h2>
+    <p class="anim-up">Que vous cherchiez une maquilleuse ou que vous en soyez une</p>
+  </div>
+  <div class="cta-grid">
+    <div class="cta-card cta-client anim-scale">
+      <span class="icon">&#128132;</span>
+      <h3>Je cherche une maquilleuse</h3>
+      <p>Mariage, soir&eacute;e, shooting&hellip; Trouvez l'artiste parfaite pour votre occasion.</p>
+      <a href="/artists.html" class="btn-glow">Explorer les artistes</a>
     </div>
-    <div class="artists-grid" id="featured-grid">
-      <!-- Chargé dynamiquement -->
-      <div class="card" style="padding:60px 20px; text-align:center; color:var(--gris); grid-column:1/-1;">
-        <div class="spinner" style="margin:0 auto 12px; border-color:rgba(232,84,122,.2); border-top-color:var(--rose);"></div>
-        Chargement...
-      </div>
+    <div class="cta-card cta-artist anim-scale">
+      <span class="icon">&#9997;&#65039;</span>
+      <h3>Je suis makeup artist</h3>
+      <p>Cr&eacute;ez votre profil gratuitement, g&eacute;rez vos dispos et recevez des r&eacute;servations.</p>
+      <a href="/auth/register.html?role=artist" class="btn-gold">Cr&eacute;er mon profil</a>
     </div>
   </div>
 </section>
 
-<!-- CTA ARTISTE -->
-<section class="section">
-  <div class="container">
-    <div class="cta-artiste">
-      <h2>Vous êtes makeup artist ?</h2>
-      <p>Rejoignez GlamBook et développez votre clientèle. Créez votre profil gratuitement, gérez vos disponibilités et recevez des réservations directement en ligne.</p>
-      <a href="/auth/register.html?role=artist" class="btn btn-gold">Créer mon profil artiste gratuitement</a>
+<!-- ═══ REASSURANCE — addresses objections ═══ -->
+<section class="reassurance">
+  <div class="section-head">
+    <h2 class="anim-up">Pourquoi GlamBook ?</h2>
+  </div>
+  <div class="reas-grid">
+    <div class="reas-item anim-up">
+      <span class="ri">&#128274;</span>
+      <h4>Paiement s&eacute;curis&eacute;</h4>
+      <p>Paiement en ligne s&eacute;curis&eacute;, remboursement garanti en cas d'annulation.</p>
+    </div>
+    <div class="reas-item anim-up">
+      <span class="ri">&#9989;</span>
+      <h4>Artistes v&eacute;rifi&eacute;es</h4>
+      <p>Chaque profil est valid&eacute;. Portfolios authentiques et avis clients r&eacute;els.</p>
+    </div>
+    <div class="reas-item anim-up">
+      <span class="ri">&#128172;</span>
+      <h4>Support r&eacute;actif</h4>
+      <p>&Eacute;quipe disponible pour vous accompagner avant et apr&egrave;s votre r&eacute;servation.</p>
     </div>
   </div>
 </section>
 
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-brand"><span>Glam</span><span>Book</span></div>
-    <div class="footer-links">
+<!-- FOOTER -->
+<footer class="footer-imm">
+  <div class="inner">
+    <div class="brand"><span>Glam</span><span>Book</span></div>
+    <div class="links">
       <a href="/artists.html">Maquilleuses</a>
       <a href="/auth/register.html?role=artist">Devenir artiste</a>
-      <a href="/legal/mentions-legales.html">Mentions légales</a>
+      <a href="/legal/mentions-legales.html">Mentions l&eacute;gales</a>
       <a href="/legal/cgu.html">CGU</a>
-      <a href="/legal/confidentialite.html">Confidentialité</a>
+      <a href="/legal/confidentialite.html">Confidentialit&eacute;</a>
       <a href="mailto:contact@glambook.fr">Contact</a>
     </div>
-    <div class="footer-copy">© 2026 GlamBook — La plateforme des makeup artists professionnels</div>
+    <div class="copy">&copy; 2026 GlamBook &mdash; La plateforme des makeup artists professionnels</div>
   </div>
 </footer>
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
-  import { supabase } from '/js/supabase.js';
+<!-- ═══ THREE.JS — Hero only ═══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-  // Date min = aujourd'hui
-  document.getElementById('search-date').min = new Date().toISOString().split('T')[0];
+<script>
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const heroWrap = document.querySelector('.hero-wrap');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, heroWrap.offsetWidth / heroWrap.offsetHeight, 0.1, 100);
+  camera.position.set(0, 0, 5);
 
-  // Stats
-  async function loadStats() {
-    const { count: artistCount } = await supabase.from('artists').select('*', { count: 'exact', head: true });
-    const { count: bookingCount } = await supabase.from('bookings').select('*', { count: 'exact', head: true });
-    document.getElementById('stat-artists').textContent = (artistCount || 0) + '+';
-    document.getElementById('stat-bookings').textContent = (bookingCount || 0) + '+';
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setSize(heroWrap.offsetWidth, heroWrap.offsetHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x080408, 1);
+
+  // Particles
+  const N = 500;
+  const pos = new Float32Array(N * 3);
+  const col = new Float32Array(N * 3);
+  const szs = new Float32Array(N);
+  const vel = [];
+  const rose = new THREE.Color(0xE8547A);
+  const gold = new THREE.Color(0xD4AF37);
+  const white = new THREE.Color(0xffffff);
+
+  for (let i = 0; i < N; i++) {
+    pos[i*3]   = (Math.random()-.5) * 16;
+    pos[i*3+1] = (Math.random()-.5) * 12;
+    pos[i*3+2] = (Math.random()-.5) * 10 - 2;
+    const c = Math.random() < .35 ? rose : Math.random() < .55 ? gold : white;
+    col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b;
+    szs[i] = Math.random() * 2.5 + .5;
+    vel.push({ x:(Math.random()-.5)*.002, y:(Math.random()-.5)*.002 });
   }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  geo.setAttribute('size', new THREE.BufferAttribute(szs, 1));
 
-  // Artistes en vedette
-  async function loadFeatured() {
-    const { data: artists } = await supabase
-      .from('artists')
-      .select(`*, profiles(full_name, avatar_url, city)`)
-      .eq('is_active', true)
-      .order('rating_avg', { ascending: false })
-      .limit(6);
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: `
+      attribute float size;
+      varying vec3 vColor;
+      uniform float uTime;
+      void main() {
+        vColor = color;
+        vec3 p = position;
+        p.y += sin(uTime*.4 + position.x*.5) * .25;
+        p.x += cos(uTime*.3 + position.z*.3) * .15;
+        vec4 mv = modelViewMatrix * vec4(p,1.);
+        gl_PointSize = size * (180. / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        float d = length(gl_PointCoord - .5);
+        if(d>.5) discard;
+        float a = smoothstep(.5,.08,d) * .55;
+        gl_FragColor = vec4(vColor, a);
+      }`,
+    transparent: true, vertexColors: true, depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+  scene.add(new THREE.Points(geo, mat));
 
-    const grid = document.getElementById('featured-grid');
-    if (!artists || artists.length === 0) {
-      grid.innerHTML = '<p style="color:var(--gris);grid-column:1/-1;text-align:center;padding:40px 0;">Bientôt disponible — soyez la première à rejoindre GlamBook !</p>';
-      return;
+  // Glowing orbs
+  function orb(color, p, s) {
+    const g = new THREE.SphereGeometry(1,24,24);
+    const m = new THREE.ShaderMaterial({
+      uniforms: { uCol:{value:new THREE.Color(color)}, uT:{value:0} },
+      vertexShader: `varying vec3 vN; void main(){ vN=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+      fragmentShader: `uniform vec3 uCol; uniform float uT; varying vec3 vN; void main(){ float i=pow(.6-dot(vN,vec3(0,0,1)),3.); float pulse=.8+.2*sin(uT*.7); gl_FragColor=vec4(uCol*i*pulse, i*.3); }`,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
+    });
+    const mesh = new THREE.Mesh(g,m);
+    mesh.position.set(p.x,p.y,p.z); mesh.scale.setScalar(s);
+    return mesh;
+  }
+  const o1=orb(0xE8547A,{x:-3,y:1.5,z:-4},2);
+  const o2=orb(0xD4AF37,{x:3.5,y:-.5,z:-5},1.8);
+  scene.add(o1,o2);
+
+  let mouseX=0, mouseY=0, t=0, running=true;
+  document.addEventListener('mousemove', e => {
+    mouseX = (e.clientX/window.innerWidth - .5)*2;
+    mouseY = (e.clientY/window.innerHeight - .5)*2;
+  });
+
+  function animate() {
+    if (!running) return;
+    requestAnimationFrame(animate);
+    t += .016;
+    mat.uniforms.uTime.value = t;
+    o1.material.uniforms.uT.value = t;
+    o2.material.uniforms.uT.value = t;
+    o1.position.y = 1.5 + Math.sin(t*.35)*.4;
+    o2.position.x = 3.5 + Math.cos(t*.25)*.4;
+
+    const pa = geo.attributes.position.array;
+    for(let i=0;i<N;i++){
+      pa[i*3]+=vel[i].x; pa[i*3+1]+=vel[i].y;
+      if(Math.abs(pa[i*3])>8) vel[i].x*=-1;
+      if(Math.abs(pa[i*3+1])>6) vel[i].y*=-1;
     }
-    grid.innerHTML = artists.map(a => artistCardHTML(a)).join('');
+    geo.attributes.position.needsUpdate = true;
+
+    camera.position.x += (mouseX*.25 - camera.position.x)*.02;
+    camera.position.y += (-mouseY*.15 - camera.position.y)*.02;
+    camera.lookAt(0,0,-2);
+    renderer.render(scene, camera);
   }
+  animate();
 
-  function artistCardHTML(a) {
-    const p = a.profiles || {};
-    const stars = '★'.repeat(Math.round(a.rating_avg || 5)) + '☆'.repeat(5 - Math.round(a.rating_avg || 5));
-    return `
-      <a href="/artist.html?id=${a.id}" class="artist-card">
-        <img class="artist-card-cover" src="${a.cover_url || '/img/placeholder-cover.jpg'}" alt="Réalisations de ${p.full_name}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#FDE8EF,#F9FAFB)'"/>
-        <div class="artist-card-body">
-          <div class="artist-card-header">
-            <img class="artist-avatar" src="${p.avatar_url || ''}" alt="${p.full_name}" onerror="this.outerHTML='<div class=\'artist-avatar avatar-placeholder\'>${(p.full_name||'?')[0]}</div>'"/>
-            <div>
-              <div class="artist-name">${p.full_name || 'Maquilleuse'}</div>
-              <div class="artist-city">📍 ${p.city || 'France'}</div>
-            </div>
-          </div>
-          <div class="tags">${(a.specialties || []).slice(0,3).map(s => `<span class="tag">${s}</span>`).join('')}</div>
-          <div class="artist-card-meta">
-            <div><span class="stars">${stars}</span> <span style="font-size:.8rem;color:var(--gris);">(${a.review_count || 0})</span></div>
-            <div class="artist-price">À partir de ${a.price_from || '–'}€</div>
-          </div>
-        </div>
-      </a>`;
+  // Stop rendering when hero is off-screen
+  const obs = new IntersectionObserver(([e]) => {
+    running = e.isIntersecting;
+    if (running) animate();
+  }, { threshold: 0 });
+  obs.observe(heroWrap);
+
+  window.addEventListener('resize', () => {
+    const w = heroWrap.offsetWidth, h = heroWrap.offsetHeight;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+  });
+})();
+
+// ═══ GSAP SCROLL ANIMATIONS ═══
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero entrance
+gsap.timeline({ defaults: { ease:'power3.out' } })
+  .to('.hero-content .anim-up:nth-child(1)', { opacity:1, y:0, duration:.7 }, .2)
+  .to('.hero-content .anim-up:nth-child(2)', { opacity:1, y:0, duration:.9 }, .35)
+  .to('.hero-content .anim-up:nth-child(3)', { opacity:1, y:0, duration:.7 }, .6)
+  .to('.hero-content .anim-up:nth-child(4)', { opacity:1, y:0, duration:.7 }, .8);
+
+// Scroll-triggered elements
+gsap.utils.toArray('.cta-card.anim-scale').forEach(el => {
+  gsap.to(el, { opacity:1, scale:1, y:0, duration:.8, ease:'power3.out',
+    scrollTrigger: { trigger:el, start:'top 82%', toggleActions:'play none none reverse' }
+  });
+});
+
+gsap.utils.toArray('.anim-up').forEach(el => {
+  if (el.closest('.hero-content')) return;
+  gsap.to(el, { opacity:1, y:0, duration:.7, ease:'power3.out',
+    scrollTrigger: { trigger:el, start:'top 85%', toggleActions:'play none none reverse' }
+  });
+});
+
+// Stagger step cards
+gsap.utils.toArray('.step-card').forEach((c,i) => {
+  gsap.to(c, { opacity:1, y:0, duration:.6, delay:i*.1, ease:'power3.out',
+    scrollTrigger: { trigger:c, start:'top 82%', toggleActions:'play none none reverse' }
+  });
+});
+</script>
+
+<!-- ═══ SUPABASE DATA ═══ -->
+<script type="module">
+import { supabase } from '/js/supabase.js';
+
+document.getElementById('search-date').min = new Date().toISOString().split('T')[0];
+
+async function loadStats() {
+  const { count: ac } = await supabase.from('artists').select('*',{count:'exact',head:true});
+  const { count: bc } = await supabase.from('bookings').select('*',{count:'exact',head:true});
+  const e1 = document.getElementById('stat-artists');
+  const e2 = document.getElementById('stat-bookings');
+  if(e1) e1.textContent = (ac||0)+'+';
+  if(e2) e2.textContent = (bc||0)+'+';
+}
+
+async function loadFeatured() {
+  const { data: artists } = await supabase
+    .from('artists').select('*, profiles(full_name, avatar_url, city)')
+    .eq('is_active', true).order('rating_avg',{ascending:false}).limit(6);
+
+  const grid = document.getElementById('featured-grid');
+  if(!artists||artists.length===0){
+    grid.innerHTML='<p style="color:rgba(255,255,255,.35);grid-column:1/-1;text-align:center;padding:60px 0;">Bientôt disponible — soyez la première à rejoindre GlamBook !</p>';
+    return;
   }
+  grid.innerHTML = artists.map(a => {
+    const p = a.profiles||{};
+    const stars = '★'.repeat(Math.round(a.rating_avg||5))+'☆'.repeat(5-Math.round(a.rating_avg||5));
+    return `<a href="/artist.html?id=${a.id}" class="a-card anim-up">
+      <img class="cover" src="${a.cover_url||''}" alt="${p.full_name}" loading="lazy"
+           onerror="this.style.cssText='height:190px;background:linear-gradient(135deg,rgba(232,84,122,.06),rgba(212,175,55,.04))'"/>
+      <div class="body"><div class="hdr">
+        <div class="av">${(p.full_name||'?')[0]}</div>
+        <div><div class="nm">${p.full_name||'Maquilleuse'}</div><div class="ct">\u{1F4CD} ${p.city||'France'}</div></div>
+      </div>
+      <div class="tg">${(a.specialties||[]).slice(0,3).map(s=>'<span>'+s+'</span>').join('')}</div>
+      <div class="mt"><div><span class="stars">${stars}</span> <span style="font-size:.72rem;color:rgba(255,255,255,.25);">(${a.review_count||0})</span></div><span class="pr">À partir de ${a.price_from||'–'}€</span></div></div></a>`;
+  }).join('');
 
-  window.doSearch = function() {
-    const city    = document.getElementById('search-city').value;
-    const date    = document.getElementById('search-date').value;
-    const service = document.getElementById('search-service').value;
-    const params  = new URLSearchParams();
-    if (city)    params.set('city', city);
-    if (date)    params.set('date', date);
-    if (service) params.set('service', service);
-    window.location.href = '/artists.html?' + params.toString();
-  };
+  gsap.utils.toArray('.a-card.anim-up').forEach((c,i) => {
+    gsap.to(c,{ opacity:1, y:0, duration:.6, delay:i*.08, ease:'power3.out',
+      scrollTrigger:{ trigger:c, start:'top 85%', toggleActions:'play none none reverse' }
+    });
+  });
+}
 
-  loadStats();
-  loadFeatured();
+window.doSearch = function() {
+  const city = document.getElementById('search-city').value;
+  const date = document.getElementById('search-date').value;
+  const service = document.getElementById('search-service').value;
+  const p = new URLSearchParams();
+  if(city) p.set('city',city);
+  if(date) p.set('date',date);
+  if(service) p.set('service',service);
+  window.location.href = '/artists.html?'+p.toString();
+};
 
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+loadStats();
+loadFeatured();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 <script src="/js/pwa-install.js"></script>
 </body>
