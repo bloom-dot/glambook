@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glambook-v4';
+const CACHE_NAME = 'glambook-v5';
 const ASSETS = [
   '/',
   '/index.html',
@@ -33,6 +33,8 @@ self.addEventListener('fetch', e => {
       url.hostname.includes('stripe') ||
       url.hostname.includes('vercel.live') ||
       url.hostname.includes('pusher') ||
+      url.hostname.includes('googleapis.com') ||
+      url.hostname.includes('gstatic.com') ||
       url.pathname.startsWith('/api/')) {
     return;
   }
