@@ -255,7 +255,7 @@ document.getElementById('toggle-password').addEventListener('click', function() 
   this.textContent = show ? '🙈' : '👁';
 });
 
-function showError(msg) { const el = document.getElementById('error-msg'); el.innerHTML = msg; el.style.display = 'block'; }
+function showError(msg) { const el = document.getElementById('error-msg'); el.textContent = msg; el.style.display = 'block'; }
 function showSuccess(msg) { const el = document.getElementById('success-msg'); el.textContent = msg; el.style.display = 'block'; }
 function hideMessages() { document.getElementById('error-msg').style.display = 'none'; document.getElementById('success-msg').style.display = 'none'; }
 </script>
