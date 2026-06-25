@@ -77,6 +77,7 @@
 
   function showBanner() {
     document.body.appendChild(banner);
+    document.body.style.paddingBottom = '80px';
     requestAnimationFrame(() => {
       requestAnimationFrame(() => banner.classList.add('show'));
     });
@@ -84,6 +85,7 @@
 
   function hideBanner() {
     banner.classList.remove('show');
+    document.body.style.paddingBottom = '';
     setTimeout(() => banner.remove(), 400);
     sessionStorage.setItem(DISMISSED_KEY, '1');
   }
