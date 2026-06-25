@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glambook-v3';
+const CACHE_NAME = 'glambook-v4';
 const ASSETS = [
   '/',
   '/index.html',
@@ -27,9 +27,12 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Ne pas intercepter les requêtes Supabase/Stripe/API
+  // Ne pas intercepter les requêtes externes/non-HTTP
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
   if (url.hostname.includes('supabase') ||
       url.hostname.includes('stripe') ||
+      url.hostname.includes('vercel.live') ||
+      url.hostname.includes('pusher') ||
       url.pathname.startsWith('/api/')) {
     return;
   }
