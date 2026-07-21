@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "framer-motion": "^12.41.0",
+    "stripe": "^17.0.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.2"
+  }
+}

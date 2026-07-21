@@ -121,10 +121,15 @@ async function init() {
   loadBookings('upcoming');
 }
 
+function isPastDate(d, now) { return d < now; }
+let currentFilter = 'upcoming';
+
 async function loadBookings(filter) {
+  currentFilter = filter;
   const now = new Date().toISOString().split('T')[0];
+  // Pas de FK artists→profiles : display_name vient de la table artists
   let q = supabase.from('bookings')
-    .select('*, artists!bookings_artist_id_fkey(id, profiles(full_name)), services(name, price_cents)')
+    .select('*, artists(id, display_name, slug), services(name, price_cents)')
     .eq('client_id', user.id)
     .order('date', { ascending: filter === 'upcoming' });
 
@@ -144,8 +149,9 @@ async function loadBookings(filter) {
 
   el.innerHTML = data.map(b => {
     const d = new Date(b.date);
-    const artistName = b.artists?.profiles?.full_name || 'Artiste';
+    const artistName = b.artists?.display_name || 'Artiste';
     const artistId   = b.artists?.id || '';
+    const canCancel  = !isPastDate(b.date, now) && ['pending','confirmed'].includes(b.status);
     const isPast  = b.date < now;
     const canReview = isPast && b.status === 'confirmed';
     const stKey = isPast && b.status === 'confirmed' ? 'done' : b.status;
@@ -167,10 +173,20 @@ async function loadBookings(filter) {
         <span class="status-badge status-${stClass}">${stLabel}</span>
         ${canReview && !b.reviewed ? `<button class="btn btn-ghost btn-sm" data-bid="${esc(b.id)}" data-aid="${esc(artistId)}" data-aname="${esc(artistName)}" onclick="openReview(this.dataset.bid,this.dataset.aid,this.dataset.aname)">Laisser un avis</button>` : ''}
         ${b.reviewed ? `<span style="font-size:.75rem;color:var(--gris);">Avis publié ✓</span>` : ''}
+        ${canCancel ? `<button class="btn btn-ghost btn-sm" style="color:#991B1B;" data-bid="${esc(b.id)}" onclick="cancelBooking(this.dataset.bid)">Annuler</button>` : ''}
       </div>
     </div>`;
   }).join('');
 }
+
+// Annulation : fonction SQL cancel_booking (libère aussi le créneau)
+window.cancelBooking = async function(bookingId) {
+  if (!confirm('Annuler cette réservation ?')) return;
+  const { error } = await supabase.rpc('cancel_booking', { p_booking_id: bookingId });
+  if (error) { showToast("Impossible d'annuler cette réservation"); return; }
+  showToast('Réservation annulée');
+  loadBookings(currentFilter);
+};
 
 window.showTab = function(filter, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -200,20 +216,15 @@ document.querySelectorAll('.star-btn').forEach(btn => {
 document.getElementById('btn-submit-review').addEventListener('click', async () => {
   if (!selectedRating) { showToast('Choisissez une note'); return; }
   const comment = document.getElementById('review-comment').value;
-  await supabase.from('reviews').insert({
+  // Les triggers SQL mettent à jour rating_avg, review_count et bookings.reviewed
+  const { error } = await supabase.from('reviews').insert({
     booking_id: reviewBookingId,
     artist_id:  reviewArtistId,
     client_id:  user.id,
     rating: selectedRating,
     comment
   });
-  await supabase.from('bookings').update({ reviewed: true }).eq('id', reviewBookingId);
-  // Recalculer note moyenne artiste
-  const { data: reviews } = await supabase.from('reviews').select('rating').eq('artist_id', reviewArtistId);
-  if (reviews?.length) {
-    const avg = reviews.reduce((s,r)=>s+r.rating,0)/reviews.length;
-    await supabase.from('artists').update({ rating_avg: avg, review_count: reviews.length }).eq('id', reviewArtistId);
-  }
+  if (error) { showToast("Impossible de publier l'avis"); return; }
   closeReviewModal();
   showToast('Merci pour votre avis !');
   loadBookings('past');

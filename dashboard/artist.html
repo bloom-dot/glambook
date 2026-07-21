@@ -478,7 +478,7 @@ async function init() {
     artistData = artist;
   }
   if (artist?.id) {
-    const url = `/artist.html?id=${artist.id}`;
+    const url = artist.slug ? `/artiste/${encodeURIComponent(artist.slug)}` : `/artist.html?id=${artist.id}`;
     const link = document.getElementById('link-public-profile');
     if (link) link.href = url;
     const btn = document.getElementById('btn-public-profile');
@@ -508,8 +508,11 @@ async function init() {
 }
 
 // Bookings
+let currentBookingFilter = 'all';
 async function loadBookings(filter) {
-  let q = supabase.from('bookings').select('*, profiles!bookings_client_id_fkey(full_name), services(name, price_cents)')
+  currentBookingFilter = filter;
+  // Pas de FK bookings→profiles : le nom client vient de bookings.client_name
+  let q = supabase.from('bookings').select('*, services(name, price_cents)')
     .eq('artist_id', artistData?.id).order('date', { ascending: false });
   if (filter !== 'all') q = q.eq('status', filter);
   const { data } = await q;
@@ -528,16 +531,36 @@ async function loadBookings(filter) {
   list.innerHTML = data.map(b => {
     const d = new Date(b.date);
     const st = ['confirmed','pending','cancelled'].includes(b.status) ? b.status : 'pending';
+    const actions = st === 'pending'
+      ? `<div style="display:flex;gap:6px;flex-shrink:0;">
+           <button class="btn btn-primary btn-sm" data-bid="${esc(b.id)}" onclick="confirmBooking(this.dataset.bid)">✓ Confirmer</button>
+           <button class="btn btn-ghost btn-sm" style="color:#991B1B;" data-bid="${esc(b.id)}" onclick="refuseBooking(this.dataset.bid)">Refuser</button>
+         </div>`
+      : '';
     return `<div class="booking-row">
       <div class="booking-date"><div class="day">${d.getDate()}</div><div class="mon">${d.toLocaleDateString('fr-FR',{month:'short'})}</div></div>
       <div class="booking-info">
-        <div class="client-name">${esc(b.profiles?.full_name || b.client_name || 'Cliente')}</div>
+        <div class="client-name">${esc(b.client_name || 'Cliente')}</div>
         <div class="booking-meta">${esc(b.services?.name || '–')} · ${esc(b.time_slot)} · ${esc(b.client_phone||'')}</div>
       </div>
       <span class="booking-status status-${st}">${statusLabel[st]}</span>
+      ${actions}
     </div>`;
   }).join('');
 }
+window.confirmBooking = async function(id) {
+  const { error } = await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', id);
+  if (error) { showToast('Erreur lors de la confirmation'); return; }
+  showToast('Réservation confirmée !');
+  loadBookings(currentBookingFilter);
+};
+window.refuseBooking = async function(id) {
+  if (!confirm('Refuser cette réservation ? Le créneau sera libéré.')) return;
+  const { error } = await supabase.rpc('cancel_booking', { p_booking_id: id });
+  if (error) { showToast('Erreur lors du refus'); return; }
+  showToast('Réservation refusée, créneau libéré');
+  loadBookings(currentBookingFilter);
+};
 window.filterBookings = function(f, el) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
@@ -584,13 +607,13 @@ window.saveSlots = async function() {
 
 // Avis
 async function loadReviews() {
-  const { data } = await supabase.from('reviews').select('*,profiles(full_name)').eq('artist_id',artistData?.id).order('created_at',{ascending:false});
+  const { data } = await supabase.from('reviews_public').select('*').eq('artist_id',artistData?.id).order('created_at',{ascending:false});
   const el = document.getElementById('reviews-dash');
   if (!data||data.length===0) { el.innerHTML='<p style="color:var(--gris);text-align:center;padding:40px;">Aucun avis pour l\'instant.</p>'; return; }
   el.innerHTML = data.map(r=>`
     <div style="background:#fff;border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-        <strong style="font-size:.9rem;">${esc(r.profiles?.full_name||'Cliente')}</strong>
+        <strong style="font-size:.9rem;">${esc(r.reviewer_name||'Cliente')}</strong>
         <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
       </div>
       <p style="font-size:.85rem;color:#4B5563;">${esc(r.comment||'')}</p>

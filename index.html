@@ -5,6 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>GlamBook — Réservez votre maquilleuse professionnelle</title>
   <meta name="description" content="Trouvez et réservez une maquilleuse professionnelle près de chez vous. Photos de réalisations, avis clients, disponibilités en temps réel."/>
+  <link rel="canonical" href="https://glambook-pi.vercel.app/"/>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="GlamBook"/>
+  <meta property="og:title" content="GlamBook — Réservez votre maquilleuse professionnelle"/>
+  <meta property="og:description" content="Trouvez et réservez une maquilleuse professionnelle près de chez vous. Portfolios, avis clients, réservation en ligne sécurisée."/>
+  <meta property="og:url" content="https://glambook-pi.vercel.app/"/>
+  <meta property="og:image" content="https://glambook-pi.vercel.app/icons/icon-512.png"/>
+  <meta property="og:locale" content="fr_FR"/>
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="GlamBook — Réservez votre maquilleuse professionnelle"/>
+  <meta name="twitter:description" content="Portfolios, avis clients, réservation en ligne sécurisée."/>
+  <meta name="twitter:image" content="https://glambook-pi.vercel.app/icons/icon-512.png"/>
+
+  <!-- Données structurées -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://glambook-pi.vercel.app/#org",
+        "name": "GlamBook",
+        "url": "https://glambook-pi.vercel.app/",
+        "logo": "https://glambook-pi.vercel.app/icons/icon-512.png",
+        "description": "Plateforme de réservation de maquilleuses professionnelles en France.",
+        "contactPoint": { "@type": "ContactPoint", "email": "contact@glambook.fr", "contactType": "customer service", "availableLanguage": "French" }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://glambook-pi.vercel.app/#website",
+        "url": "https://glambook-pi.vercel.app/",
+        "name": "GlamBook",
+        "publisher": { "@id": "https://glambook-pi.vercel.app/#org" },
+        "inLanguage": "fr-FR",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": { "@type": "EntryPoint", "urlTemplate": "https://glambook-pi.vercel.app/artists.html?city={search_term_string}" },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://lcrrdwlnxmneqfzqediu.supabase.co"/>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"/>
@@ -21,7 +70,7 @@
       --border-subtle: rgba(255,255,255,.06);
       --text-primary: #FFFFFF;
       --text-secondary: rgba(255,255,255,.7);
-      --text-muted: rgba(255,255,255,.45);
+      --text-muted: rgba(255,255,255,.62); /* ≥4.5:1 sur fond #080408 */
     }
     body { background: var(--bg-deep); overflow-x: hidden; color: var(--text-primary); }
 
@@ -102,12 +151,13 @@
 
     /* ── Scroll indicator ── */
     .scroll-hint {
-      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-      z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px;
-      color: var(--text-muted); font-size: .65rem; letter-spacing: .15em; text-transform: uppercase;
-      animation: bobDown 2s ease-in-out infinite;
+      position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+      z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      color: var(--text-muted); font-size: .6rem; letter-spacing: .15em; text-transform: uppercase;
+      animation: bobDown 2s ease-in-out infinite; pointer-events: none;
     }
-    .scroll-hint .line { width: 1px; height: 36px; background: linear-gradient(to bottom, rgba(232,84,122,.5), transparent); }
+    .scroll-hint .line { width: 1px; height: 22px; background: linear-gradient(to bottom, rgba(232,84,122,.5), transparent); }
+    @media (max-height: 700px) { .scroll-hint { display: none; } }
     @keyframes bobDown { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(8px); } }
 
     /* ═══════════════════════════════════
@@ -146,22 +196,24 @@
     .btn-search:hover { box-shadow: 0 0 40px rgba(232,84,122,.4); transform: translateY(-1px); }
 
     /* ═══════════════════════════════════
-       ARTIST CTA BAND
+       SKELETON LOADERS
        ═══════════════════════════════════ */
-    .artist-cta-band {
-      background: linear-gradient(135deg, #1a0a12, #2a1020);
-      padding: 28px 20px;
-      border-top: 1px solid rgba(212,175,55,.15);
-      border-bottom: 1px solid rgba(212,175,55,.15);
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
     }
-    .artist-cta-inner {
-      max-width: 700px; margin: 0 auto;
-      display: flex; align-items: center; justify-content: center; gap: 24px;
-      flex-wrap: wrap;
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.05) 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.4s infinite linear;
+      border-radius: 8px;
     }
-    .artist-cta-text {
-      color: rgba(255,255,255,.85); font-size: 1rem; font-weight: 600;
-    }
+    .skel-num { display: inline-block; width: 64px; height: 2rem; }
+    .skel-card { border-radius: 16px; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-subtle); }
+    .skel-card .sk-cover { height: 190px; }
+    .skel-card .sk-body { padding: 18px; }
+    .skel-card .sk-line { height: 14px; margin-bottom: 10px; }
+    @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
 
     /* ═══════════════════════════════════
        TRUST SIGNALS
@@ -385,6 +437,7 @@
       </a>
     </div>
   </div>
+  <div class="scroll-hint" aria-hidden="true"><span>D&eacute;couvrir</span><span class="line"></span></div>
   <div class="hero-fade" style="pointer-events:none;"></div>
 </section>
 
@@ -419,10 +472,10 @@
 <!-- ═══ TRUST SIGNALS — social proof for anxious brides & first-timers ═══ -->
 <div class="trust-strip">
   <div class="trust-row">
-    <div class="trust-item anim-up"><span class="num" id="stat-artists">&ndash;</span><span class="lbl">Artistes v&eacute;rifi&eacute;es</span></div>
-    <div class="trust-item anim-up"><span class="num" id="stat-bookings">&ndash;</span><span class="lbl">R&eacute;servations</span></div>
-    <div class="trust-item anim-up"><span class="num">4.9&#9733;</span><span class="lbl">Note moyenne</span></div>
-    <div class="trust-item anim-up"><span class="num">100%</span><span class="lbl">Paiement s&eacute;curis&eacute;</span></div>
+    <div class="trust-item anim-up"><span class="num" id="stat-artists"><span class="skeleton skel-num"></span></span><span class="lbl">Artistes v&eacute;rifi&eacute;es</span></div>
+    <div class="trust-item anim-up"><span class="num" id="stat-bookings"><span class="skeleton skel-num"></span></span><span class="lbl">R&eacute;servations</span></div>
+    <div class="trust-item anim-up"><span class="num" id="stat-rating">4.9&#9733;</span><span class="lbl">Note moyenne</span></div>
+    <div class="trust-item anim-up"><span class="num">0&euro;</span><span class="lbl">Frais de r&eacute;servation</span></div>
   </div>
 </div>
 
@@ -467,7 +520,11 @@
       <h2 class="anim-up">Artistes en vedette</h2>
       <p class="anim-up">Les maquilleuses les plus appr&eacute;ci&eacute;es</p>
     </div>
-    <div class="artists-grid" id="featured-grid"></div>
+    <div class="artists-grid" id="featured-grid" aria-live="polite">
+      <div class="skel-card"><div class="skeleton sk-cover"></div><div class="sk-body"><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div></div>
+      <div class="skel-card"><div class="skeleton sk-cover"></div><div class="sk-body"><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div></div>
+      <div class="skel-card"><div class="skeleton sk-cover"></div><div class="sk-body"><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div></div>
+    </div>
     <div style="text-align:center;margin-top:36px;">
       <a href="/artists.html" class="btn-outline">Voir toutes les artistes &#8594;</a>
     </div>
@@ -504,8 +561,8 @@
   <div class="reas-grid">
     <div class="reas-item anim-up">
       <span class="ri">&#128274;</span>
-      <h4>Paiement s&eacute;curis&eacute;</h4>
-      <p>Paiement en ligne s&eacute;curis&eacute;, remboursement garanti en cas d'annulation.</p>
+      <h4>R&eacute;servation s&eacute;curis&eacute;e</h4>
+      <p>Vos donn&eacute;es sont prot&eacute;g&eacute;es. Annulation gratuite jusqu'&agrave; 48h avant le rendez-vous.</p>
     </div>
     <div class="reas-item anim-up">
       <span class="ri">&#9989;</span>
@@ -539,13 +596,25 @@
 
 <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
-<!-- ═══ THREE.JS — Hero only ═══ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- ═══ THREE.JS + GSAP — defer : ne bloque plus le premier rendu ═══ -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
-(function() {
+// Appareils modestes / reduced-motion : gradient CSS au lieu du WebGL
+function heroFallback() {
+  const canvas = document.getElementById('hero-canvas');
+  if (canvas) canvas.style.cssText =
+    'position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%, rgba(232,84,122,.14), transparent 55%), radial-gradient(ellipse at 70% 60%, rgba(212,175,55,.1), transparent 55%), #080408;';
+}
+
+function initHero() {
+  const lowEnd = (navigator.hardwareConcurrency || 8) <= 4
+    || matchMedia('(prefers-reduced-motion: reduce)').matches
+    || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+  if (lowEnd || !window.THREE) { heroFallback(); return; }
+
   const canvas = document.getElementById('hero-canvas');
   const heroWrap = document.querySelector('.hero-wrap');
   const scene = new THREE.Scene();
@@ -557,8 +626,8 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setClearColor(0x080408, 1);
 
-  // Particles
-  const N = 250;
+  // Particles (120 suffisent visuellement, moitié du coût GPU)
+  const N = 120;
   const pos = new Float32Array(N * 3);
   const col = new Float32Array(N * 3);
   const szs = new Float32Array(N);
@@ -669,10 +738,18 @@
     camera.aspect = w/h; camera.updateProjectionMatrix();
     renderer.setSize(w,h);
   });
-})();
+}
 
 // ═══ GSAP SCROLL ANIMATIONS ═══
-gsap.registerPlugin(ScrollTrigger);
+function initAnimations() {
+  if (!window.gsap || !window.ScrollTrigger) {
+    // CDN indisponible : rendre tout visible immédiatement
+    document.querySelectorAll('.anim-up, .anim-scale').forEach(el => {
+      el.style.opacity = '1'; el.style.transform = 'none';
+    });
+    return;
+  }
+  gsap.registerPlugin(ScrollTrigger);
 
 // Hero entrance
 gsap.timeline({ defaults: { ease:'power3.out' } })
@@ -701,6 +778,10 @@ gsap.utils.toArray('.step-card').forEach((c,i) => {
     scrollTrigger: { trigger:c, start:'top 82%', toggleActions:'play none none reverse' }
   });
 });
+}
+
+// Les scripts CDN sont en defer : ils sont chargés au DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => { initHero(); initAnimations(); });
 </script>
 
 <!-- ═══ SUPABASE DATA ═══ -->
@@ -710,28 +791,22 @@ import { supabase, esc, safeUrl } from '/js/supabase.js';
 document.getElementById('search-date').min = new Date().toISOString().split('T')[0];
 
 async function loadStats() {
-  const { count: ac } = await supabase.from('artists').select('*',{count:'exact',head:true});
-  const { count: bc } = await supabase.from('bookings').select('*',{count:'exact',head:true});
+  // Vue agrégée : bookings n'est plus lisible publiquement (RLS)
+  const { data } = await supabase.from('public_stats').select('*').maybeSingle();
   const e1 = document.getElementById('stat-artists');
   const e2 = document.getElementById('stat-bookings');
-  if(e1) e1.textContent = (ac||0)+'+';
-  if(e2) e2.textContent = (bc||0)+'+';
+  const e3 = document.getElementById('stat-rating');
+  if(e1) e1.textContent = (data?.artists_count||0)+'+';
+  if(e2) e2.textContent = (data?.bookings_count||0)+'+';
+  if(e3 && data?.avg_rating) e3.textContent = Number(data.avg_rating).toFixed(1)+'★';
 }
 
 async function loadFeatured() {
+  // Vue artists_public : jointure profils + photos faite en SQL (fini le N+1)
   const { data: artists } = await supabase
-    .from('artists').select('*, artist_photos(url)')
-    .eq('is_active', true).order('rating_avg',{ascending:false}).limit(6);
-
-  if (artists) {
-    const userIds = artists.map(a => a.user_id).filter(Boolean);
-    const { data: profs } = userIds.length
-      ? await supabase.from('profiles').select('user_id, full_name, avatar_url, city').in('user_id', userIds)
-      : { data: [] };
-    const profMap = {};
-    (profs||[]).forEach(p => { profMap[p.user_id] = p; });
-    artists.forEach(a => { a._profile = profMap[a.user_id] || {}; });
-  }
+    .from('artists_public')
+    .select('id, slug, display_name, avatar_url, city, rating_avg, review_count, price_from, specialties, photos')
+    .order('rating_avg',{ascending:false}).limit(6);
 
   const grid = document.getElementById('featured-grid');
   if(!artists||artists.length===0){
@@ -739,30 +814,38 @@ async function loadFeatured() {
     return;
   }
   grid.innerHTML = artists.map(a => {
-    const p = a._profile||{};
-    const name = esc(p.full_name||a.display_name||'Maquilleuse');
-    const city = esc(p.city||'France');
-    const coverUrl = safeUrl((a.artist_photos||[])[0]?.url)||'';
+    const name = esc(a.display_name||'Maquilleuse');
+    const city = esc(a.city||'France');
+    const coverUrl = safeUrl((a.photos||[])[0]?.url)||'';
+    const avatarUrl = safeUrl(a.avatar_url);
     const stars = '★'.repeat(Math.round(a.rating_avg||5))+'☆'.repeat(5-Math.round(a.rating_avg||5));
-    return `<a href="/artist.html?id=${encodeURIComponent(a.id)}" class="a-card anim-up">
-      <img class="cover" src="${coverUrl}" alt="${name}" loading="lazy"
+    const href = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : `/artist.html?id=${encodeURIComponent(a.id)}`;
+    return `<a href="${href}" class="a-card anim-up" aria-label="Voir le profil de ${name}">
+      <img class="cover" src="${coverUrl}" alt="Réalisations de ${name}" loading="lazy"
            onerror="this.style.cssText='height:190px;background:linear-gradient(135deg,rgba(232,84,122,.06),rgba(212,175,55,.04))'"/>
       <div class="body"><div class="hdr">
-        <div class="av">${name[0]}</div>
+        <div class="av">${avatarUrl ? `<img src="${avatarUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>` : name[0]}</div>
         <div><div class="nm">${name}</div><div class="ct">\u{1F4CD} ${city}</div></div>
       </div>
       <div class="tg">${(a.specialties||[]).slice(0,3).map(s=>'<span>'+esc(s)+'</span>').join('')}</div>
-      <div class="mt"><div><span class="stars">${stars}</span> <span style="font-size:.72rem;color:rgba(255,255,255,.25);">(${parseInt(a.review_count)||0})</span></div><span class="pr">À partir de ${parseInt(a.price_from)||'–'}€</span></div></div></a>`;
+      <div class="mt"><div><span class="stars">${stars}</span> <span style="font-size:.72rem;color:rgba(255,255,255,.4);">(${parseInt(a.review_count)||0})</span></div><span class="pr">À partir de ${parseInt(a.price_from)||'–'}€</span></div></div></a>`;
   }).join('');
 
-  gsap.utils.toArray('.a-card.anim-up').forEach((c,i) => {
-    gsap.to(c,{ opacity:1, y:0, duration:.6, delay:i*.08, ease:'power3.out',
-      scrollTrigger:{ trigger:c, start:'top 85%', toggleActions:'play none none reverse' }
+  if (window.gsap && window.ScrollTrigger) {
+    gsap.utils.toArray('.a-card.anim-up').forEach((c,i) => {
+      gsap.to(c,{ opacity:1, y:0, duration:.6, delay:i*.08, ease:'power3.out',
+        scrollTrigger:{ trigger:c, start:'top 85%', toggleActions:'play none none reverse' }
+      });
     });
-  });
+  } else {
+    document.querySelectorAll('.a-card.anim-up').forEach(el => { el.style.opacity='1'; el.style.transform='none'; });
+  }
 }
 
 window.doSearch = function() {
+  const btn = document.querySelector('.btn-search');
+  btn.disabled = true;
+  btn.textContent = 'Recherche en cours…';
   const city = document.getElementById('search-city').value;
   const date = document.getElementById('search-date').value;
   const service = document.getElementById('search-service').value;

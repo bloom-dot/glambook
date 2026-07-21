@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Réserver — GlamBook</title>
+  <meta name="robots" content="noindex"/>
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
@@ -60,19 +61,19 @@
     <div id="step-coords" class="card" style="padding:28px;">
       <p class="section-label">Vos coordonnées</p>
       <div class="field">
-        <label>Nom complet</label>
-        <input type="text" id="b-name" placeholder="Marie Dupont" required/>
+        <label for="b-name">Nom complet</label>
+        <input type="text" id="b-name" placeholder="Marie Dupont" required autocomplete="name"/>
       </div>
       <div class="field">
-        <label>Email</label>
-        <input type="email" id="b-email" placeholder="marie@exemple.fr" required/>
+        <label for="b-email">Email</label>
+        <input type="email" id="b-email" placeholder="marie@exemple.fr" required autocomplete="email"/>
       </div>
       <div class="field">
-        <label>Téléphone</label>
-        <input type="tel" id="b-phone" placeholder="+33 6 00 00 00 00"/>
+        <label for="b-phone">Téléphone</label>
+        <input type="tel" id="b-phone" placeholder="+33 6 00 00 00 00" autocomplete="tel"/>
       </div>
       <div class="field">
-        <label>Message pour la maquilleuse <span style="color:var(--gris);font-weight:400;">(optionnel)</span></label>
+        <label for="b-note">Message pour la maquilleuse <span style="color:var(--gris);font-weight:400;">(optionnel)</span></label>
         <textarea id="b-note" placeholder="Précisions sur l'occasion, allergies, préférences..."></textarea>
       </div>
       <button class="btn btn-primary btn-full" id="btn-next-payment">Continuer vers le paiement →</button>
@@ -84,7 +85,7 @@
       <div id="stripe-form">
         <div id="card-element"></div>
       </div>
-      <div id="card-error" style="color:#DC2626;font-size:.82rem;margin-top:8px;display:none;"></div>
+      <div id="card-error" style="color:#DC2626;font-size:.82rem;margin-top:8px;display:none;" role="alert"></div>
       <div class="secure-note">
         🔒 Paiement sécurisé par Stripe · Vos données bancaires sont chiffrées
       </div>
@@ -97,7 +98,7 @@
     <div id="step-confirm" class="card" style="padding:40px;text-align:center;display:none;">
       <div style="font-size:3rem;margin-bottom:16px;">🎉</div>
       <h2 style="font-size:1.4rem;font-weight:900;margin-bottom:8px;">Réservation confirmée !</h2>
-      <p style="color:var(--gris);margin-bottom:24px;">Un email de confirmation vous a été envoyé. La maquilleuse vous contactera pour confirmer les détails.</p>
+      <p style="color:var(--gris);margin-bottom:24px;">Votre paiement a été accepté. La maquilleuse vous contactera pour confirmer les détails.</p>
       <div style="background:var(--rose-cl);border-radius:10px;padding:16px;margin-bottom:24px;" id="confirm-details"></div>
       <a href="/dashboard/client.html" class="btn btn-primary">Voir mes réservations</a>
     </div>
@@ -134,10 +135,11 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
 <script type="module">
 import { supabase, getCurrentUser } from '/js/supabase.js';
+import { showToast, dateFR } from '/js/utils.js';
 
 const p = new URLSearchParams(location.search);
 const artistId  = p.get('artist');
@@ -153,37 +155,98 @@ if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(loc
 // Pré-remplir email
 if (user) document.getElementById('b-email').value = user.email;
 
-// Charger infos
-async function loadSummary() {
-  const { data: artist } = await supabase
-    .from('artists').select('*, profiles(full_name)').eq('id', artistId).single();
-  const { data: service } = await supabase
-    .from('services').select('*').eq('id', serviceId).single();
+// Mode paiement : Stripe activé seulement si la clé est configurée côté serveur.
+// Sinon, réservation sans paiement en ligne (demande + confirmation par l'artiste).
+let stripeEnabled = false;
+try {
+  const cfg = await (await fetch('/api/config')).json();
+  stripeEnabled = !!cfg.stripePublishableKey && typeof Stripe !== 'undefined';
+} catch { stripeEnabled = false; }
 
-  document.getElementById('s-artist').textContent  = artist?.profiles?.full_name || '–';
+if (!stripeEnabled) {
+  document.getElementById('step-payment-dot').style.display = 'none';
+  document.getElementById('btn-next-payment').textContent = 'Confirmer ma réservation';
+  document.querySelector('#step-confirm h2').textContent = 'Demande envoyée !';
+  document.querySelector('#step-confirm p').textContent =
+    'Votre demande de réservation a bien été enregistrée. La maquilleuse va la confirmer rapidement — le règlement se fera directement avec elle.';
+}
+
+// Charger infos (vue publique — pas de jointure profiles côté client)
+async function loadSummary() {
+  const [{ data: artist }, { data: service }] = await Promise.all([
+    supabase.from('artists_public').select('display_name').eq('id', artistId).maybeSingle(),
+    supabase.from('services').select('name, price_cents').eq('id', serviceId).maybeSingle()
+  ]);
+
+  document.getElementById('s-artist').textContent  = artist?.display_name || '–';
   document.getElementById('s-service').textContent = service?.name || '–';
-  document.getElementById('s-date').textContent    = date ? new Date(date).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }) : '–';
+  document.getElementById('s-date').textContent    = date ? dateFR(date) : '–';
   document.getElementById('s-time').textContent    = time || '–';
   document.getElementById('s-total').textContent   = service ? `${(service.price_cents/100).toFixed(0)}€` : '–';
 }
 loadSummary();
 
-// Étape 1 → 2
-document.getElementById('btn-next-payment').addEventListener('click', () => {
-  const name  = document.getElementById('b-name').value;
-  const email = document.getElementById('b-email').value;
-  if (!name || !email) { showToast('Veuillez remplir vos coordonnées'); return; }
+// Étape 1 → 2 (ou réservation directe si paiement en ligne désactivé)
+document.getElementById('btn-next-payment').addEventListener('click', async () => {
+  const name  = document.getElementById('b-name').value.trim();
+  const email = document.getElementById('b-email').value.trim();
+  if (!name || !email) { showToast('Veuillez remplir vos coordonnées', 'error'); return; }
+
+  if (!stripeEnabled) { await bookWithoutPayment(); return; }
+
   document.getElementById('step-coords').style.display   = 'none';
   document.getElementById('step-payment').style.display  = 'block';
   document.querySelector('.step-dot:nth-child(2)').classList.replace('active','done');
   document.getElementById('step-payment-dot').classList.add('active');
-  initStripe();
+  await initStripe();
 });
 
-// Stripe
+// Réservation sans paiement en ligne : créneau verrouillé, statut pending,
+// la maquilleuse confirme depuis son dashboard
+async function bookWithoutPayment() {
+  const btn = document.getElementById('btn-next-payment');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Réservation...';
+
+  const { data: bookingId, error } = await supabase.rpc('book_slot', {
+    p_slot_id: slotId,
+    p_service_id: serviceId,
+    p_note: document.getElementById('b-note').value,
+    p_client_name:  document.getElementById('b-name').value.trim(),
+    p_client_email: document.getElementById('b-email').value.trim(),
+    p_client_phone: document.getElementById('b-phone').value.trim()
+  });
+
+  if (error || !bookingId) {
+    const msg = (error?.message || '').includes('SLOT_UNAVAILABLE')
+      ? "Ce créneau vient d'être réservé par quelqu'un d'autre."
+      : 'Impossible de créer la réservation. Réessayez.';
+    showToast(msg, 'error');
+    btn.disabled = false; btn.textContent = 'Confirmer ma réservation';
+    return;
+  }
+
+  document.getElementById('step-coords').style.display  = 'none';
+  document.getElementById('step-confirm').style.display = 'block';
+  document.querySelector('.step-dot:nth-child(2)').classList.replace('active','done');
+  document.getElementById('step-confirm-dot').classList.add('active');
+  document.getElementById('confirm-details').innerHTML = `
+    <p style="font-size:.9rem;font-weight:700;color:var(--rose);margin-bottom:4px;">Votre rendez-vous</p>
+    <p style="font-size:.88rem;">${document.getElementById('s-date').textContent} à ${time}</p>`;
+}
+
+// Stripe — clé publique chargée depuis le serveur, jamais en dur
 let stripe, cardElement;
-function initStripe() {
-  stripe = Stripe('VOTRE_STRIPE_PUBLISHABLE_KEY');
+async function initStripe() {
+  if (stripe) return;
+  try {
+    const cfg = await (await fetch('/api/config')).json();
+    if (!cfg.stripePublishableKey) throw new Error('missing key');
+    stripe = Stripe(cfg.stripePublishableKey);
+  } catch {
+    showPayError('Le paiement est momentanément indisponible. Réessayez plus tard.');
+    document.getElementById('btn-pay').disabled = true;
+    return;
+  }
   const elements = stripe.elements();
   cardElement = elements.create('card', {
     style: { base: { fontSize:'16px', color:'#1A0A12', '::placeholder':{ color:'#9CA3AF' } } }
@@ -199,16 +262,45 @@ function initStripe() {
 document.getElementById('btn-pay').addEventListener('click', async () => {
   const btn = document.getElementById('btn-pay');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Paiement en cours...';
+  const resetBtn = () => { btn.disabled = false; btn.textContent = 'Payer et confirmer'; };
 
-  // Créer PaymentIntent via Vercel Function
-  const res = await fetch('/api/create-checkout', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ artistId, serviceId, slotId, userId: user?.id })
+  // 1. Réservation atomique côté serveur : verrouille le créneau (statut pending)
+  const { data: bookingId, error: bookErr } = await supabase.rpc('book_slot', {
+    p_slot_id: slotId,
+    p_service_id: serviceId,
+    p_note: document.getElementById('b-note').value,
+    p_client_name:  document.getElementById('b-name').value.trim(),
+    p_client_email: document.getElementById('b-email').value.trim(),
+    p_client_phone: document.getElementById('b-phone').value.trim()
   });
-  const { clientSecret, error: serverError } = await res.json();
-  if (serverError) { showPayError(serverError); btn.disabled=false; btn.textContent='Payer et confirmer'; return; }
+  if (bookErr || !bookingId) {
+    const msg = (bookErr?.message || '').includes('SLOT_UNAVAILABLE')
+      ? "Ce créneau vient d'être réservé par quelqu'un d'autre."
+      : 'Impossible de créer la réservation. Réessayez.';
+    showPayError(msg); resetBtn(); return;
+  }
 
+  // 2. PaymentIntent créé côté serveur — le montant vient de la base, pas du navigateur
+  const { data: { session } } = await supabase.auth.getSession();
+  let clientSecret;
+  try {
+    const res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || ''}`
+      },
+      body: JSON.stringify({ bookingId })
+    });
+    const out = await res.json();
+    if (!res.ok || out.error) throw new Error(out.error || 'server');
+    clientSecret = out.clientSecret;
+  } catch (e) {
+    await supabase.rpc('cancel_booking', { p_booking_id: bookingId }).then(()=>{},()=>{});
+    showPayError('Erreur lors de la préparation du paiement.'); resetBtn(); return;
+  }
+
+  // 3. Confirmation carte
   const { error } = await stripe.confirmCardPayment(clientSecret, {
     payment_method: {
       card: cardElement,
@@ -218,26 +310,13 @@ document.getElementById('btn-pay').addEventListener('click', async () => {
       }
     }
   });
-  if (error) { showPayError(error.message); btn.disabled=false; btn.textContent='Payer et confirmer'; return; }
+  if (error) {
+    // Échec/refus : libérer le créneau (le webhook le fera aussi si un PI a échoué)
+    await supabase.rpc('cancel_booking', { p_booking_id: bookingId }).then(()=>{},()=>{});
+    showPayError(error.message); resetBtn(); return;
+  }
 
-  // Enregistrer la réservation
-  await supabase.from('bookings').insert({
-    client_id: user.id,
-    artist_id: artistId,
-    service_id: serviceId,
-    slot_id: slotId,
-    date, time_slot: time,
-    note: document.getElementById('b-note').value,
-    status: 'confirmed',
-    client_name:  document.getElementById('b-name').value,
-    client_email: document.getElementById('b-email').value,
-    client_phone: document.getElementById('b-phone').value
-  });
-
-  // Marquer créneau pris
-  await supabase.from('availabilities').update({ is_booked: true }).eq('id', slotId);
-
-  // Confirmation
+  // 4. Paiement accepté — la confirmation définitive du statut vient du webhook Stripe
   document.getElementById('step-payment').style.display = 'none';
   document.getElementById('step-confirm').style.display = 'block';
   document.getElementById('step-payment-dot').classList.replace('active','done');
@@ -250,11 +329,6 @@ document.getElementById('btn-pay').addEventListener('click', async () => {
 function showPayError(msg) {
   const el = document.getElementById('card-error');
   el.textContent = msg; el.style.display = 'block';
-}
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
 }
 </script>
 </body>

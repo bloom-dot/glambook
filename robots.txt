@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /booking.html
+Disallow: /auth/
+
+Sitemap: https://glambook-pi.vercel.app/sitemap.xml

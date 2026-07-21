@@ -1,10 +1,11 @@
-const CACHE_NAME = 'glambook-v6';
+const CACHE_NAME = 'glambook-v7';
 const ASSETS = [
   '/',
   '/index.html',
   '/artists.html',
   '/css/main.css',
   '/js/supabase.js',
+  '/js/utils.js',
   '/manifest.json'
 ];
 

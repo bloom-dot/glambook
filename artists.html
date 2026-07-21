@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Maquilleuses disponibles — GlamBook</title>
+  <title>Maquilleuses professionnelles — Trouvez et réservez près de chez vous | GlamBook</title>
+  <meta name="description" content="Parcourez les maquilleuses professionnelles disponibles : mariage, soirée, shooting. Portfolios, avis clients et réservation en ligne."/>
+  <link rel="canonical" href="https://glambook-pi.vercel.app/artists.html"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="GlamBook"/>
+  <meta property="og:title" content="Maquilleuses professionnelles — GlamBook"/>
+  <meta property="og:description" content="Portfolios, avis clients et réservation en ligne."/>
+  <meta property="og:url" content="https://glambook-pi.vercel.app/artists.html"/>
+  <meta property="og:image" content="https://glambook-pi.vercel.app/icons/icon-512.png"/>
+  <meta name="twitter:card" content="summary"/>
+  <link rel="preconnect" href="https://lcrrdwlnxmneqfzqediu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
@@ -63,6 +73,18 @@
       .filter-pill { padding: 6px 12px; font-size: .75rem; }
       .filter-input { min-width: 120px; }
     }
+
+    /* Skeleton loaders */
+    @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+    .skeleton {
+      background: linear-gradient(90deg, rgba(0,0,0,.05) 25%, rgba(0,0,0,.1) 50%, rgba(0,0,0,.05) 75%);
+      background-size: 800px 100%; animation: shimmer 1.4s infinite linear; border-radius: 8px;
+    }
+    .skel-card { border-radius: 16px; overflow: hidden; background: #fff; border: 1px solid rgba(0,0,0,.06); }
+    .skel-card .sk-cover { height: 200px; border-radius: 0; }
+    .skel-card .sk-body { padding: 16px; }
+    .skel-card .sk-line { height: 14px; margin-bottom: 10px; }
+    @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
   </style>
 </head>
 <body>
@@ -105,11 +127,7 @@
 <section class="section">
   <div class="container">
     <div class="results-meta" id="results-meta"></div>
-    <div class="artists-grid" id="artists-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:60px 0;">
-        <div class="spinner" style="margin:0 auto 12px;border-color:rgba(232,84,122,.2);border-top-color:var(--rose);"></div>
-      </div>
-    </div>
+    <div class="artists-grid" id="artists-grid" aria-live="polite"></div>
     <div style="text-align:center;margin-top:40px;">
       <button class="btn btn-ghost" id="btn-load-more" style="display:none;">Voir plus de maquilleuses</button>
     </div>
@@ -155,22 +173,28 @@ document.querySelectorAll('.filter-pill').forEach(p => {
 });
 document.getElementById('btn-load-more').addEventListener('click', () => loadArtists(false));
 
-function reload() { page = 0; document.getElementById('artists-grid').innerHTML = ''; loadArtists(true); }
+function skeletons(n) {
+  return Array(n).fill(`<div class="skel-card"><div class="skeleton sk-cover"></div><div class="sk-body"><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div></div>`).join('');
+}
+
+function reload() { page = 0; document.getElementById('artists-grid').innerHTML = skeletons(6); loadArtists(true); }
 
 async function loadArtists(reset) {
   if (reset) page = 0;
   const from = page * PAGE_SIZE;
   const to   = from + PAGE_SIZE - 1;
 
+  // Vue artists_public : profil + photos joints en SQL, ville filtrable
+  // côté serveur → pagination et count justes
   let q = supabase
-    .from('artists')
-    .select('id, user_id, rating_avg, review_count, price_from, specialties, display_name, is_active, created_at, artist_photos(url)', { count: 'exact' })
-    .eq('is_active', true)
+    .from('artists_public')
+    .select('id, slug, display_name, avatar_url, city, region, rating_avg, review_count, price_from, specialties, created_at, photos', { count: 'exact' })
     .range(from, to);
 
+  if (filters.city)    q = q.or(`city.ilike.%${filters.city}%,region.ilike.%${filters.city}%`);
   if (filters.service) q = q.contains('specialties', [filters.service]);
   if (filters.date) q = q.in('id',
-    (await supabase.from('availabilities').select('artist_id').eq('date', filters.date).eq('is_available', true)).data?.map(r => r.artist_id) || []
+    (await supabase.from('availabilities').select('artist_id').eq('date', filters.date).eq('is_available', true).eq('is_booked', false)).data?.map(r => r.artist_id) || []
   );
 
   if (filters.sort === 'rating')      q = q.order('rating_avg', { ascending: false });
@@ -179,25 +203,6 @@ async function loadArtists(reset) {
   if (filters.sort === 'recent')      q = q.order('created_at', { ascending: false });
 
   const { data, count, error } = await q;
-
-  // Fetch profiles separately (no direct FK artists→profiles)
-  let profMap = {};
-  if (data && data.length) {
-    const userIds = data.map(a => a.user_id).filter(Boolean);
-    if (userIds.length) {
-      let pq = supabase.from('profiles').select('user_id, full_name, avatar_url, city, region').in('user_id', userIds);
-      if (filters.city) pq = pq.ilike('city', `%${filters.city}%`);
-      const { data: profs } = await pq;
-      (profs||[]).forEach(p => { profMap[p.user_id] = p; });
-    }
-    // If city filter active, keep only artists whose profile matched
-    if (filters.city) {
-      const filtered = data.filter(a => profMap[a.user_id]);
-      data.length = 0;
-      data.push(...filtered);
-    }
-    data.forEach(a => { a._profile = profMap[a.user_id] || {}; });
-  }
 
   const grid = document.getElementById('artists-grid');
   if (reset) grid.innerHTML = '';
@@ -210,25 +215,28 @@ async function loadArtists(reset) {
         <p>Essayez d'élargir votre recherche ou de changer la date.</p>
       </div>`;
     document.getElementById('btn-load-more').style.display = 'none';
+    document.getElementById('results-meta').textContent = '';
+    document.getElementById('header-sub').textContent = filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses';
     return;
   }
 
   data.forEach(a => {
-    const p   = a._profile || {};
     const stars = '★'.repeat(Math.round(a.rating_avg || 5)) + '☆'.repeat(5 - Math.round(a.rating_avg || 5));
     const el  = document.createElement('a');
-    el.href   = `/artist.html?id=${encodeURIComponent(a.id)}`;
+    el.href   = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : `/artist.html?id=${encodeURIComponent(a.id)}`;
     el.className = 'artist-card';
-    const name = esc(p.full_name || a.display_name || 'Maquilleuse');
-    const city = esc(p.city || p.region || 'France');
-    const coverUrl = safeUrl((a.artist_photos||[])[0]?.url) || '';
+    const name = esc(a.display_name || 'Maquilleuse');
+    const city = esc(a.city || a.region || 'France');
+    const coverUrl = safeUrl((a.photos||[])[0]?.url) || '';
+    const avatarUrl = safeUrl(a.avatar_url);
+    el.setAttribute('aria-label', `Voir le profil de ${name}`);
     el.innerHTML = `
-      <img class="artist-card-cover" src="${coverUrl}" alt="${name}" loading="lazy"
+      <img class="artist-card-cover" src="${coverUrl}" alt="Réalisations de ${name}" loading="lazy"
            onerror="this.style.cssText='height:200px;display:flex;background:linear-gradient(135deg,#FDE8EF,#F9FAFB)'"/>
       <div class="artist-card-body">
         <div class="artist-card-header">
-          <div class="artist-avatar avatar-placeholder" style="width:52px;height:52px;font-size:1.1rem;margin-top:-30px;border:3px solid #fff;flex-shrink:0;">
-            ${esc((p.full_name || '?')[0])}
+          <div class="artist-avatar avatar-placeholder" style="width:52px;height:52px;font-size:1.1rem;margin-top:-30px;border:3px solid #fff;flex-shrink:0;overflow:hidden;">
+            ${avatarUrl ? `<img src="${avatarUrl}" alt="" style="width:100%;height:100%;object-fit:cover;"/>` : esc((a.display_name || '?')[0])}
           </div>
           <div>
             <div class="artist-name">${name}</div>
@@ -250,10 +258,15 @@ async function loadArtists(reset) {
   const sub = filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses';
   document.getElementById('header-sub').textContent = sub + (filters.date ? ` — ${new Date(filters.date).toLocaleDateString('fr-FR')}` : '');
   document.getElementById('results-meta').textContent = `${count} maquilleuse${count > 1 ? 's' : ''} trouvée${count > 1 ? 's' : ''}`;
+  if (filters.city) {
+    document.title = `Maquilleuses à ${filters.city} — GlamBook`;
+    document.querySelector('.page-header h1').textContent = `Maquilleuses professionnelles à ${filters.city}`;
+  }
 }
 
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
+document.getElementById('artists-grid').innerHTML = skeletons(6);
 loadArtists(true);
 </script>
 </body>

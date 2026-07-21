@@ -4,6 +4,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Profil maquilleuse — GlamBook</title>
+  <meta name="description" content="Portfolio, avis clients et réservation en ligne de votre maquilleuse professionnelle sur GlamBook."/>
+  <meta property="og:type" content="profile"/>
+  <meta property="og:site_name" content="GlamBook"/>
+  <meta property="og:title" content="Profil maquilleuse — GlamBook"/>
+  <meta property="og:description" content="Portfolio, avis clients et réservation en ligne."/>
+  <meta property="og:image" content="https://glambook-pi.vercel.app/icons/icon-512.png"/>
+  <meta name="twitter:card" content="summary"/>
+  <link rel="preconnect" href="https://lcrrdwlnxmneqfzqediu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
@@ -220,7 +228,7 @@
         Réserver ce créneau
       </button>
       <p style="font-size:.75rem;color:var(--gris);text-align:center;margin-top:10px;">
-        Paiement sécurisé · Annulation 48h avant
+        Annulation gratuite jusqu'à 48h avant
       </p>
     </div>
   </div>
@@ -237,9 +245,13 @@
 <script type="module">
 import { supabase, getCurrentUser, esc, safeUrl } from '/js/supabase.js';
 
-const artistId = new URLSearchParams(location.search).get('id');
-if (!artistId) { location.href = '/artists.html'; }
+// URL propre /artiste/<slug> (rewrite Vercel) ou fallback ?id=UUID
+const slugMatch = location.pathname.match(/^\/artiste\/([^/]+)\/?$/);
+const slug = slugMatch ? decodeURIComponent(slugMatch[1]) : null;
+const idParam = new URLSearchParams(location.search).get('id');
+if (!slug && !idParam) { location.href = '/artists.html'; }
 
+let artistId = idParam;
 let selectedService = null, selectedSlot = null, selectedDate = null;
 
 // Vérifie si la cliente est connectée
@@ -247,21 +259,13 @@ const currentUser = await getCurrentUser();
 const isGuest = !currentUser;
 
 async function load() {
-  // Artiste
-  const { data: a } = await supabase
-    .from('artists')
-    .select('*')
-    .eq('id', artistId)
-    .maybeSingle();
+  // Vue publique : profil + photos joints en SQL, aucune donnée privée
+  let q = supabase.from('artists_public').select('*');
+  q = slug ? q.eq('slug', slug) : q.eq('id', artistId);
+  const { data: a } = await q.maybeSingle();
 
   if (!a) { document.getElementById('artist-name').textContent = 'Artiste introuvable'; return; }
-
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('full_name, avatar_url, city, region, phone')
-    .eq('user_id', a.user_id)
-    .maybeSingle();
-  a.profiles = profileData || {};
+  artistId = a.id;
 
   // Appliquer les settings de personnalisation
   const PALETTES = {
@@ -293,13 +297,42 @@ async function load() {
   if (sections.avis      === false) document.querySelector('[data-section="avis"]')?.remove();
   if (sections.social    === false) document.getElementById('social-links')?.style && (document.getElementById('social-links').style.display='none');
 
-  const p = a.profiles || {};
-  document.title = `${p.full_name} — GlamBook`;
+  const p = { full_name: a.display_name, avatar_url: a.avatar_url, city: a.city, region: a.region };
+  const displayName = a.display_name || 'Maquilleuse';
+  document.title = `${displayName} — Maquilleuse${a.city ? ' à ' + a.city : ''} | GlamBook`;
+
+  // Canonical + OG dynamiques
+  const pageUrl = a.slug ? `https://glambook-pi.vercel.app/artiste/${encodeURIComponent(a.slug)}` : location.href;
+  const canonical = document.createElement('link');
+  canonical.rel = 'canonical'; canonical.href = pageUrl;
+  document.head.appendChild(canonical);
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
+  const firstPhoto = (a.photos || [])[0]?.url;
+  if (firstPhoto) document.querySelector('meta[property="og:image"]')?.setAttribute('content', firstPhoto);
+
+  // Données structurées LocalBusiness
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'BeautySalon',
+    name: displayName,
+    url: pageUrl,
+    description: a.bio || 'Maquilleuse professionnelle',
+    image: firstPhoto || undefined,
+    address: a.city ? { '@type': 'PostalAddress', addressLocality: a.city, addressCountry: 'FR' } : undefined,
+    priceRange: a.price_from ? `À partir de ${a.price_from}€` : undefined
+  };
+  if (a.review_count > 0) {
+    ld.aggregateRating = { '@type': 'AggregateRating', ratingValue: Number(a.rating_avg), reviewCount: a.review_count, bestRating: 5 };
+  }
+  const ldScript = document.createElement('script');
+  ldScript.type = 'application/ld+json';
+  ldScript.textContent = JSON.stringify(ld);
+  document.head.appendChild(ldScript);
 
   // Cover
   const coverEl = document.getElementById('cover-img');
-  if (s.cover_url) { coverEl.src = s.cover_url; }
-  else if (a.cover_url) { coverEl.src = a.cover_url; }
+  const coverUrl = safeUrl(s.cover_url);
+  if (coverUrl) { coverEl.src = coverUrl; }
   else { coverEl.style.cssText = `height:240px;display:block;background:${palette.cover};`; }
 
   // Avatar
@@ -360,8 +393,8 @@ async function load() {
     sl.innerHTML = '<p style="color:var(--gris);font-size:.85rem;">Tarifs sur demande</p>';
   }
 
-  // Portfolio — 2 photos visibles + reste flouté pour les guests
-  const { data: photos } = await supabase.from('artist_photos').select('*').eq('artist_id', artistId).order('created_at', { ascending: false }).limit(12);
+  // Portfolio — photos déjà jointes par la vue ; 2 visibles + flou pour les guests
+  const photos = (a.photos || []).slice(0, 12);
   const pg = document.getElementById('photo-grid');
   if (photos && photos.length > 0) {
     if (isGuest) {
@@ -381,9 +414,9 @@ async function load() {
     pg.innerHTML = '<p style="grid-column:1/-1;color:var(--gris);text-align:center;padding:24px;">Portfolio en cours de construction</p>';
   }
 
-  // Avis — 1 avis visible pour les guests
+  // Avis — vue reviews_public (nom du reviewer sans exposer profiles)
   const { data: reviews } = await supabase
-    .from('reviews').select(`*, profiles(full_name)`)
+    .from('reviews_public').select('*')
     .eq('artist_id', artistId).order('created_at', { ascending: false })
     .limit(isGuest ? 1 : 10);
 
@@ -393,7 +426,7 @@ async function load() {
     rl.innerHTML = reviews.map(r => `
       <div class="review-card">
         <div class="review-header">
-          <span class="review-author">${esc(r.profiles?.full_name || 'Cliente')}</span>
+          <span class="review-author">${esc(r.reviewer_name || 'Cliente')}</span>
           <span class="review-date">${new Date(r.created_at).toLocaleDateString('fr-FR')}</span>
         </div>
         <div style="margin-bottom:6px;" class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
