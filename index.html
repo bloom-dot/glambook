@@ -403,8 +403,9 @@
     /* ═══════════════════════════════════
        GSAP ANIMATIONS (initial states)
        ═══════════════════════════════════ */
-    .anim-up { opacity: 0; transform: translateY(30px); }
-    .anim-scale { opacity: 0; transform: scale(.95) translateY(20px); }
+    /* Effet d'apparition au défilement désactivé : tout le contenu est visible d'emblée */
+    .anim-up { opacity: 1 !important; transform: none !important; }
+    .anim-scale { opacity: 1 !important; transform: none !important; }
   </style>
 </head>
 <body>
