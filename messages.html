@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Messages — GlamBook</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    body { background: var(--gris-cl); }
+    .chat { max-width: 1000px; margin: 0 auto; height: 100dvh; display: grid; grid-template-columns: 320px 1fr; }
+    @media(max-width:760px){ .chat { grid-template-columns: 1fr; } }
+
+    .col { display: flex; flex-direction: column; min-height: 0; background: var(--blanc); border-right: 1px solid var(--bord); }
+    .col-head { padding: 16px 18px; border-bottom: 1px solid var(--bord); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .col-head .ttl { font-weight: 800; font-size: 1.05rem; }
+    .col-head a { font-size: .8rem; color: var(--gris); text-decoration: none; }
+    .col-head a:hover { color: var(--rose); }
+
+    /* Liste conversations */
+    .conv-list { flex: 1; overflow-y: auto; }
+    .conv { display: flex; align-items: center; gap: 12px; padding: 13px 18px; cursor: pointer; border-bottom: 1px solid var(--gris-cl); transition: background var(--transition); }
+    .conv:hover { background: var(--gris-cl); }
+    .conv.active { background: var(--rose-cl); }
+    .conv .av { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg,var(--rose),var(--rose-f)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; flex-shrink:0; }
+    .conv .mid { flex: 1; min-width: 0; }
+    .conv .nm { font-weight: 700; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv .last { font-size: .78rem; color: var(--gris); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv .meta { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+    .conv .time { font-size: .68rem; color: var(--gris); }
+    .badge-n { background: var(--rose); color:#fff; font-size:.68rem; font-weight:800; min-width:18px; height:18px; border-radius:9px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
+
+    /* Fil de discussion */
+    .thread { display: flex; flex-direction: column; min-height: 0; background: var(--gris-cl); }
+    .thread-head { padding: 14px 18px; background: var(--blanc); border-bottom: 1px solid var(--bord); display:flex; align-items:center; gap:12px; }
+    .thread-head .back { display:none; background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--gris); }
+    .thread-head .av { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,var(--rose),var(--rose-f)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; }
+    .thread-head .nm { font-weight: 800; }
+    .thread-head .sub { font-size:.72rem; color:var(--gris); }
+
+    .msgs { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+    .msg { max-width: 74%; padding: 9px 13px; border-radius: 14px; font-size: .9rem; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap; }
+    .msg.them { align-self: flex-start; background: var(--blanc); border: 1px solid var(--bord); border-bottom-left-radius: 4px; }
+    .msg.me { align-self: flex-end; background: linear-gradient(135deg,var(--rose),var(--rose-f)); color:#fff; border-bottom-right-radius: 4px; }
+    .msg .t { display:block; font-size:.64rem; opacity:.7; margin-top:3px; text-align:right; }
+
+    .composer { display: flex; gap: 8px; padding: 12px 14px; background: var(--blanc); border-top: 1px solid var(--bord); }
+    .composer textarea { flex:1; resize:none; font-family:inherit; font-size:.92rem; padding:10px 13px; border:1.5px solid var(--bord); border-radius:20px; max-height:120px; }
+    .composer textarea:focus { outline:none; border-color:var(--rose); }
+    .composer button { flex-shrink:0; }
+
+    .empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--gris); text-align:center; padding:30px; }
+    .empty .ic { font-size:2.4rem; margin-bottom:10px; }
+    .secure-note { font-size:.72rem; color:var(--gris); padding:8px 18px; background:var(--or-cl); border-bottom:1px solid var(--bord); display:flex; gap:6px; align-items:center; }
+
+    .hide { display:none !important; }
+    @media(max-width:760px){
+      .thread.mobile-hidden { display:none; }
+      .col.mobile-hidden { display:none; }
+      .thread-head .back { display:block; }
+    }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+<div class="chat">
+  <!-- Colonne conversations -->
+  <div class="col" id="listCol">
+    <div class="col-head">
+      <span class="ttl">Messages</span>
+      <a href="/" id="homeLink">Accueil</a>
+    </div>
+    <div class="secure-note">🔒 Messagerie sécurisée — aucune coordonnée personnelle n'est partagée.</div>
+    <div class="conv-list" id="convList">
+      <div class="empty"><div class="ic">💬</div><p style="font-size:.85rem;">Chargement…</p></div>
+    </div>
+  </div>
+
+  <!-- Fil -->
+  <div class="thread mobile-hidden" id="threadCol">
+    <div class="thread-head" id="threadHead" style="display:none;">
+      <button class="back" id="backBtn">←</button>
+      <div class="av" id="threadAv">?</div>
+      <div><div class="nm" id="threadName">—</div><div class="sub">🔒 Conversation sécurisée</div></div>
+    </div>
+    <div class="msgs" id="msgs">
+      <div class="empty"><div class="ic">✉️</div><p style="font-size:.9rem;">Sélectionnez une conversation pour discuter.</p></div>
+    </div>
+    <div class="composer" id="composer" style="display:none;">
+      <textarea id="input" rows="1" placeholder="Écrivez votre message…"></textarea>
+      <button class="btn btn-primary" id="sendBtn">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { getCurrentUser } from '/js/supabase.js';
+  import { startConversation, myConversations, getMessages, sendMessage, markRead, subscribeMessages } from '/js/chat/store.js';
+  import { showToast, esc } from '/js/utils.js';
+
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  const artistParam = params.get('artist');
+
+  let me = null, convs = [], activeId = null, unsub = null;
+
+  const initials = (n) => (n || '?').trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+  const timeShort = (d) => d ? new Date(d).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) : '';
+  const dayShort  = (d) => {
+    if (!d) return '';
+    const dt = new Date(d), now = new Date();
+    if (dt.toDateString() === now.toDateString()) return timeShort(d);
+    return dt.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit' });
+  };
+
+  // Auth
+  me = await getCurrentUser();
+  if (!me) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`; }
+
+  async function loadConversations() {
+    convs = await myConversations();
+    renderList();
+  }
+
+  function renderList() {
+    const box = $('convList');
+    if (!convs.length) {
+      box.innerHTML = `<div class="empty"><div class="ic">💬</div><p style="font-size:.85rem;">Aucune conversation pour le moment.</p></div>`;
+      return;
+    }
+    box.innerHTML = convs.map(c => `
+      <div class="conv ${c.id === activeId ? 'active' : ''}" data-id="${esc(c.id)}">
+        <div class="av">${esc(initials(c.other_name))}</div>
+        <div class="mid">
+          <div class="nm">${esc(c.other_name)}</div>
+          <div class="last">${esc(c.last_body || 'Nouvelle conversation')}</div>
+        </div>
+        <div class="meta">
+          <span class="time">${esc(dayShort(c.last_message_at))}</span>
+          ${Number(c.unread) > 0 ? `<span class="badge-n">${esc(c.unread)}</span>` : ''}
+        </div>
+      </div>`).join('');
+    box.querySelectorAll('.conv').forEach(el => el.onclick = () => openConversation(el.getAttribute('data-id')));
+  }
+
+  async function openConversation(id) {
+    activeId = id;
+    if (unsub) { unsub(); unsub = null; }
+    renderList();
+    const c = convs.find(x => x.id === id);
+    $('threadHead').style.display = 'flex';
+    $('composer').style.display = 'flex';
+    $('threadAv').textContent = initials(c?.other_name);
+    $('threadName').textContent = c?.other_name || 'Conversation';
+
+    // Vue mobile : montrer le fil
+    $('threadCol').classList.remove('mobile-hidden');
+    $('listCol').classList.add('mobile-hidden');
+
+    const msgs = await getMessages(id);
+    renderMessages(msgs);
+    await markRead(id);
+    // Recharger la liste pour remettre à zéro le compteur non-lus
+    loadConversations();
+
+    unsub = subscribeMessages(id, (m) => {
+      appendMessage(m);
+      if (m.sender_id !== me.id) markRead(id);
+    });
+  }
+
+  function renderMessages(list) {
+    const box = $('msgs');
+    if (!list.length) {
+      box.innerHTML = `<div class="empty"><div class="ic">👋</div><p style="font-size:.88rem;">Démarrez la conversation !</p></div>`;
+      return;
+    }
+    box.innerHTML = list.map(bubble).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function bubble(m) {
+    const mine = m.sender_id === me.id;
+    return `<div class="msg ${mine ? 'me' : 'them'}">${esc(m.body)}<span class="t">${esc(timeShort(m.created_at))}</span></div>`;
+  }
+
+  function appendMessage(m) {
+    const box = $('msgs');
+    if (box.querySelector('.empty')) box.innerHTML = '';
+    box.insertAdjacentHTML('beforeend', bubble(m));
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function doSend() {
+    const inp = $('input');
+    const text = inp.value.trim();
+    if (!text || !activeId) return;
+    inp.value = ''; inp.style.height = 'auto';
+    try {
+      await sendMessage(activeId, text);
+      // le message s'affichera via le temps réel ; on l'ajoute aussi tout de suite
+    } catch (e) { console.error(e); showToast("Échec de l'envoi."); inp.value = text; }
+  }
+
+  $('sendBtn').onclick = doSend;
+  $('input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
+  });
+  $('input').addEventListener('input', (e) => {
+    e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+  });
+  $('backBtn').onclick = () => {
+    $('threadCol').classList.add('mobile-hidden');
+    $('listCol').classList.remove('mobile-hidden');
+    if (unsub) { unsub(); unsub = null; }
+    activeId = null; renderList();
+  };
+
+  // Init
+  (async () => {
+    await loadConversations();
+    if (artistParam) {
+      try {
+        const id = await startConversation(artistParam);
+        await loadConversations();
+        if (id) openConversation(id);
+      } catch (e) { console.error(e); showToast('Impossible de démarrer la conversation.'); }
+    }
+  })();
+</script>
+</body>
+</html>

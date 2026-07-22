@@ -227,8 +227,9 @@
       <button class="btn btn-primary btn-full" id="btn-book" disabled style="margin-top:16px;">
         Réserver ce créneau
       </button>
+      <a class="btn btn-ghost btn-full" id="btn-contact" style="margin-top:8px;">💬 Contacter</a>
       <p style="font-size:.75rem;color:var(--gris);text-align:center;margin-top:10px;">
-        Annulation gratuite jusqu'à 48h avant
+        Annulation gratuite jusqu'à 48h avant · Messagerie sécurisée
       </p>
     </div>
   </div>
@@ -266,6 +267,8 @@ async function load() {
 
   if (!a) { document.getElementById('artist-name').textContent = 'Artiste introuvable'; return; }
   artistId = a.id;
+  const contactBtn = document.getElementById('btn-contact');
+  if (contactBtn) contactBtn.href = '/messages.html?artist=' + encodeURIComponent(artistId);
 
   // Appliquer les settings de personnalisation
   const PALETTES = {

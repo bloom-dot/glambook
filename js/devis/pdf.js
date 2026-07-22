@@ -69,6 +69,16 @@ export function buildQuotePdf(quote) {
 
   y = 46;
 
+  // ── Logo MUA (letterhead, optionnel) ──
+  if (quote.mua.logoUrl) {
+    try {
+      const props = doc.getImageProperties(quote.mua.logoUrl);
+      const h = 14, w = Math.min(48, h * props.width / props.height);
+      doc.addImage(quote.mua.logoUrl, props.fileType || 'PNG', M, y - 2, w, h);
+      y += 16;
+    } catch (_) { /* logo illisible : on l'ignore */ }
+  }
+
   // ── Blocs MUA / Cliente ──
   const colW = (W - M * 2 - 8) / 2;
   const blockLabel = (x, label) => {
@@ -341,6 +351,7 @@ function quoteToHtml(q, t) {
       </div>
     </div>
     <div style="padding:20px 22px;">
+      ${q.mua.logoUrl ? `<div style="margin-bottom:14px;"><img src="${escHtml(q.mua.logoUrl)}" alt="Logo" style="max-height:48px;max-width:180px;object-fit:contain;"/></div>` : ''}
       <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px;">
         ${party('Prestataire', [q.mua.name, q.mua.address, q.mua.siret ? 'SIRET : '+q.mua.siret : '', q.mua.email, q.mua.phone])}
         ${party('Cliente', [q.client.name, q.client.email, q.client.phone])}

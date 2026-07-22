@@ -55,7 +55,7 @@ module.exports = async function handler(req, res) {
     // 2) Charger le devis + le user_id du propriétaire (embed artists)
     const qRes = await fetch(
       `${supabaseUrl}/rest/v1/quotes?id=eq.${quoteId}` +
-      `&select=id,share_token,status,quote_number,client_name,client_email,mua_name,total_cents,artist_id,artists(user_id)`,
+      `&select=id,share_token,status,quote_number,client_name,client_email,mua_name,mua_logo_url,total_cents,artist_id,artists(user_id)`,
       { headers: svcHeaders }
     );
     const quotes = await qRes.json();
@@ -85,6 +85,9 @@ module.exports = async function handler(req, res) {
 
     // 5) Envoyer l'email via Resend (si configuré)
     const resendKey = process.env.RESEND_API_KEY;
+    // Expéditeur configurable via MAIL_FROM. Sans domaine vérifié dans Resend,
+    // l'adresse technique reste onboarding@resend.dev (libellé affiché « GlamBook »).
+    // Les réponses de la cliente sont routées vers l'artiste via reply_to (ci-dessous).
     const from = process.env.MAIL_FROM || 'GlamBook <onboarding@resend.dev>';
     if (!resendKey) {
       // Pas de fournisseur email configuré : on renvoie quand même le lien pour partage manuel
@@ -97,10 +100,11 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({
         from,
         to: [q.client_email],
+        // Les réponses de la cliente arrivent directement à l'artiste.
         reply_to: user.email || undefined,
         subject: `Votre devis ${q.quote_number || ''} — ${q.mua_name || 'GlamBook'}`,
         html: emailHtml({
-          clientName: q.client_name, muaName: q.mua_name,
+          clientName: q.client_name, muaName: q.mua_name, logoUrl: q.mua_logo_url,
           quoteNumber: q.quote_number, total: q.total_cents, link
         })
       })
@@ -121,7 +125,12 @@ module.exports = async function handler(req, res) {
   }
 };
 
-function emailHtml({ clientName, muaName, quoteNumber, total, link }) {
+function emailHtml({ clientName, muaName, quoteNumber, total, link, logoUrl }) {
+  // Les images en data: URL sont bloquées par la plupart des messageries → on n'affiche
+  // le logo dans l'email que s'il est hébergé (http/https). PDF & aperçu l'affichent toujours.
+  const logoTag = (logoUrl && /^https?:\/\//i.test(logoUrl))
+    ? `<img src="${esc(logoUrl)}" alt="${esc(muaName || '')}" style="max-height:40px;max-width:150px;margin-top:10px;"/>`
+    : '';
   return `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/></head>
@@ -131,6 +140,7 @@ function emailHtml({ clientName, muaName, quoteNumber, total, link }) {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.06);">
         <tr><td style="background:#111;padding:22px 28px;">
           <span style="font-size:22px;font-weight:800;color:#E8547A;letter-spacing:-.03em;">Glam<span style="color:#D4AF37;">Book</span></span>
+          ${logoTag ? '<br/>' + logoTag : ''}
         </td></tr>
         <tr><td style="padding:28px;">
           <p style="font-size:15px;margin:0 0 14px;">Bonjour ${esc(clientName) || ''},</p>

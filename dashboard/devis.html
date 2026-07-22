@@ -96,6 +96,16 @@
         <div class="field"><label>Email</label><input id="mua_email" type="email"/></div>
         <div class="field"><label>Téléphone</label><input id="mua_phone" type="tel"/></div>
         <div class="field" style="grid-column:1/-1"><label>Adresse</label><input id="mua_address"/></div>
+        <div class="field" style="grid-column:1/-1">
+          <label>Logo (optionnel)</label>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <img id="logoPreview" alt="" style="display:none;height:48px;max-width:160px;object-fit:contain;border-radius:8px;border:1px solid var(--bord);padding:4px;background:#fff;"/>
+            <label class="btn btn-ghost btn-sm" for="logoInput" style="margin:0;">Choisir un logo</label>
+            <input id="logoInput" type="file" accept="image/*" style="display:none;"/>
+            <button type="button" class="btn btn-ghost btn-sm" id="logoRemove" style="display:none;">Retirer</button>
+          </div>
+          <span style="font-size:.72rem;color:var(--gris);">PNG ou JPG — apparaît en haut de votre devis.</span>
+        </div>
       </div>
     </div>
 
@@ -244,6 +254,30 @@
 
     $('btnAddItem').onclick = () => { quote.items.push({title:'',qty:1,unitPriceCents:0}); renderItems(); };
 
+    // ── Logo MUA : upload → redimensionne → dataURL ──
+    function showLogo(url) {
+      const img = $('logoPreview');
+      if (url) { img.src = url; img.style.display = ''; $('logoRemove').style.display = ''; }
+      else { img.removeAttribute('src'); img.style.display = 'none'; $('logoRemove').style.display = 'none'; }
+    }
+    $('logoInput').onchange = (e) => {
+      const file = e.target.files?.[0]; if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 240;
+        const scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+        const w = Math.round(img.naturalWidth * scale), h = Math.round(img.naturalHeight * scale);
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        const isPng = /png/i.test(file.type);
+        quote.mua.logoUrl = c.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.9);
+        showLogo(quote.mua.logoUrl);
+      };
+      img.onerror = () => showToast('Logo illisible.', 'error');
+      img.src = URL.createObjectURL(file);
+    };
+    $('logoRemove').onclick = () => { quote.mua.logoUrl = ''; showLogo(''); $('logoInput').value = ''; };
+
     $('btnPreview').onclick = () => previewQuotePdf(quote);
 
     async function persist() {
@@ -334,6 +368,7 @@
       $('valid_until').value = q.validUntil || '';
       $('payment_terms').value = q.paymentTerms || '';
       $('notes').value = q.notes || '';
+      showLogo(q.mua.logoUrl || '');
       if (!q.items || !q.items.length) q.items = [{ title:'', qty:1, unitPriceCents:0 }];
       renderItems();
       renderTotals();

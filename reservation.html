@@ -201,7 +201,10 @@
       <div style="font-size:2.6rem;margin-bottom:10px;">💌</div>
       <h2 style="margin-bottom:6px;">Demande envoyée !</h2>
       <p style="color:var(--gris);font-size:.9rem;">La maquilleuse va préparer votre devis personnalisé et vous l'enverra par email pour signature. À très vite ✨</p>
-      <a href="/" class="btn btn-primary" style="margin-top:18px;">Retour à l'accueil</a>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;">
+        <a id="doneContact" class="btn btn-primary">💬 Discuter avec la maquilleuse</a>
+        <a href="/" class="btn btn-ghost">Retour à l'accueil</a>
+      </div>
     </div>
   </div>
 </div>
@@ -229,6 +232,7 @@
   const user = await getCurrentUser();
   if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`; }
   if (!artistId) { showToast("Artiste introuvable.", 'error'); }
+  if (artistId) { const dc = $('doneContact'); if (dc) dc.href = '/messages.html?artist=' + encodeURIComponent(artistId); }
 
   // ── ÉTAPE A : services + préremplissage ──
   (async () => {
