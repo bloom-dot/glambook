@@ -180,6 +180,7 @@
     <a class="nav-item active" onclick="showTab('disponibilites',this)">🗓️ Disponibilités</a>
     <a class="nav-item" onclick="showTab('avis',this)">⭐ Avis clients</a>
     <a class="nav-item" href="/messages.html">💬 Messages</a>
+    <a class="nav-item" href="/dashboard/diagnostic.html">🔬 Diagnostic</a>
     <a class="nav-item" onclick="showTab('demandes',this)">📥 Demandes</a>
     <a class="nav-item" onclick="showTab('devis',this)">🧾 Devis</a>
     <div class="nav-section">Profil</div>
@@ -900,6 +901,7 @@ function diagnosticHtml(d) {
     </div>
     <div style="font-size:.72rem;font-weight:700;color:var(--gris);margin:6px 0 4px;">Sensibilités / imperfections</div>${chips(d.sensibilite_ou_imperfections)}
     <div style="font-size:.72rem;font-weight:700;color:var(--gris);margin:8px 0 4px;">Recommandations produits</div>${chips(d.recommandations_produits)}
+    ${(d.produits_a_prevoir && d.produits_a_prevoir.length) ? `<div style="font-size:.72rem;font-weight:700;color:#8a6d1a;margin:8px 0 4px;">🧳 Produits à emporter</div>${chips(d.produits_a_prevoir)}` : ''}
   </div>`;
 }
 

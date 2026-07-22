@@ -24,8 +24,10 @@ Réponds STRICTEMENT en JSON valide, sans texte autour, avec exactement ces clé
   "type_de_peau": "seche" | "mixte" | "grasse" | "normale",
   "sensibilite_ou_imperfections": string[],   // ex: ["rougeurs légères zone T", "cernes"]
   "recommandations_produits": string[],        // ex: ["base hydratante conseillée", "fond de teint fini satiné"]
+  "produits_a_prevoir": string[],              // KIT CONCRET à emporter au rendez-vous, ex: ["primer hydratant", "fond de teint fini satiné teinte medium", "anticernes pêche", "poudre matifiante zone T", "blush corail"]
   "confiance": "faible" | "moyenne" | "elevee"
 }
+Le champ produits_a_prevoir doit être une liste d'articles précis et actionnables que la maquilleuse doit apporter, adaptés au type de peau et au sous-ton détectés.
 Si la photo ne montre pas clairement un visage, renvoie confiance "faible" et des tableaux vides.`;
 
 module.exports = async function handler(req, res) {
@@ -111,6 +113,7 @@ function normalize(p) {
     type_de_peau: oneOf(p.type_de_peau, TYPES_PEAU, 'normale'),
     sensibilite_ou_imperfections: arr(p.sensibilite_ou_imperfections),
     recommandations_produits: arr(p.recommandations_produits),
+    produits_a_prevoir: arr(p.produits_a_prevoir),
     confiance: ['faible', 'moyenne', 'elevee'].includes(str(p.confiance).toLowerCase()) ? str(p.confiance).toLowerCase() : 'moyenne',
     _disclaimer: "Diagnostic cosmétique généré par IA, à titre indicatif — ne constitue pas un avis médical.",
   };
