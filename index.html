@@ -212,6 +212,35 @@
     }
     .btn-search:hover { box-shadow: 0 0 40px rgba(232,84,122,.4); transform: translateY(-1px); }
 
+    /* ═══ Barre de recherche unifiée dans le hero (style Doctolib) ═══ */
+    .hero-search-bar {
+      margin: 32px auto 0; max-width: 720px;
+      display: flex; align-items: stretch; gap: 8px;
+      background: rgba(24,24,27,.6); backdrop-filter: blur(18px);
+      border: 1px solid var(--bord-strong, #3F3F46); border-radius: 16px;
+      padding: 8px; text-align: left;
+      box-shadow: 0 22px 60px rgba(0,0,0,.55);
+    }
+    .hsb-field { flex: 1; min-width: 0; padding: 6px 14px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid rgba(255,255,255,.07); }
+    .hsb-field label { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--champagne, #E7C766); margin-bottom: 3px; }
+    .hsb-field input, .hsb-field select { width: 100%; background: transparent; border: none; color: #F4F4F5; font-size: .92rem; font-family: inherit; outline: none; padding: 2px 0; cursor: pointer; }
+    .hsb-field input[type=date] { color-scheme: dark; }
+    .hsb-field input::placeholder { color: rgba(255,255,255,.32); }
+    .hsb-field select option { background: #18181B; color: #F4F4F5; }
+    .hsb-near { flex: 0 0 auto; width: 46px; border-radius: 12px; border: 1px solid var(--bord-strong, #3F3F46); background: rgba(255,255,255,.03); color: #E7C766; font-size: 1.05rem; cursor: pointer; transition: background .2s, border-color .2s; }
+    .hsb-near:hover { background: rgba(212,175,55,.12); border-color: rgba(212,175,55,.4); }
+    .hsb-go { flex: 0 0 auto; padding: 0 26px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: .9rem; color: #1a0a12; background: linear-gradient(100deg, #E8D8CE, #D4AF37 55%, #E11D48); box-shadow: 0 0 26px rgba(212,175,55,.25); transition: box-shadow .2s, transform .2s; font-family: inherit; }
+    .hsb-go:hover { box-shadow: 0 0 42px rgba(212,175,55,.42); transform: translateY(-1px); }
+    .hero-secondary { margin-top: 18px; font-size: .82rem; }
+    .hero-secondary a { color: rgba(255,255,255,.6); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.22); padding-bottom: 1px; transition: color .2s, border-color .2s; }
+    .hero-secondary a:hover { color: #E7C766; border-color: #E7C766; }
+    @media (max-width: 680px) {
+      .hero-search-bar { flex-direction: column; gap: 6px; padding: 10px; }
+      .hsb-field { border-right: none; border-bottom: 1px solid rgba(255,255,255,.07); padding: 9px 12px; }
+      .hsb-go { padding: 13px; }
+      .hsb-near { width: 100%; height: 44px; }
+    }
+
     /* ═══════════════════════════════════
        SKELETON LOADERS
        ═══════════════════════════════════ */
@@ -452,29 +481,8 @@
     <p class="hero-sub anim-up">
       Parcourez les profils, consultez les r&eacute;alisations et r&eacute;servez directement en ligne. Simple, rapide, s&eacute;curis&eacute;.
     </p>
-    <div style="margin-top:20px;">
-      <a href="/auth/register.html?role=artist" class="btn-gold" style="padding:11px 28px;font-size:.82rem;">
-        Vous &ecirc;tes maquilleuse ? Cr&eacute;ez votre profil &rarr;
-      </a>
-    </div>
-  </div>
-  <div class="scroll-hint" aria-hidden="true"><span>D&eacute;couvrir</span><span class="line"></span></div>
-  <div class="hero-fade" style="pointer-events:none;"></div>
-</section>
-
-<!-- ═══ SEARCH — section dédiée sous hero ═══ -->
-<section class="search-section">
-  <div class="hero-search">
-    <div class="search-row">
-      <div class="f">
-        <label>Ville ou r&eacute;gion</label>
-        <input type="text" id="search-city" placeholder="Paris, Lyon, Marseille..."/>
-      </div>
-      <div class="f">
-        <label>Date</label>
-        <input type="date" id="search-date"/>
-      </div>
-      <div class="f">
+    <form class="hero-search-bar anim-up" onsubmit="doSearch(); return false;">
+      <div class="hsb-field">
         <label>Prestation</label>
         <select id="search-service">
           <option value="">Toutes</option>
@@ -485,10 +493,26 @@
           <option value="scene">&#127917; Sc&egrave;ne</option>
         </select>
       </div>
+      <div class="hsb-field">
+        <label>O&ugrave; ?</label>
+        <input type="text" id="search-city" placeholder="Ville ou r&eacute;gion"/>
+      </div>
+      <div class="hsb-field">
+        <label>Date</label>
+        <input type="date" id="search-date"/>
+      </div>
+      <button type="button" class="hsb-near" onclick="doSearchNear(this)" title="Rechercher autour de moi" aria-label="Rechercher autour de moi">&#128205;</button>
+      <button type="submit" class="hsb-go">Rechercher</button>
+    </form>
+    <div class="hero-secondary anim-up">
+      <a href="/auth/register.html?role=artist">Vous &ecirc;tes maquilleuse ? Cr&eacute;ez votre profil &rarr;</a>
     </div>
-    <button type="button" class="btn-search" onclick="doSearch()">Rechercher une maquilleuse</button>
   </div>
+  <div class="scroll-hint" aria-hidden="true"><span>D&eacute;couvrir</span><span class="line"></span></div>
+  <div class="hero-fade" style="pointer-events:none;"></div>
 </section>
+
+<!-- Recherche déplacée dans le hero (barre unifiée .hero-search-bar) -->
 
 <!-- ═══ TRUST SIGNALS — social proof for anxious brides & first-timers ═══ -->
 <div class="trust-strip">
@@ -1032,18 +1056,39 @@ async function loadFeatured() {
   document.querySelectorAll('.a-card.anim-up').forEach(el => { el.style.opacity='1'; el.style.transform='none'; });
 }
 
-window.doSearch = function() {
-  const btn = document.querySelector('.btn-search');
-  btn.disabled = true;
-  btn.textContent = 'Recherche en cours…';
+function buildSearchParams() {
+  const p = new URLSearchParams();
   const city = document.getElementById('search-city').value;
   const date = document.getElementById('search-date').value;
   const service = document.getElementById('search-service').value;
-  const p = new URLSearchParams();
-  if(city) p.set('city',city);
-  if(date) p.set('date',date);
-  if(service) p.set('service',service);
-  window.location.href = '/artists.html?'+p.toString();
+  if (city) p.set('city', city);
+  if (date) p.set('date', date);
+  if (service) p.set('service', service);
+  return p;
+}
+
+window.doSearch = function() {
+  const btn = document.querySelector('.hsb-go');
+  if (btn) { btn.disabled = true; btn.textContent = 'Recherche…'; }
+  window.location.href = '/artists.html?' + buildSearchParams().toString();
+};
+
+// « Autour de moi » : récupère la position puis transmet lat/lng/radius à la page artistes
+window.doSearchNear = function(btn) {
+  const p = buildSearchParams();
+  if (!navigator.geolocation) { window.location.href = '/artists.html?' + p.toString(); return; }
+  const original = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳'; }
+  navigator.geolocation.getCurrentPosition((pos) => {
+    p.set('lat', pos.coords.latitude.toFixed(5));
+    p.set('lng', pos.coords.longitude.toFixed(5));
+    p.set('radius', '10');
+    window.location.href = '/artists.html?' + p.toString();
+  }, () => {
+    if (btn) { btn.disabled = false; btn.innerHTML = original; }
+    // Position refusée : bascule sur la recherche classique
+    window.location.href = '/artists.html?' + p.toString();
+  }, { enableHighAccuracy: false, timeout: 8000 });
 };
 
 loadStats();

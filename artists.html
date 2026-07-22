@@ -162,6 +162,16 @@ let filters   = {
   near:    false       // recherche autour de ma position
 };
 
+// Recherche géolocalisée transmise depuis l'accueil (?lat=..&lng=..&radius=..)
+const pLat = parseFloat(params.get('lat'));
+const pLng = parseFloat(params.get('lng'));
+const pRadius = parseInt(params.get('radius'), 10);
+if (!Number.isNaN(pLat) && !Number.isNaN(pLng)) {
+  filters.center = { lat: pLat, lng: pLng };
+  filters.near   = true;
+  filters.radius = (!Number.isNaN(pRadius) && pRadius > 0) ? pRadius : 10;
+}
+
 // Géocodage ville (Base Adresse Nationale, gratuit) — mis en cache
 const geoCache = new Map();
 async function geocodeCity(city) {
@@ -195,6 +205,9 @@ if (filters.service) {
     p.classList.toggle('active', p.dataset.service === filters.service);
   });
 }
+// Reflète l'état géo transmis par l'accueil
+if (filters.radius) { const fr = document.getElementById('f-radius'); if (fr) fr.value = String(filters.radius); }
+if (filters.near)   { const fn = document.getElementById('f-near');   if (fn) fn.classList.add('active'); }
 
 // Events
 document.getElementById('f-city').addEventListener('input', debounce(() => { filters.city = document.getElementById('f-city').value; reload(); }, 400));
