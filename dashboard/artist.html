@@ -178,6 +178,7 @@
     <a class="nav-item" onclick="showTab('reservations',this)">📅 Réservations</a>
     <a class="nav-item active" onclick="showTab('disponibilites',this)">🗓️ Disponibilités</a>
     <a class="nav-item" onclick="showTab('avis',this)">⭐ Avis clients</a>
+    <a class="nav-item" onclick="showTab('devis',this)">🧾 Devis</a>
     <div class="nav-section">Profil</div>
     <a class="nav-item" onclick="showTab('profil',this)">✏️ Mon profil</a>
     <a class="nav-item" onclick="showTab('photos',this)">📸 Portfolio</a>
@@ -257,6 +258,18 @@
     <div id="tab-avis" style="display:none;">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Avis de mes clientes</h2>
       <div id="reviews-dash"></div>
+    </div>
+
+    <!-- ═══ ONGLET DEVIS ═══ -->
+    <div id="tab-devis" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+        <div>
+          <h2 style="font-size:1.1rem;font-weight:800;">Mes devis</h2>
+          <p style="font-size:.82rem;color:var(--gris);">Créez, envoyez et suivez la signature de vos devis.</p>
+        </div>
+        <a href="/dashboard/devis.html" class="btn btn-primary btn-sm">+ Nouveau devis</a>
+      </div>
+      <div id="devis-list-dash"><div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div></div>
     </div>
 
     <!-- ═══ ONGLET PROFIL ═══ -->
@@ -431,6 +444,8 @@
 
 <script type="module">
 import { supabase, getCurrentUser, esc } from '/js/supabase.js';
+import { listMyQuotes, getShareToken, signatureUrl, deleteQuote } from '/js/devis/store.js';
+import { euros } from '/js/devis/model.js';
 
 // Auth check
 const user = await getCurrentUser();
@@ -848,13 +863,82 @@ document.getElementById('btn-save-espace').addEventListener('click', async () =>
 
 // Navigation onglets
 window.showTab = function(name, triggerEl) {
-  ['reservations','disponibilites','avis','profil','photos','services','espace'].forEach(t => {
+  ['reservations','disponibilites','avis','devis','profil','photos','services','espace'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
   });
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   if (triggerEl) triggerEl.classList.add('active');
   if (name === 'espace') initEspace();
+  if (name === 'devis') loadDevis();
 };
+
+// ── Devis ──
+const DEVIS_STATUS = {
+  draft:    { label: 'Brouillon', cls: 'status-pending'   },
+  sent:     { label: 'Envoyé',    cls: 'status-pending'   },
+  signed:   { label: '✓ Signé',   cls: 'status-confirmed' },
+  declined: { label: 'Refusé',    cls: 'status-cancelled' },
+  expired:  { label: 'Expiré',    cls: 'status-cancelled' },
+};
+
+async function loadDevis() {
+  const box = document.getElementById('devis-list-dash');
+  box.innerHTML = `<div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div>`;
+  let quotes;
+  try { quotes = await listMyQuotes(); }
+  catch (e) { console.error(e); box.innerHTML = `<div style="color:var(--gris);text-align:center;padding:40px;">Impossible de charger les devis.</div>`; return; }
+
+  if (!quotes.length) {
+    box.innerHTML = `<div style="background:#fff;border-radius:var(--radius);padding:40px;text-align:center;box-shadow:var(--shadow);">
+      <div style="font-size:2rem;margin-bottom:8px;">🧾</div>
+      <p style="font-weight:700;margin-bottom:4px;">Aucun devis pour le moment</p>
+      <p style="font-size:.85rem;color:var(--gris);margin-bottom:16px;">Créez votre premier devis en quelques clics.</p>
+      <a href="/dashboard/devis.html" class="btn btn-primary btn-sm">+ Nouveau devis</a>
+    </div>`;
+    return;
+  }
+
+  box.innerHTML = quotes.map(q => {
+    const st = DEVIS_STATUS[q.status] || DEVIS_STATUS.draft;
+    const date = q.createdAt ? new Date(q.createdAt).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }) : '';
+    return `<div class="booking-row">
+      <div class="booking-info">
+        <div class="client-name">${esc(q.quoteNumber || 'Devis')} · ${esc(q.client.name || 'Cliente')}</div>
+        <div class="booking-meta">${esc(euros(q.totalCents))} · ${esc(date)}</div>
+      </div>
+      <span class="booking-status ${st.cls}">${st.label}</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" data-act="pdf"  data-id="${esc(q.id)}">PDF</button>
+        ${q.status === 'sent' ? `<button class="btn btn-ghost btn-sm" data-act="link" data-id="${esc(q.id)}">Lien</button>` : ''}
+        <button class="btn btn-ghost btn-sm" data-act="del" data-id="${esc(q.id)}" title="Supprimer">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Actions
+  box.querySelectorAll('button[data-act]').forEach(btn => {
+    const id = btn.getAttribute('data-id');
+    const act = btn.getAttribute('data-act');
+    btn.onclick = async () => {
+      const quote = quotes.find(x => x.id === id);
+      if (act === 'pdf') {
+        const { previewQuotePdf } = await import('/js/devis/pdf.js');
+        previewQuotePdf(quote);
+      } else if (act === 'link') {
+        try {
+          const token = await getShareToken(id);
+          const url = signatureUrl(token);
+          await navigator.clipboard.writeText(url);
+          showToast('Lien de signature copié !');
+        } catch { showToast('Impossible de copier le lien.'); }
+      } else if (act === 'del') {
+        if (!confirm('Supprimer ce devis ? Cette action est définitive.')) return;
+        try { await deleteQuote(id); showToast('Devis supprimé.'); loadDevis(); }
+        catch (e) { console.error(e); showToast('Suppression impossible.'); }
+      }
+    };
+  });
+}
 
 function showToast(msg) {
   const t = document.getElementById('toast');
