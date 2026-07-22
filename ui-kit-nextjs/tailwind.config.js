@@ -21,11 +21,12 @@ module.exports = {
         border:     'var(--border)',
 
         // Palette de marque (fixe)
-        noir:      { DEFAULT: '#0F0F11', 900: '#0F0F11', 800: '#18181B', 700: '#27272A' },
+        noir:      { DEFAULT: '#0F0F11', 900: '#0F0F11', 800: '#18181B', 700: '#27272A', 600: '#3F3F46' },
         champagne: { DEFAULT: '#D4AF37', light: '#E7C766', dark: '#B8962E' },
         poudre:    '#E8D8CE',
-        rose:      { DEFAULT: '#E8547A', deep: '#C43A60' },
+        rose:      { DEFAULT: '#E8547A', deep: '#C43A60', crimson: '#E11D48' },
         fuchsia:   '#E84393',
+        ink:       { primary: '#F4F4F5', secondary: '#A1A1AA' },
       },
       fontFamily: {
         // Alimentés par next/font (var(--font-*)) OU par le @import de globals.css
@@ -39,8 +40,12 @@ module.exports = {
         'card-hover':'0 18px 50px rgba(0,0,0,.45)',
       },
       backgroundImage: {
+        // CTA & accents lumineux : champagne → or → rose (cahier des charges)
+        'cta-lux': 'linear-gradient(120deg,#E8D8CE 0%,#D4AF37 45%,#E11D48 100%)',
         'gloss-trail': 'linear-gradient(90deg,#E8D8CE 0%,#E8547A 40%,#E84393 70%,#D4AF37 100%)',
         'champagne-sheen': 'linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent)',
+        // Halo tamisé doré/rosé pour le hero
+        'hero-halo': 'radial-gradient(ellipse at center, rgba(212,175,55,.22), rgba(225,29,72,.14) 46%, transparent 70%)',
       },
       keyframes: {
         'gloss-sheen': {

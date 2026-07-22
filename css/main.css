@@ -19,12 +19,14 @@
   /* Jetons sensibles au thème — valeurs SOMBRES */
   --rose-cl: #2A1A20;   /* tuile rose sombre */
   --or-cl:   #2A2410;
-  --noir:    #F4F1EC;   /* = couleur de texte (ivoire) */
-  --gris:    #9CA3AF;
-  --gris-cl: #0F0F11;   /* = fond de page (noir satiné) */
+  --noir:    #F4F4F5;   /* = couleur de texte (blanc cassé) */
+  --gris:    #A1A1AA;   /* texte secondaire */
+  --gris-cl: #0F0F11;   /* = fond de page (noir satiné anthracite) */
   --blanc:   #18181B;   /* = surfaces / cartes */
   --surface-2: #27272A;
-  --bord:    #2A2A2E;
+  --bord:    #27272A;   /* bordure fine */
+  --bord-strong: #3F3F46;
+  --glass:   rgba(24,24,27,.55);  /* fond glassmorphism */
   --nav-bg:  rgba(15,15,17,.72);
   --scroll-thumb: rgba(255,255,255,.16);
 
@@ -51,6 +53,8 @@ html.theme-light {
   --blanc:   #FFFFFF;
   --surface-2: #F3EFEA;
   --bord:    #E5E7EB;
+  --bord-strong: #D1D5DB;
+  --glass:   rgba(255,255,255,.7);
   --nav-bg:  rgba(255,255,255,.85);
   --scroll-thumb: rgba(0,0,0,.12);
   --shadow:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
@@ -220,15 +224,19 @@ h1, .hero-title { font-weight: 700; }
   gap: 24px;
 }
 .artist-card {
-  background: var(--blanc); border-radius: var(--radius);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-radius: var(--radius);
   box-shadow: var(--shadow); overflow: hidden;
-  transition: all var(--transition);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
   text-decoration: none; color: inherit; display: block;
-  border: 1px solid rgba(0,0,0,.04);
+  border: 1px solid var(--bord);
 }
 .artist-card:hover {
   transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
+  border-color: var(--bord-strong);
+  box-shadow: var(--shadow-lg), 0 0 36px rgba(212,175,55,.16), 0 0 22px rgba(225,29,72,.12);
 }
 .artist-card-cover {
   width: 100%; height: 200px; object-fit: cover;
@@ -254,10 +262,12 @@ h1, .hero-title { font-weight: 700; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag {
   font-size: .72rem; font-weight: 600;
-  background: var(--rose-cl); color: var(--rose);
-  padding: 4px 10px; border-radius: 20px;
-  transition: background var(--transition);
+  background: linear-gradient(135deg, rgba(232,216,206,.10), rgba(212,175,55,.08));
+  color: var(--poudre); border: 1px solid rgba(212,175,55,.22);
+  padding: 4px 11px; border-radius: 999px;
+  transition: all var(--transition);
 }
+.tag:hover { border-color: rgba(212,175,55,.5); color: var(--or); }
 
 /* ── TOAST ── */
 .toast {
@@ -337,6 +347,14 @@ h1, .hero-title { font-weight: 700; }
 .stat-card:hover, .booking-row:hover { box-shadow: var(--shadow-md), 0 0 20px rgba(232,84,122,.12); }
 .btn-primary:hover { box-shadow: 0 8px 32px rgba(232,84,122,.35), 0 0 18px rgba(232,84,122,.25); }
 .btn-gold:hover { box-shadow: 0 8px 32px rgba(212,175,55,.4), 0 0 18px rgba(212,175,55,.3); }
+
+/* CTA luxe : dégradé champagne → or → rose */
+.btn-lux {
+  background: linear-gradient(120deg, #E8D8CE 0%, #D4AF37 45%, #E11D48 100%);
+  color: #1A0A12; font-weight: 800; letter-spacing: .01em; border: none;
+  box-shadow: 0 0 28px rgba(225,29,72,.25);
+}
+.btn-lux:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(225,29,72,.4), 0 0 20px rgba(212,175,55,.3); }
 
 /* Apparition organique au scroll (activée par js/theme.js) */
 .reveal { opacity: 0; transform: translateY(24px); filter: blur(6px); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1), filter .7s ease; }

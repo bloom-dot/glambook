@@ -45,6 +45,8 @@
       el.style.transitionDelay = (Math.min(i, 8) * 0.05) + 's';
       io.observe(el);
     });
+    // Filet de sécurité : rien ne doit rester masqué (ex. si l'utilisateur ne défile pas)
+    setTimeout(function () { els.forEach(function (el) { el.classList.add('in'); }); }, 2500);
   }
 
   function boot() { mountToggle(); initReveal(); }

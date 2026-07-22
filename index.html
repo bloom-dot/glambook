@@ -107,12 +107,21 @@
       padding: 8px 20px; border-radius: 28px; margin-bottom: 28px;
     }
     .hero-title {
-      font-size: clamp(2.6rem, 6.5vw, 4.5rem); font-weight: 900;
-      line-height: 1.05; letter-spacing: -.04em; margin-bottom: 22px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(3rem, 7.5vw, 5.2rem); font-weight: 600;
+      line-height: 1.02; letter-spacing: -.005em; margin-bottom: 22px;
     }
     .hero-title .glow {
-      background: linear-gradient(135deg, #E8547A 0%, #F5A0B8 40%, #D4AF37 100%);
+      background: linear-gradient(120deg, #E8D8CE 0%, #D4AF37 45%, #E11D48 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-title em { font-style: italic; font-weight: 600; padding-right: .04em; }
+    /* Halo lumineux tamisé derrière le titre */
+    .hero-halo {
+      position: absolute; top: 44%; left: 50%; transform: translate(-50%,-50%);
+      width: min(720px, 92%); height: 380px; z-index: 0; pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(212,175,55,.22), rgba(225,29,72,.14) 46%, transparent 70%);
+      filter: blur(52px);
     }
     .hero-sub {
       font-size: 1rem; color: var(--text-secondary); max-width: 520px;
@@ -130,12 +139,12 @@
 
     /* ── Buttons ── */
     .btn-glow {
-      background: linear-gradient(135deg, var(--rose), #D64070); color: #fff;
-      padding: 16px 36px; border-radius: 12px; font-size: .95rem; font-weight: 700;
+      background: linear-gradient(120deg, #E8D8CE 0%, #D4AF37 45%, #E11D48 100%); color: #1A0A12;
+      padding: 16px 36px; border-radius: 12px; font-size: .95rem; font-weight: 800; letter-spacing: .01em;
       border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-      box-shadow: 0 0 32px rgba(232,84,122,.3); transition: all .3s; font-family: inherit;
+      box-shadow: 0 0 32px rgba(225,29,72,.28); transition: all .3s; font-family: 'Plus Jakarta Sans', inherit;
     }
-    .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(232,84,122,.45); }
+    .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 0 52px rgba(225,29,72,.45); }
     .btn-outline {
       background: transparent; color: rgba(255,255,255,.75); padding: 16px 36px;
       border-radius: 12px; font-size: .95rem; font-weight: 600;
@@ -427,9 +436,10 @@
 <section class="hero-wrap" id="hero">
   <canvas id="hero-canvas"></canvas>
   <div class="hero-content">
+    <div class="hero-halo" aria-hidden="true"></div>
     <div class="hero-badge anim-up">&#10024; LA PLATEFORME N&deg;1 DES MAKEUP ARTISTS</div>
     <h1 class="hero-title anim-up">
-      Trouvez votre<br/><span class="glow">maquilleuse id&eacute;ale</span>
+      Trouvez votre<br/><span class="glow">maquilleuse <em>id&eacute;ale</em></span>
     </h1>
     <p class="hero-sub anim-up">
       Parcourez les profils, consultez les r&eacute;alisations et r&eacute;servez directement en ligne. Simple, rapide, s&eacute;curis&eacute;.
