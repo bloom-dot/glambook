@@ -908,6 +908,7 @@ async function loadDevis() {
       </div>
       <span class="booking-status ${st.cls}">${st.label}</span>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${q.status !== 'signed' ? `<a class="btn btn-ghost btn-sm" href="/dashboard/devis.html?id=${esc(q.id)}">Éditer</a>` : ''}
         <button class="btn btn-ghost btn-sm" data-act="pdf"  data-id="${esc(q.id)}">PDF</button>
         ${q.status === 'sent' ? `<button class="btn btn-ghost btn-sm" data-act="link" data-id="${esc(q.id)}">Lien</button>` : ''}
         <button class="btn btn-ghost btn-sm" data-act="del" data-id="${esc(q.id)}" title="Supprimer">🗑</button>

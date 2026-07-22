@@ -165,7 +165,7 @@
 
   <script type="module">
     import { emptyQuote, computeTotals, euros, parseEuros, lineTotalCents, validateForSend, generateQuoteNumber } from '/js/devis/model.js';
-    import { saveQuote, markAsSent, emailQuote, signatureUrl, getMyArtistId } from '/js/devis/store.js';
+    import { saveQuote, markAsSent, emailQuote, signatureUrl, getMyArtistId, getQuote, getShareToken } from '/js/devis/store.js';
     import { previewQuotePdf } from '/js/devis/pdf.js';
     import { getCurrentUser, getProfile } from '/js/supabase.js';
     import { showToast, esc } from '/js/utils.js';
@@ -250,7 +250,8 @@
       const saved = await saveQuote(quote);
       quote.id = saved.id;
       quote.quoteNumber = saved.quoteNumber;
-      $('quoteNo').textContent = `${saved.quoteNumber} · Brouillon`;
+      quote.status = saved.status || quote.status;
+      $('quoteNo').textContent = `${saved.quoteNumber} · ${STATUS_LABEL[quote.status] || 'Brouillon'}`;
       return saved;
     }
 
@@ -302,8 +303,74 @@
     };
     $('btnCloseModal').onclick = () => $('modal').classList.remove('show');
 
-    // ── Préremplissage depuis le profil connecté ──
+    const STATUS_LABEL = { draft:'Brouillon', sent:'Envoyé', signed:'Signé', declined:'Refusé', expired:'Expiré' };
+
+    // ISO → valeur pour <input type="datetime-local"> (heure locale)
+    function toLocalInput(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      const p = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+    }
+
+    // Remplit tous les champs du formulaire depuis l'objet devis
+    function fillForm(q) {
+      $('mua_name').value = q.mua.name || '';
+      $('mua_siret').value = q.mua.siret || '';
+      $('mua_email').value = q.mua.email || '';
+      $('mua_phone').value = q.mua.phone || '';
+      $('mua_address').value = q.mua.address || '';
+      $('cli_name').value = q.client.name || '';
+      $('cli_email').value = q.client.email || '';
+      $('cli_phone').value = q.client.phone || '';
+      $('event_address').value = q.client.eventAddress || '';
+      $('event_date').value = toLocalInput(q.eventDate);
+      $('travel_km').value = q.travelDistanceKm || 0;
+      $('travel_rate').value = (q.travelRateCents || 0) / 100;
+      $('deposit').value = (q.depositCents || 0) / 100;
+      $('vat_mode').value = q.vatExempt ? 'exempt' : 'taxed';
+      $('vatRateField').style.display = q.vatExempt ? 'none' : 'flex';
+      $('vat_rate').value = q.vatRate ?? 20;
+      $('valid_until').value = q.validUntil || '';
+      $('payment_terms').value = q.paymentTerms || '';
+      $('notes').value = q.notes || '';
+      if (!q.items || !q.items.length) q.items = [{ title:'', qty:1, unitPriceCents:0 }];
+      renderItems();
+      renderTotals();
+    }
+
+    // Passe le formulaire en lecture seule (devis déjà signé)
+    function setReadOnly() {
+      document.querySelectorAll('input, textarea, select').forEach(el => el.disabled = true);
+      document.querySelectorAll('.item-del, #btnAddItem').forEach(el => el.style.display = 'none');
+      $('btnSave').style.display = 'none';
+      $('btnSend').style.display = 'none';
+      const bar = document.createElement('div');
+      bar.style.cssText = 'background:#E7F7EE;color:#1B8A4B;border-radius:var(--radius-sm);padding:12px 16px;font-size:.85rem;font-weight:600;margin-bottom:16px;';
+      bar.textContent = '✓ Ce devis a été signé par la cliente — il n’est plus modifiable.';
+      document.querySelector('.wrap').insertBefore(bar, document.querySelector('.panel'));
+    }
+
+    // ── Init : édition d'un devis existant (?id=) ou nouveau ──
     (async () => {
+      const editId = new URLSearchParams(location.search).get('id');
+
+      if (editId) {
+        try {
+          const loaded = await getQuote(editId);
+          if (loaded) {
+            quote = loaded;
+            document.querySelector('.top h1').textContent = 'Modifier le devis';
+            $('quoteNo').textContent = `${quote.quoteNumber} · ${STATUS_LABEL[quote.status] || 'Brouillon'}`;
+            fillForm(quote);
+            if (quote.status === 'signed') setReadOnly();
+            return;
+          }
+          showToast('Devis introuvable.', 'error');
+        } catch (e) { console.error(e); showToast('Chargement impossible.', 'error'); }
+      }
+
+      // Nouveau devis : préremplissage depuis le profil connecté
       try {
         const user = await getCurrentUser();
         if (user) {
