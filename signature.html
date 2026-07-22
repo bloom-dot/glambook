@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <title>Signer votre devis — GlamBook</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    body { background: var(--gris-cl); }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
+    .brand { text-align:center; font-size:1.3rem; font-weight:900; color:var(--rose); letter-spacing:-.03em; margin-bottom:16px; }
+    .brand span { color:var(--or); }
+
+    .card2 { background:var(--blanc); border:1px solid var(--bord); border-radius:var(--radius); box-shadow:var(--shadow); padding:22px; margin-bottom:16px; }
+    .status-pill { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:700; padding:5px 12px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
+    .pill-sent   { background:var(--or-cl); color:#8a6d1a; }
+    .pill-signed { background:#E7F7EE; color:#1B8A4B; }
+
+    .head-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+    .q-no { font-size:.8rem; color:var(--gris); }
+    h1 { font-size:1.3rem; font-weight:800; letter-spacing:-.02em; margin:2px 0 4px; }
+
+    .parties { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+    @media(max-width:520px){ .parties { grid-template-columns:1fr; } }
+    .party .lbl { font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--rose); margin-bottom:4px; }
+    .party .nm { font-weight:700; font-size:.95rem; }
+    .party .ln { font-size:.82rem; color:var(--gris); }
+
+    .event-band { background:var(--rose-cl); border-radius:var(--radius-sm); padding:10px 14px; font-size:.85rem; margin:6px 0 14px; }
+    .event-band b { color:var(--rose-f); }
+
+    table { width:100%; border-collapse:collapse; font-size:.86rem; margin-bottom:8px; }
+    th { text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.04em; color:var(--gris); border-bottom:1.5px solid var(--bord); padding:8px 6px; }
+    th.r, td.r { text-align:right; } th.c, td.c { text-align:center; }
+    td { padding:9px 6px; border-bottom:1px solid var(--gris-cl); }
+    tr:last-child td { border-bottom:none; }
+
+    .totals { margin-left:auto; max-width:300px; margin-top:8px; }
+    .tr { display:flex; justify-content:space-between; padding:5px 0; font-size:.88rem; color:var(--gris); }
+    .tr b { color:var(--noir); }
+    .grand { border-top:2px solid var(--rose); margin-top:6px; padding-top:9px; font-size:1.1rem; font-weight:800; color:var(--noir); }
+    .grand .amt { color:var(--rose-f); }
+    .exempt { font-size:.72rem; font-style:italic; color:var(--gris); text-align:right; }
+    .terms { font-size:.8rem; color:var(--gris); margin-top:12px; padding-top:12px; border-top:1px solid var(--bord); }
+    .terms b { color:var(--noir); }
+
+    /* Signature */
+    .sig-title { font-weight:800; font-size:1.05rem; margin-bottom:2px; }
+    .sig-sub { font-size:.82rem; color:var(--gris); margin-bottom:14px; }
+    .pad-frame { position:relative; border:2px dashed var(--bord); border-radius:var(--radius-sm); background:#fff; touch-action:none; }
+    .pad-frame canvas { display:block; width:100%; height:200px; border-radius:var(--radius-sm); }
+    .pad-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#C9CDD4; font-size:.9rem; pointer-events:none; }
+    .pad-hint.hidden { display:none; }
+    .baseline { position:absolute; left:16px; right:16px; bottom:44px; border-bottom:1.5px solid var(--bord); pointer-events:none; }
+    .name-field { margin:14px 0; }
+    .name-field label { font-size:.75rem; font-weight:600; color:var(--gris); display:block; margin-bottom:5px; }
+    .name-field input { width:100%; font-family:inherit; font-size:.95rem; padding:11px 13px; border:1.5px solid var(--bord); border-radius:var(--radius-sm); }
+    .name-field input:focus { outline:none; border-color:var(--rose); }
+    .sig-actions { display:flex; gap:10px; margin-top:14px; }
+    .sig-actions .btn { flex:1; }
+    .accord { font-size:.78rem; color:var(--gris); text-align:center; margin-top:12px; }
+
+    .center-state { text-align:center; padding:48px 20px; }
+    .center-state .big { font-size:2.4rem; margin-bottom:10px; }
+    .center-state h2 { font-size:1.2rem; font-weight:800; margin-bottom:6px; }
+    .center-state p { color:var(--gris); font-size:.9rem; }
+    .hide { display:none !important; }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .toast.error { background:var(--rose-f); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Glam<span>Book</span></div>
+
+    <!-- Chargement -->
+    <div id="loading" class="card2 center-state">
+      <div class="big">✨</div>
+      <p>Chargement du devis…</p>
+    </div>
+
+    <!-- Introuvable -->
+    <div id="notfound" class="card2 center-state hide">
+      <div class="big">🔍</div>
+      <h2>Devis introuvable</h2>
+      <p>Ce lien n'est plus valide ou a expiré. Contactez votre maquilleuse pour en obtenir un nouveau.</p>
+    </div>
+
+    <!-- Contenu du devis -->
+    <div id="content" class="hide">
+      <div class="card2">
+        <div class="head-row">
+          <div>
+            <div class="q-no" id="qNo"></div>
+            <h1>Votre devis</h1>
+          </div>
+          <span class="status-pill" id="statusPill"></span>
+        </div>
+
+        <div class="parties">
+          <div class="party">
+            <div class="lbl">Prestataire</div>
+            <div class="nm" id="muaName"></div>
+            <div class="ln" id="muaAddr"></div>
+            <div class="ln" id="muaContact"></div>
+            <div class="ln" id="muaSiret"></div>
+          </div>
+          <div class="party">
+            <div class="lbl">Cliente</div>
+            <div class="nm" id="cliName"></div>
+            <div class="ln" id="cliContact"></div>
+          </div>
+        </div>
+
+        <div class="event-band hide" id="eventBand"></div>
+
+        <table>
+          <thead><tr><th>Prestation</th><th class="c">Qté</th><th class="r">P.U.</th><th class="r">Total</th></tr></thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+
+        <div class="totals" id="totals"></div>
+        <div class="terms hide" id="terms"></div>
+      </div>
+
+      <!-- Zone de signature (si à signer) -->
+      <div class="card2" id="signBox">
+        <div class="sig-title">Bon pour accord</div>
+        <div class="sig-sub">Signez ci-dessous avec votre doigt ou votre souris pour valider ce devis.</div>
+        <div class="pad-frame" id="padFrame">
+          <canvas id="pad"></canvas>
+          <div class="baseline"></div>
+          <div class="pad-hint" id="padHint">Signez ici</div>
+        </div>
+        <div class="name-field">
+          <label for="signerName">Votre nom complet</label>
+          <input id="signerName" placeholder="Prénom Nom" autocomplete="name"/>
+        </div>
+        <div class="sig-actions">
+          <button class="btn btn-ghost" id="btnClear">Effacer</button>
+          <button class="btn btn-primary" id="btnSign" disabled>Valider et signer</button>
+        </div>
+        <div class="accord">En signant, vous acceptez les termes de ce devis.</div>
+      </div>
+
+      <!-- Déjà signé -->
+      <div class="card2 center-state hide" id="signedBox">
+        <div class="big">✅</div>
+        <h2>Devis signé</h2>
+        <p id="signedInfo"></p>
+        <button class="btn btn-secondary" id="btnDownload" style="margin-top:16px">Télécharger le PDF signé</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { computeTotals, euros } from '/js/devis/model.js';
+    import { getQuoteByToken, signQuoteByToken } from '/js/devis/store.js';
+    import { SignaturePad } from '/js/devis/signature-pad.js';
+    import { buildQuotePdf, downloadQuotePdf } from '/js/devis/pdf.js';
+    import { showToast, esc } from '/js/utils.js';
+
+    const $ = (id) => document.getElementById(id);
+    const token = new URLSearchParams(location.search).get('t');
+    let quote = null;
+    let pad = null;
+
+    const fmtDate = (d, time=false) => d ? new Date(d).toLocaleDateString('fr-FR',
+      time ? {day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}
+           : {day:'2-digit',month:'long',year:'numeric'}) : '';
+
+    function show(el) { el.classList.remove('hide'); }
+    function hide(el) { el.classList.add('hide'); }
+
+    function renderQuote() {
+      $('qNo').textContent = quote.quoteNumber || '';
+      const signed = quote.status === 'signed';
+      const pill = $('statusPill');
+      pill.className = 'status-pill ' + (signed ? 'pill-signed' : 'pill-sent');
+      pill.textContent = signed ? '✓ Signé' : 'À signer';
+
+      $('muaName').textContent = quote.mua.name;
+      $('muaAddr').textContent = quote.mua.address || '';
+      $('muaContact').textContent = [quote.mua.email, quote.mua.phone].filter(Boolean).join(' · ');
+      $('muaSiret').textContent = quote.mua.siret ? 'SIRET : ' + quote.mua.siret : '';
+      $('cliName').textContent = quote.client.name;
+      $('cliContact').textContent = [quote.client.email, quote.client.phone].filter(Boolean).join(' · ');
+
+      if (quote.eventDate || quote.client.eventAddress) {
+        show($('eventBand'));
+        $('eventBand').innerHTML = `<b>Prestation :</b> ${esc(fmtDate(quote.eventDate, true))}${quote.client.eventAddress ? ' — ' + esc(quote.client.eventAddress) : ''}`;
+      }
+
+      const t = computeTotals(quote);
+      const rows = quote.items.map(it => `<tr>
+        <td>${esc(it.title)}</td><td class="c">${it.qty}</td>
+        <td class="r">${euros(it.unitPriceCents)}</td>
+        <td class="r"><b>${euros((Number(it.qty)||0)*Math.round(Number(it.unitPriceCents)||0))}</b></td></tr>`);
+      if (t.travelCents > 0) rows.push(`<tr><td>Frais de déplacement (${quote.travelDistanceKm} km)</td><td class="c"></td><td class="r"></td><td class="r"><b>${euros(t.travelCents)}</b></td></tr>`);
+      $('itemsBody').innerHTML = rows.join('');
+
+      const tot = [];
+      tot.push(`<div class="tr">Total HT <b>${euros(t.subtotalCents)}</b></div>`);
+      if (quote.vatExempt) tot.push(`<div class="exempt">TVA non applicable, art. 293 B du CGI</div>`);
+      else tot.push(`<div class="tr">TVA (${quote.vatRate} %) <b>${euros(t.vatCents)}</b></div>`);
+      tot.push(`<div class="tr grand">Total TTC <span class="amt">${euros(t.totalCents)}</span></div>`);
+      if (t.depositCents > 0) {
+        tot.push(`<div class="tr">Acompte <b>${euros(t.depositCents)}</b></div>`);
+        tot.push(`<div class="tr">Solde le jour J <b>${euros(t.balanceCents)}</b></div>`);
+      }
+      $('totals').innerHTML = tot.join('');
+
+      if (quote.paymentTerms || quote.notes) {
+        show($('terms'));
+        $('terms').innerHTML =
+          (quote.paymentTerms ? `<div><b>Conditions de paiement :</b> ${esc(quote.paymentTerms)}</div>` : '') +
+          (quote.notes ? `<div style="margin-top:6px">${esc(quote.notes)}</div>` : '');
+      }
+
+      if (signed) {
+        hide($('signBox')); show($('signedBox'));
+        $('signedInfo').textContent = `Signé${quote.signedName ? ' par ' + quote.signedName : ''} le ${fmtDate(quote.signedAt, true)}.`;
+      } else {
+        show($('signBox')); hide($('signedBox'));
+        initPad();
+      }
+    }
+
+    function initPad() {
+      pad = new SignaturePad($('pad'), {
+        penColor: '#111111', lineWidth: 2.6,
+        onChange: () => {
+          const empty = pad.isEmpty();
+          $('padHint').classList.toggle('hidden', !empty);
+          $('btnSign').disabled = empty;
+        },
+      });
+      $('btnClear').onclick = () => pad.clear();
+      $('btnSign').onclick = doSign;
+    }
+
+    async function doSign() {
+      if (!pad || pad.isEmpty()) { showToast('Merci de signer avant de valider.', 'error'); return; }
+      const name = $('signerName').value.trim();
+      const btn = $('btnSign');
+      btn.disabled = true; btn.textContent = 'Signature en cours…';
+      try {
+        const sig = pad.toDataURL();
+        const res = await signQuoteByToken(token, sig, name);
+        if (!res.ok) {
+          const msg = res.error === 'already_signed' ? 'Ce devis a déjà été signé.'
+                    : res.error === 'empty_signature' ? 'Signature vide.'
+                    : "Impossible de signer ce devis.";
+          showToast(msg, 'error');
+          btn.disabled = false; btn.textContent = 'Valider et signer';
+          if (res.error === 'already_signed') location.reload();
+          return;
+        }
+        // Mise à jour locale pour l'incrustation dans le PDF
+        quote.status = 'signed';
+        quote.signatureData = sig;
+        quote.signedName = name;
+        quote.signedAt = new Date().toISOString();
+        pad.destroy();
+        renderQuote();
+        showToast('Devis signé, merci ! 🎉');
+      } catch (e) {
+        console.error(e);
+        showToast("Erreur réseau, réessayez.", 'error');
+        btn.disabled = false; btn.textContent = 'Valider et signer';
+      }
+    }
+
+    $('btnDownload').onclick = () => { if (quote) downloadQuotePdf(quote); };
+
+    (async () => {
+      if (!token) { hide($('loading')); show($('notfound')); return; }
+      try {
+        quote = await getQuoteByToken(token);
+        hide($('loading'));
+        if (!quote) { show($('notfound')); return; }
+        show($('content'));
+        renderQuote();
+      } catch (e) {
+        console.error(e);
+        hide($('loading')); show($('notfound'));
+      }
+    })();
+  </script>
+</body>
+</html>

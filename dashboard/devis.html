@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Nouveau devis — GlamBook</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    body { background: var(--gris-cl); }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 24px 18px 96px; }
+    .top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+    .top h1 { font-size:1.45rem; font-weight:800; letter-spacing:-.02em; }
+    .top .sub { font-size:.85rem; color:var(--gris); margin-top:2px; }
+
+    .panel { background:var(--blanc); border:1px solid var(--bord); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); margin-bottom:18px; }
+    .panel h2 { font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--rose); margin-bottom:14px; }
+
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:640px){ .grid2 { grid-template-columns:1fr; } }
+    .field { display:flex; flex-direction:column; gap:5px; }
+    .field label { font-size:.75rem; font-weight:600; color:var(--gris); }
+    input, textarea, select {
+      font-family:inherit; font-size:.9rem; padding:10px 12px; border:1.5px solid var(--bord);
+      border-radius:var(--radius-sm); background:var(--blanc); color:var(--noir); transition:border-color var(--transition); width:100%;
+    }
+    input:focus, textarea:focus, select:focus { outline:none; border-color:var(--rose); }
+    textarea { resize:vertical; min-height:64px; }
+
+    /* Lignes de prestation */
+    .items-head, .item-row { display:grid; grid-template-columns: 1fr 72px 120px 110px 36px; gap:8px; align-items:center; }
+    .items-head { font-size:.7rem; font-weight:700; color:var(--gris); text-transform:uppercase; letter-spacing:.04em; padding:0 2px 8px; }
+    .item-row { margin-bottom:8px; }
+    .item-row .line-total { font-weight:700; font-size:.88rem; text-align:right; padding-right:4px; }
+    .item-del { background:none; border:none; color:var(--gris); cursor:pointer; font-size:1.1rem; line-height:1; padding:6px; border-radius:var(--radius-xs); }
+    .item-del:hover { background:var(--rose-cl); color:var(--rose-f); }
+    @media(max-width:640px){
+      .items-head { display:none; }
+      .item-row { grid-template-columns: 1fr 36px; grid-template-areas: "title del" "qty del" "price del" "tot del"; gap:6px; padding:10px; border:1px solid var(--bord); border-radius:var(--radius-sm); }
+      .item-row .i-title{grid-area:title} .item-row .i-qty{grid-area:qty} .item-row .i-price{grid-area:price} .item-row .line-total{grid-area:tot; text-align:left} .item-row .item-del{grid-area:del}
+    }
+
+    .row-inline { display:flex; align-items:center; gap:10px; }
+    .switch { display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+    .switch input { width:auto; }
+
+    /* Récapitulatif totaux */
+    .totals { max-width:340px; margin-left:auto; }
+    .totals .tr { display:flex; justify-content:space-between; padding:6px 0; font-size:.9rem; color:var(--gris); }
+    .totals .tr b { color:var(--noir); }
+    .totals .grand { border-top:2px solid var(--rose); margin-top:6px; padding-top:10px; font-size:1.15rem; font-weight:800; color:var(--noir); }
+    .totals .grand .amt { color:var(--rose-f); }
+    .exempt-note { font-size:.72rem; font-style:italic; color:var(--gris); text-align:right; }
+
+    .actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    @media(max-width:640px){ .actions .btn { flex:1; } }
+
+    /* Modal lien */
+    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.5); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:200; padding:18px; }
+    .modal-bg.show { display:flex; }
+    .modal { background:var(--blanc); border-radius:var(--radius); padding:26px; max-width:460px; width:100%; box-shadow:var(--shadow-lg); text-align:center; }
+    .modal h3 { font-size:1.15rem; font-weight:800; margin-bottom:6px; }
+    .modal p { font-size:.86rem; color:var(--gris); margin-bottom:16px; }
+    .link-box { display:flex; gap:8px; margin-bottom:16px; }
+    .link-box input { font-size:.8rem; }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .toast.error { background:var(--rose-f); }
+    .back-link { font-size:.85rem; color:var(--gris); text-decoration:none; }
+    .back-link:hover { color:var(--rose); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="/dashboard/artist.html" class="back-link">← Retour au tableau de bord</a>
+    <div class="top" style="margin-top:12px;">
+      <div>
+        <h1>Nouveau devis</h1>
+        <div class="sub" id="quoteNo">Brouillon</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="btnPreview">👁 Prévisualiser le PDF</button>
+        <button class="btn btn-secondary" id="btnSave">Enregistrer</button>
+        <button class="btn btn-primary" id="btnSend">Envoyer à la cliente</button>
+      </div>
+    </div>
+
+    <!-- MUA -->
+    <div class="panel">
+      <h2>Vos informations (prestataire)</h2>
+      <div class="grid2">
+        <div class="field"><label>Nom / Nom commercial</label><input id="mua_name" placeholder="Ex. Studio Léa Makeup"/></div>
+        <div class="field"><label>SIRET</label><input id="mua_siret" placeholder="123 456 789 00012"/></div>
+        <div class="field"><label>Email</label><input id="mua_email" type="email"/></div>
+        <div class="field"><label>Téléphone</label><input id="mua_phone" type="tel"/></div>
+        <div class="field" style="grid-column:1/-1"><label>Adresse</label><input id="mua_address"/></div>
+      </div>
+    </div>
+
+    <!-- Cliente -->
+    <div class="panel">
+      <h2>Cliente</h2>
+      <div class="grid2">
+        <div class="field"><label>Nom</label><input id="cli_name"/></div>
+        <div class="field"><label>Email</label><input id="cli_email" type="email" placeholder="Pour l'envoi du lien de signature"/></div>
+        <div class="field"><label>Téléphone</label><input id="cli_phone" type="tel"/></div>
+        <div class="field"><label>Date &amp; heure de l'événement</label><input id="event_date" type="datetime-local"/></div>
+        <div class="field" style="grid-column:1/-1"><label>Adresse de l'événement</label><input id="event_address" placeholder="Lieu de la prestation"/></div>
+      </div>
+    </div>
+
+    <!-- Prestations -->
+    <div class="panel">
+      <h2>Prestations</h2>
+      <div class="items-head">
+        <span>Intitulé</span><span style="text-align:center">Qté</span><span style="text-align:right">Prix unit. (€)</span><span style="text-align:right">Total</span><span></span>
+      </div>
+      <div id="items"></div>
+      <button class="btn btn-ghost btn-sm" id="btnAddItem" style="margin-top:6px">+ Ajouter une prestation</button>
+    </div>
+
+    <!-- Déplacement & paiement -->
+    <div class="panel">
+      <h2>Déplacement, TVA &amp; paiement</h2>
+      <div class="grid2">
+        <div class="field"><label>Distance (km, aller-retour)</label><input id="travel_km" type="number" min="0" step="1" value="0"/></div>
+        <div class="field"><label>Tarif au km (€)</label><input id="travel_rate" type="number" min="0" step="0.05" value="0.50"/></div>
+        <div class="field"><label>Acompte demandé (€)</label><input id="deposit" type="number" min="0" step="1" value="0"/></div>
+        <div class="field">
+          <label>Régime TVA</label>
+          <select id="vat_mode">
+            <option value="exempt">Franchise en base (auto-entrepreneur) — TVA non applicable</option>
+            <option value="taxed">Assujetti à la TVA</option>
+          </select>
+        </div>
+        <div class="field" id="vatRateField" style="display:none"><label>Taux de TVA (%)</label><input id="vat_rate" type="number" min="0" step="0.1" value="20"/></div>
+        <div class="field"><label>Date de validité du devis</label><input id="valid_until" type="date"/></div>
+        <div class="field" style="grid-column:1/-1"><label>Conditions de paiement</label><textarea id="payment_terms"></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label>Notes (optionnel)</label><textarea id="notes" placeholder="Précisions, mentions particulières…"></textarea></div>
+      </div>
+    </div>
+
+    <!-- Totaux -->
+    <div class="panel">
+      <div class="totals" id="totals"></div>
+    </div>
+  </div>
+
+  <!-- Modal lien de signature -->
+  <div class="modal-bg" id="modal">
+    <div class="modal">
+      <h3>Devis envoyé ✨</h3>
+      <p>Partagez ce lien unique avec votre cliente. Elle pourra consulter le devis et le signer depuis son téléphone.</p>
+      <div class="link-box">
+        <input id="shareLink" readonly/>
+        <button class="btn btn-primary btn-sm" id="btnCopy">Copier</button>
+      </div>
+      <button class="btn btn-ghost btn-full" id="btnCloseModal">Fermer</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { emptyQuote, computeTotals, euros, parseEuros, lineTotalCents, validateForSend, generateQuoteNumber } from '/js/devis/model.js';
+    import { saveQuote, markAsSent, signatureUrl, getMyArtistId } from '/js/devis/store.js';
+    import { previewQuotePdf } from '/js/devis/pdf.js';
+    import { getCurrentUser, getProfile } from '/js/supabase.js';
+    import { showToast, esc } from '/js/utils.js';
+
+    let quote = emptyQuote();
+    quote.quoteNumber = generateQuoteNumber();
+
+    const $ = (id) => document.getElementById(id);
+
+    // ── Rendu des lignes ──
+    function renderItems() {
+      const box = $('items');
+      box.innerHTML = '';
+      quote.items.forEach((it, i) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <input class="i-title" placeholder="Ex. Maquillage mariée + essai" value="${esc(it.title)}"/>
+          <input class="i-qty" type="number" min="0" step="1" style="text-align:center" value="${it.qty}"/>
+          <input class="i-price" type="number" min="0" step="0.5" style="text-align:right" value="${(it.unitPriceCents/100).toString()}"/>
+          <span class="line-total">${euros(lineTotalCents(it))}</span>
+          <button class="item-del" title="Supprimer">✕</button>`;
+        row.querySelector('.i-title').oninput = (e) => { it.title = e.target.value; };
+        row.querySelector('.i-qty').oninput  = (e) => { it.qty = parseInt(e.target.value) || 0; renderTotals(); row.querySelector('.line-total').textContent = euros(lineTotalCents(it)); };
+        row.querySelector('.i-price').oninput = (e) => { it.unitPriceCents = parseEuros(e.target.value); renderTotals(); row.querySelector('.line-total').textContent = euros(lineTotalCents(it)); };
+        row.querySelector('.item-del').onclick = () => { quote.items.splice(i,1); if(!quote.items.length) quote.items.push({title:'',qty:1,unitPriceCents:0}); renderItems(); renderTotals(); };
+        box.appendChild(row);
+      });
+    }
+
+    // ── Rendu des totaux ──
+    function renderTotals() {
+      const t = computeTotals(quote);
+      const rows = [];
+      rows.push(`<div class="tr">Total prestations <b>${euros(t.prestationsCents)}</b></div>`);
+      if (t.travelCents > 0) rows.push(`<div class="tr">Frais de déplacement <b>${euros(t.travelCents)}</b></div>`);
+      rows.push(`<div class="tr">Total HT <b>${euros(t.subtotalCents)}</b></div>`);
+      if (quote.vatExempt) rows.push(`<div class="exempt-note">TVA non applicable, art. 293 B du CGI</div>`);
+      else rows.push(`<div class="tr">TVA (${quote.vatRate} %) <b>${euros(t.vatCents)}</b></div>`);
+      rows.push(`<div class="tr grand">Total TTC <span class="amt">${euros(t.totalCents)}</span></div>`);
+      if (t.depositCents > 0) {
+        rows.push(`<div class="tr">Acompte <b>${euros(t.depositCents)}</b></div>`);
+        rows.push(`<div class="tr">Solde le jour J <b>${euros(t.balanceCents)}</b></div>`);
+      }
+      $('totals').innerHTML = rows.join('');
+    }
+
+    // ── Synchronisation champs → modèle ──
+    function bindField(id, setter) {
+      const el = $(id); if (!el) return;
+      el.addEventListener('input', () => { setter(el.value); renderTotals(); });
+    }
+    bindField('mua_name', v => quote.mua.name = v);
+    bindField('mua_siret', v => quote.mua.siret = v);
+    bindField('mua_email', v => quote.mua.email = v);
+    bindField('mua_phone', v => quote.mua.phone = v);
+    bindField('mua_address', v => quote.mua.address = v);
+    bindField('cli_name', v => quote.client.name = v);
+    bindField('cli_email', v => quote.client.email = v);
+    bindField('cli_phone', v => quote.client.phone = v);
+    bindField('event_address', v => quote.client.eventAddress = v);
+    bindField('event_date', v => quote.eventDate = v ? new Date(v).toISOString() : '');
+    bindField('travel_km', v => quote.travelDistanceKm = parseFloat(v) || 0);
+    bindField('travel_rate', v => quote.travelRateCents = parseEuros(v));
+    bindField('deposit', v => quote.depositCents = parseEuros(v));
+    bindField('vat_rate', v => quote.vatRate = parseFloat(v) || 0);
+    bindField('valid_until', v => quote.validUntil = v);
+    bindField('payment_terms', v => quote.paymentTerms = v);
+    bindField('notes', v => quote.notes = v);
+
+    $('vat_mode').addEventListener('change', (e) => {
+      quote.vatExempt = e.target.value === 'exempt';
+      $('vatRateField').style.display = quote.vatExempt ? 'none' : 'flex';
+      renderTotals();
+    });
+
+    $('btnAddItem').onclick = () => { quote.items.push({title:'',qty:1,unitPriceCents:0}); renderItems(); };
+
+    $('btnPreview').onclick = () => previewQuotePdf(quote);
+
+    async function persist() {
+      const saved = await saveQuote(quote);
+      quote.id = saved.id;
+      quote.quoteNumber = saved.quoteNumber;
+      $('quoteNo').textContent = `${saved.quoteNumber} · Brouillon`;
+      return saved;
+    }
+
+    $('btnSave').onclick = async () => {
+      try { await persist(); showToast('Devis enregistré.'); }
+      catch (e) { console.error(e); showToast(e.message || "Erreur d'enregistrement.", 'error'); }
+    };
+
+    $('btnSend').onclick = async () => {
+      const errs = validateForSend(quote);
+      if (errs.length) { showToast(errs[0], 'error'); return; }
+      try {
+        if (!quote.id) await persist();
+        const { shareToken } = await markAsSent(quote.id);
+        const url = signatureUrl(shareToken);
+        $('shareLink').value = url;
+        $('modal').classList.add('show');
+        $('quoteNo').textContent = `${quote.quoteNumber} · Envoyé`;
+      } catch (e) { console.error(e); showToast(e.message || "Erreur lors de l'envoi.", 'error'); }
+    };
+
+    $('btnCopy').onclick = async () => {
+      try { await navigator.clipboard.writeText($('shareLink').value); showToast('Lien copié !'); }
+      catch { $('shareLink').select(); document.execCommand('copy'); showToast('Lien copié !'); }
+    };
+    $('btnCloseModal').onclick = () => $('modal').classList.remove('show');
+
+    // ── Préremplissage depuis le profil connecté ──
+    (async () => {
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          if (!quote.mua.email) { quote.mua.email = user.email || ''; $('mua_email').value = quote.mua.email; }
+          const prof = await getProfile(user.id);
+          if (prof?.full_name && !quote.mua.name) { quote.mua.name = prof.full_name; $('mua_name').value = prof.full_name; }
+          if (prof?.phone && !quote.mua.phone) { quote.mua.phone = prof.phone; $('mua_phone').value = prof.phone; }
+        }
+      } catch (_) {}
+      $('payment_terms').value = quote.paymentTerms;
+      $('quoteNo').textContent = `${quote.quoteNumber} · Brouillon`;
+      renderItems();
+      renderTotals();
+    })();
+  </script>
+</body>
+</html>
