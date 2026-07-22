@@ -432,8 +432,10 @@
     <a href="/" class="nav-logo">Glam<span>Book</span></a>
     <div class="nav-links">
       <a href="/artists.html" class="hide-mobile">Explorer</a>
-      <a href="/auth/login.html">Connexion</a>
-      <a href="/auth/register.html" class="btn-nav btn">Rejoindre</a>
+      <span id="nav-auth">
+        <a href="/auth/login.html">Connexion</a>
+        <a href="/auth/register.html" class="btn-nav btn">Rejoindre</a>
+      </span>
     </div>
   </div>
 </nav>
@@ -497,6 +499,48 @@
     <div class="trust-item anim-up"><span class="num">0&euro;</span><span class="lbl">Frais de r&eacute;servation</span></div>
   </div>
 </div>
+
+<!-- ═══ HOME CONNECTÉE — bloc personnalisé (révélé par JS si session active) ═══ -->
+<style>
+  .home-me { max-width: 1120px; margin: 30px auto 4px; padding: 0 20px; }
+  .home-me-inner { background: linear-gradient(135deg, #141416, #1A1517); border: 1px solid var(--bord, #27272A); border-radius: 20px; padding: 26px 28px; box-shadow: 0 16px 48px rgba(0,0,0,.4); }
+  .home-me h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.85rem; font-weight: 600; color: #F4F4F5; margin: 0 0 2px; }
+  .home-me .sub { color: var(--text-secondary, #A1A1AA); font-size: .9rem; }
+  .home-me .blk-title { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--champagne, #E7C766); font-weight: 700; margin: 20px 0 10px; }
+  .rdv-list { display: grid; gap: 10px; }
+  .rdv-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #0F0F11; border: 1px solid var(--bord, #27272A); border-radius: 12px; padding: 12px 14px; }
+  .rdv-item .r-main { min-width: 0; }
+  .rdv-item .r-svc { color: #F4F4F5; font-weight: 600; font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rdv-item .r-meta { color: var(--text-secondary, #A1A1AA); font-size: .82rem; margin-top: 2px; }
+  .rdv-badge { font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .rdv-badge.b-pending { background: rgba(231,199,102,.14); color: #E7C766; }
+  .rdv-badge.b-quoted { background: rgba(232,84,122,.16); color: #F06A96; }
+  .me-artists { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .me-artist { display: flex; align-items: center; gap: 10px; background: #0F0F11; border: 1px solid var(--bord, #27272A); border-radius: 12px; padding: 10px 12px; text-decoration: none; transition: border-color .2s, box-shadow .2s; }
+  .me-artist:hover { border-color: rgba(212,175,55,.4); box-shadow: 0 0 18px rgba(212,175,55,.12); }
+  .me-artist .av { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, rgba(232,216,206,.2), rgba(212,175,55,.15)); display: flex; align-items: center; justify-content: center; color: #E7C766; font-weight: 700; flex: 0 0 auto; }
+  .me-artist .nm { color: #F4F4F5; font-weight: 600; font-size: .88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .me-artist .ct { color: var(--text-secondary, #A1A1AA); font-size: .76rem; }
+  .home-me .me-actions { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+</style>
+<section class="home-me" id="home-me" hidden>
+  <div class="home-me-inner">
+    <h2 id="me-hello">Bon retour</h2>
+    <div class="sub">Votre espace GlamBook en un coup d'&oelig;il.</div>
+    <div id="me-rdv-wrap" hidden>
+      <div class="blk-title">Vos rendez-vous &agrave; venir</div>
+      <div class="rdv-list" id="me-rdv"></div>
+    </div>
+    <div id="me-artists-wrap" hidden>
+      <div class="blk-title">Vos maquilleuses</div>
+      <div class="me-artists" id="me-artists"></div>
+    </div>
+    <div class="me-actions">
+      <a href="/mes-devis.html" class="btn-outline">Mes devis &amp; rendez-vous</a>
+      <a href="/messages.html" class="btn-outline">Mes messages</a>
+    </div>
+  </div>
+</section>
 
 <!-- ═══ CATÉGORIES — exploration par prestation (style Doctolib) ═══ -->
 <style>
@@ -891,9 +935,96 @@ document.addEventListener('DOMContentLoaded', () => { initHero(); initAnimations
 
 <!-- ═══ SUPABASE DATA ═══ -->
 <script type="module">
-import { supabase, esc, safeUrl } from '/js/supabase.js';
+import { supabase, esc, safeUrl, getProfile } from '/js/supabase.js';
 
 document.getElementById('search-date').min = new Date().toISOString().split('T')[0];
+
+// ── Home personnalisée : révélée uniquement si une session est active ──
+async function loadMe() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return; // visiteur non connecté : le bloc reste masqué
+
+  // Rôle : détermine l'expérience (cliente vs maquilleuse)
+  let profile = null;
+  try { profile = await getProfile(user.id); } catch (_) {}
+  const isArtist = profile?.role === 'artist';
+  const spaceHref = isArtist ? '/dashboard/artist.html' : '/mes-devis.html';
+
+  // Nav : refléter l'état connecté (sans toucher au reste de la barre)
+  const navAuth = document.getElementById('nav-auth');
+  if (navAuth) navAuth.innerHTML =
+    `<a href="${spaceHref}" class="hide-mobile">Mon espace</a>` +
+    '<a href="#" id="nav-logout" class="btn-nav btn">Déconnexion</a>';
+  const logout = document.getElementById('nav-logout');
+  if (logout) logout.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await supabase.auth.signOut().catch(()=>{});
+    location.reload();
+  });
+
+  // Salutation
+  const meta = user.user_metadata || {};
+  const raw = (profile?.full_name || meta.full_name || meta.name || meta.first_name || '').trim();
+  let first = (raw.split(' ')[0]) || (user.email || '').split('@')[0] || '';
+  if (first) first = first.charAt(0).toUpperCase() + first.slice(1);
+  document.getElementById('me-hello').textContent = first ? ('Bonjour ' + first) : 'Bon retour';
+  document.querySelector('#home-me .sub').textContent = isArtist
+    ? 'Vos demandes et votre activité en un coup d’œil.'
+    : 'Votre espace GlamBook en un coup d’œil.';
+  // Boutons d'action + libellé du bloc RDV selon le rôle
+  document.querySelector('#home-me .me-actions').innerHTML = isArtist
+    ? '<a href="/dashboard/artist.html" class="btn-outline">Mon tableau de bord</a><a href="/messages.html" class="btn-outline">Mes messages</a>'
+    : '<a href="/mes-devis.html" class="btn-outline">Mes devis &amp; rendez-vous</a><a href="/messages.html" class="btn-outline">Mes messages</a>';
+  const rdvTitle = document.querySelector('#me-rdv-wrap .blk-title');
+  if (rdvTitle) rdvTitle.textContent = isArtist ? 'Vos prochaines demandes' : 'Vos rendez-vous à venir';
+  document.getElementById('home-me').hidden = false;
+
+  // Rendez-vous / demandes à venir (RLS : les siennes uniquement)
+  try {
+    const { data } = await supabase.from('booking_requests')
+      .select('id,event_date,services_snapshot,status,artist_id,created_at')
+      .neq('status', 'declined')
+      .order('created_at', { ascending: false }).limit(10);
+    const all = data || [];
+    const yesterday = Date.now() - 86400000;
+    const upcoming = all
+      .filter(r => !r.event_date || new Date(r.event_date).getTime() >= yesterday)
+      .slice(0, 3);
+    if (upcoming.length) {
+      const LBL = { pending: ['En attente', 'b-pending'], quoted: ['Devis reçu', 'b-quoted'] };
+      document.getElementById('me-rdv').innerHTML = upcoming.map(r => {
+        const [lbl, cls] = LBL[r.status] || ['En cours', 'b-pending'];
+        const svc = (r.services_snapshot || []).map(s => s.name).join(', ') || 'Prestation';
+        const when = r.event_date
+          ? new Date(r.event_date).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })
+          : 'Date à définir';
+        return `<div class="rdv-item"><div class="r-main"><div class="r-svc">${esc(svc)}</div>`
+          + `<div class="r-meta">\u{1F4C5} ${esc(when)}</div></div>`
+          + `<span class="rdv-badge ${cls}">${lbl}</span></div>`;
+      }).join('');
+      document.getElementById('me-rdv-wrap').hidden = false;
+    }
+
+    // Vos maquilleuses : les artistes que vous avez contactées (cliente uniquement)
+    const ids = isArtist ? [] : [...new Set(all.map(r => r.artist_id).filter(Boolean))].slice(0, 4);
+    if (ids.length) {
+      const { data: arts } = await supabase.from('artists_public')
+        .select('id,slug,display_name,avatar_url,city').in('id', ids);
+      if (arts && arts.length) {
+        document.getElementById('me-artists').innerHTML = arts.map(a => {
+          const name = esc(a.display_name || 'Maquilleuse');
+          const href = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : `/artist.html?id=${encodeURIComponent(a.id)}`;
+          const av = safeUrl(a.avatar_url);
+          const avh = av ? `<img class="av" src="${av}" alt=""/>` : `<span class="av">${name[0] || '✦'}</span>`;
+          return `<a class="me-artist" href="${href}">${avh}`
+            + `<div style="min-width:0"><div class="nm">${name}</div>`
+            + `<div class="ct">\u{1F4CD} ${esc(a.city || 'France')}</div></div></a>`;
+        }).join('');
+        document.getElementById('me-artists-wrap').hidden = false;
+      }
+    }
+  } catch (e) { console.error('home-me', e); }
+}
 
 async function loadStats() {
   // Vue agrégée : bookings n'est plus lisible publiquement (RLS)
@@ -963,6 +1094,7 @@ window.doSearch = function() {
 
 loadStats();
 loadFeatured();
+loadMe();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 <script src="/js/pwa-install.js"></script>
