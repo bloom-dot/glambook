@@ -186,11 +186,12 @@
 
   function bubble(m) {
     const mine = m.sender_id === me.id;
-    return `<div class="msg ${mine ? 'me' : 'them'}">${esc(m.body)}<span class="t">${esc(timeShort(m.created_at))}</span></div>`;
+    return `<div class="msg ${mine ? 'me' : 'them'}" data-mid="${esc(m.id)}">${esc(m.body)}<span class="t">${esc(timeShort(m.created_at))}</span></div>`;
   }
 
   function appendMessage(m) {
     const box = $('msgs');
+    if (m.id && box.querySelector(`[data-mid="${m.id}"]`)) return; // déjà affiché (dédup temps réel)
     if (box.querySelector('.empty')) box.innerHTML = '';
     box.insertAdjacentHTML('beforeend', bubble(m));
     box.scrollTop = box.scrollHeight;
@@ -202,8 +203,8 @@
     if (!text || !activeId) return;
     inp.value = ''; inp.style.height = 'auto';
     try {
-      await sendMessage(activeId, text);
-      // le message s'affichera via le temps réel ; on l'ajoute aussi tout de suite
+      const msg = await sendMessage(activeId, text);
+      if (msg) appendMessage(msg);           // affichage immédiat (dédupliqué si le temps réel le renvoie)
     } catch (e) { console.error(e); showToast("Échec de l'envoi."); inp.value = text; }
   }
 
