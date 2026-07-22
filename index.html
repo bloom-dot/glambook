@@ -863,5 +863,18 @@ loadFeatured();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 <script src="/js/pwa-install.js"></script>
+<script>
+  // Filet de sécurité : si une animation d'apparition (GSAP) ne s'exécute pas,
+  // on rend visibles les éléments restés masqués pour ne jamais cacher le contenu.
+  (function(){
+    function reveal(){
+      document.querySelectorAll('.anim-up, .anim-scale').forEach(function(el){
+        if (parseFloat(getComputedStyle(el).opacity) === 0) { el.style.opacity='1'; el.style.transform='none'; }
+      });
+    }
+    window.addEventListener('load', function(){ setTimeout(reveal, 1400); });
+    setTimeout(reveal, 3000);
+  })();
+</script>
 </body>
 </html>

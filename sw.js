@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glambook-v7';
+const CACHE_NAME = 'glambook-v8';
 const ASSETS = [
   '/',
   '/index.html',
@@ -48,8 +48,8 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Network-first pour JS, cache-first pour le reste
-  if (url.pathname.endsWith('.js')) {
+  // Network-first pour JS et CSS (évite un thème/style figé en cache), cache-first pour le reste
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
     e.respondWith(
       fetch(e.request).then(res => {
         if (res.ok) {
