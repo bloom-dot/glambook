@@ -37,6 +37,49 @@
     .scan-actions { display:flex; gap:10px; flex-wrap:wrap; }
     .scan-actions .btn { flex:1; }
 
+    /* ── Guide de cadrage + auto-détection ── */
+    .fg { position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .3s ease; }
+    .cam-wrap.cam-on .fg { opacity:1; }
+    .fg-oval { position:absolute; inset:0; width:100%; height:100%; }
+    .fg-oval ellipse { fill:none; stroke:var(--rose); stroke-width:3; stroke-dasharray:10 12; stroke-linecap:round;
+      filter:drop-shadow(0 0 6px rgba(232,84,122,.5)); transform-origin:50% 50%;
+      animation:fg-rot 6s linear infinite, fg-pulse 2s ease-in-out infinite; transition:stroke .4s ease, stroke-dasharray .4s ease; }
+    @keyframes fg-rot { to { stroke-dashoffset:-88; } }
+    @keyframes fg-pulse { 0%,100%{ opacity:.75; } 50%{ opacity:1; } }
+    .fg-corner { position:absolute; width:20px; height:20px; border:3px solid rgba(255,255,255,.55); transition:border-color .4s ease, transform .4s ease; }
+    .fg-corner.tl { top:12px; left:12px; border-right:0; border-bottom:0; border-radius:6px 0 0 0; }
+    .fg-corner.tr { top:12px; right:12px; border-left:0; border-bottom:0; border-radius:0 6px 0 0; }
+    .fg-corner.bl { bottom:12px; left:12px; border-right:0; border-top:0; border-radius:0 0 0 6px; }
+    .fg-corner.br { bottom:12px; right:12px; border-left:0; border-top:0; border-radius:0 0 6px 0; }
+    .fg-scan { position:absolute; left:8%; right:8%; height:2px; top:14%;
+      background:linear-gradient(90deg,transparent,var(--or),transparent); box-shadow:0 0 12px 2px rgba(212,175,55,.5);
+      animation:fg-sweep 2.4s ease-in-out infinite; }
+    @keyframes fg-sweep { 0%{ top:14%; opacity:0; } 15%{ opacity:1; } 85%{ opacity:1; } 100%{ top:86%; opacity:0; } }
+    .fg-check { position:absolute; left:50%; top:46%; width:60px; height:60px;
+      transform:translate(-50%,-50%) scale(.4); opacity:0; transition:opacity .3s ease, transform .3s cubic-bezier(.2,1.4,.4,1); }
+    .fg-check circle { fill:none; stroke:#22B573; stroke-width:3; opacity:.25; }
+    .fg-check path { fill:none; stroke:#22B573; stroke-width:4; stroke-linecap:round; stroke-linejoin:round;
+      stroke-dasharray:44; stroke-dashoffset:44; transition:stroke-dashoffset .4s ease .1s; }
+    .fg-hint { position:absolute; left:50%; bottom:12px; transform:translateX(-50%); display:flex; align-items:center; gap:7px;
+      padding:7px 13px; border-radius:999px; background:rgba(17,17,17,.6); color:#fff; font-size:.76rem; font-weight:700;
+      white-space:nowrap; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); transition:background .4s ease; }
+    .fg-hint .dot { width:7px; height:7px; border-radius:50%; background:var(--rose); animation:fg-blink 1.2s ease-in-out infinite; }
+    @keyframes fg-blink { 0%,100%{ opacity:.35; } 50%{ opacity:1; } }
+    /* état détecté */
+    .cam-wrap.detected .fg-oval ellipse { stroke:#22B573; stroke-dasharray:0; opacity:1; filter:drop-shadow(0 0 8px rgba(34,181,115,.55)); animation:none; }
+    .cam-wrap.detected .fg-scan { opacity:0; animation:none; }
+    .cam-wrap.detected .fg-corner { border-color:#22B573; transform:scale(.92); }
+    .cam-wrap.detected .fg-check { opacity:1; transform:translate(-50%,-50%) scale(1); }
+    .cam-wrap.detected .fg-check path { stroke-dashoffset:0; }
+    .cam-wrap.detected .fg-hint { background:rgba(27,138,75,.85); }
+    .cam-wrap.detected .fg-hint .dot { background:#fff; animation:none; }
+    /* sans détection auto : garder le repère, masquer le balayage */
+    .cam-wrap.no-detect .fg-scan { display:none; }
+    .fg-note { font-size:.74rem; color:var(--gris); text-align:center; margin:0 0 10px; }
+    @media (prefers-reduced-motion: reduce) {
+      .fg-oval ellipse, .fg-scan, .fg-hint .dot { animation:none !important; }
+    }
+
     .diag { }
     .diag-badges { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
     .badge2 { display:inline-flex; align-items:center; gap:6px; background:var(--rose-cl); color:var(--rose-f); font-weight:700; font-size:.8rem; padding:6px 12px; border-radius:999px; }
@@ -104,6 +147,16 @@
         <div class="cam-placeholder" id="camPlaceholder">Activez la caméra ou importez une photo</div>
         <video id="video" autoplay playsinline class="hide"></video>
         <img id="shot" class="hide" alt="Aperçu"/>
+
+        <!-- Guide de cadrage (auto-détection du visage) -->
+        <div class="fg" id="faceGuide" aria-hidden="true">
+          <span class="fg-corner tl"></span><span class="fg-corner tr"></span>
+          <span class="fg-corner bl"></span><span class="fg-corner br"></span>
+          <svg class="fg-oval" viewBox="0 0 200 260"><ellipse cx="100" cy="130" rx="78" ry="104"/></svg>
+          <div class="fg-scan"></div>
+          <svg class="fg-check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27 l7 7 l15 -16"/></svg>
+          <div class="fg-hint"><span class="dot"></span><span id="camHintTxt">Centrez votre visage</span></div>
+        </div>
       </div>
       <div class="scan-actions" style="margin-bottom:10px;">
         <button class="btn btn-secondary" id="btnCam">📷 Caméra</button>
@@ -111,6 +164,7 @@
         <label class="btn btn-ghost" for="fileInput" style="margin:0;">🖼️ Importer</label>
         <input id="fileInput" type="file" accept="image/*" capture="user" class="hide"/>
       </div>
+      <p class="fg-note" id="fgNote"></p>
       <button class="btn btn-ghost btn-sm hide" id="btnRetake">↺ Reprendre</button>
       <canvas id="canvas" class="hide"></canvas>
 
@@ -229,6 +283,9 @@
   $('backB').onclick = () => goto('b');
 
   // ── ÉTAPE B : caméra / upload ──
+  const supportsFD = 'FaceDetector' in window;   // API navigateur (Chrome/Android)
+  let faceDetector = null, detectTimer = null, stableCount = 0, autoShot = false;
+
   $('btnCam').onclick = async () => {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
@@ -236,14 +293,71 @@
       v.srcObject = stream; v.classList.remove('hide');
       $('camPlaceholder').classList.add('hide'); $('shot').classList.add('hide');
       $('btnCapture').style.display = ''; $('btnCapture').classList.remove('hide');
+      startDetection();
     } catch (e) { console.error(e); showToast("Impossible d'accéder à la caméra. Importez une photo.", 'error'); }
   };
 
-  $('btnCapture').onclick = () => {
+  $('btnCapture').onclick = () => captureNow();
+
+  function captureNow() {
     const v = $('video');
-    const data = frameToDataUrl(v, v.videoWidth, v.videoHeight);
-    usePhoto(data);
-  };
+    if (!v.videoWidth) return;
+    usePhoto(frameToDataUrl(v, v.videoWidth, v.videoHeight));
+  }
+
+  // Démarre l'auto-détection du visage (ou repli visuel si non supporté)
+  function startDetection() {
+    const cw = $('camWrap');
+    cw.classList.add('cam-on'); cw.classList.remove('detected');
+    stableCount = 0; autoShot = false;
+    if (!supportsFD) {
+      cw.classList.add('no-detect');
+      setHint('Cadrez votre visage dans l’ovale');
+      $('fgNote').textContent = 'Placez votre visage dans l’ovale, puis appuyez sur « Prendre la photo ».';
+      return;
+    }
+    cw.classList.remove('no-detect');
+    try { faceDetector = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 1 }); }
+    catch { cw.classList.add('no-detect'); return; }
+    $('fgNote').textContent = 'Détection automatique : la photo se prend seule une fois le visage bien cadré.';
+    detectTimer = setInterval(runDetect, 350);
+  }
+
+  async function runDetect() {
+    const v = $('video');
+    if (!v.videoWidth || !faceDetector) return;
+    let faces = [];
+    try { faces = await faceDetector.detect(v); } catch { return; }
+    const ok = faces.length && wellFramed(faces[0].boundingBox, v.videoWidth, v.videoHeight);
+    $('camWrap').classList.toggle('detected', ok);
+    setHint(ok ? 'Visage bien cadré ✓' : 'Centrez votre visage dans l’ovale');
+    if (ok) {
+      stableCount++;
+      if (stableCount >= 5 && !autoShot) {   // ~1,7 s stable → capture auto
+        autoShot = true;
+        setHint('Parfait, on prend la photo…');
+        setTimeout(captureNow, 400);
+      }
+    } else {
+      stableCount = 0;
+    }
+  }
+
+  // Visage suffisamment centré et grand dans le cadre ?
+  function wellFramed(b, vw, vh) {
+    const cx = (b.x + b.width / 2) / vw;
+    const cy = (b.y + b.height / 2) / vh;
+    const size = b.width / vw;
+    return cx > 0.32 && cx < 0.68 && cy > 0.28 && cy < 0.72 && size > 0.22;
+  }
+
+  function stopDetection() {
+    if (detectTimer) { clearInterval(detectTimer); detectTimer = null; }
+    faceDetector = null; stableCount = 0; autoShot = false;
+    const cw = $('camWrap'); cw.classList.remove('cam-on', 'detected', 'no-detect');
+  }
+
+  function setHint(txt) { const el = $('camHintTxt'); if (el) el.textContent = txt; }
 
   $('fileInput').onchange = (e) => {
     const file = e.target.files?.[0]; if (!file) return;
@@ -259,6 +373,7 @@
     $('diagArea').classList.add('hide'); $('diagResult').classList.add('hide');
     $('btnRetake').classList.add('hide'); $('toC').disabled = true;
     $('camPlaceholder').classList.remove('hide');
+    $('fgNote').textContent = '';
   };
 
   // Réduit l'image à max 768px et renvoie une dataURL JPEG
@@ -311,7 +426,11 @@
       <div class="disclaimer">Diagnostic cosmétique généré par IA, à titre indicatif — ne constitue pas un avis médical.</div>`;
   }
 
-  function stopCam() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
+  function stopCam() {
+    stopDetection();
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    $('btnCapture').style.display = 'none';
+  }
 
   // ── ÉTAPE C : récapitulatif ──
   function buildRecap() {
