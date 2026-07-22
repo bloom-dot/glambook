@@ -152,7 +152,7 @@
   <div class="modal-bg" id="modal">
     <div class="modal">
       <h3>Devis envoyé ✨</h3>
-      <p>Partagez ce lien unique avec votre cliente. Elle pourra consulter le devis et le signer depuis son téléphone.</p>
+      <p id="modalMsg">Partagez ce lien unique avec votre cliente. Elle pourra consulter le devis et le signer depuis son téléphone.</p>
       <div class="link-box">
         <input id="shareLink" readonly/>
         <button class="btn btn-primary btn-sm" id="btnCopy">Copier</button>
@@ -165,7 +165,7 @@
 
   <script type="module">
     import { emptyQuote, computeTotals, euros, parseEuros, lineTotalCents, validateForSend, generateQuoteNumber } from '/js/devis/model.js';
-    import { saveQuote, markAsSent, signatureUrl, getMyArtistId } from '/js/devis/store.js';
+    import { saveQuote, markAsSent, emailQuote, signatureUrl, getMyArtistId } from '/js/devis/store.js';
     import { previewQuotePdf } from '/js/devis/pdf.js';
     import { getCurrentUser, getProfile } from '/js/supabase.js';
     import { showToast, esc } from '/js/utils.js';
@@ -262,15 +262,39 @@
     $('btnSend').onclick = async () => {
       const errs = validateForSend(quote);
       if (errs.length) { showToast(errs[0], 'error'); return; }
+      const btn = $('btnSend');
+      btn.disabled = true; btn.textContent = 'Envoi…';
       try {
         if (!quote.id) await persist();
-        const { shareToken } = await markAsSent(quote.id);
-        const url = signatureUrl(shareToken);
+        let url, emailed = false;
+        try {
+          // Envoi email via la fonction serverless (marque aussi "sent" côté serveur)
+          const r = await emailQuote(quote.id);
+          url = r.link || signatureUrl(await getShareTokenSafe());
+          emailed = !!r.emailed;
+        } catch (apiErr) {
+          // Repli : pas d'API/email dispo → on marque "sent" côté client et on partage le lien
+          console.warn('send-quote indisponible, repli lien manuel:', apiErr);
+          const { shareToken } = await markAsSent(quote.id);
+          url = signatureUrl(shareToken);
+        }
         $('shareLink').value = url;
+        $('modalMsg').textContent = emailed
+          ? `Un email a été envoyé à ${quote.client.email}. Vous pouvez aussi partager ce lien :`
+          : `Partagez ce lien unique avec votre cliente. Elle pourra consulter le devis et le signer depuis son téléphone.`;
         $('modal').classList.add('show');
         $('quoteNo').textContent = `${quote.quoteNumber} · Envoyé`;
-      } catch (e) { console.error(e); showToast(e.message || "Erreur lors de l'envoi.", 'error'); }
+      } catch (e) {
+        console.error(e); showToast(e.message || "Erreur lors de l'envoi.", 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Envoyer à la cliente';
+      }
     };
+
+    async function getShareTokenSafe() {
+      try { const { getShareToken } = await import('/js/devis/store.js'); return await getShareToken(quote.id); }
+      catch { return ''; }
+    }
 
     $('btnCopy').onclick = async () => {
       try { await navigator.clipboard.writeText($('shareLink').value); showToast('Lien copié !'); }

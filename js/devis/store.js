@@ -90,6 +90,25 @@ export function signatureUrl(token) {
   return `${location.origin}/signature.html?t=${encodeURIComponent(token)}`;
 }
 
+/**
+ * Envoie le devis à la cliente par email via la fonction serverless /api/send-quote.
+ * Marque aussi le devis "sent" côté serveur.
+ * @returns {Promise<{ ok:boolean, emailed:boolean, link?:string, error?:string }>}
+ */
+export async function emailQuote(quoteId) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const jwt = session?.access_token;
+  if (!jwt) throw new Error('Non connecté.');
+  const res = await fetch('/api/send-quote', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+    body: JSON.stringify({ quoteId }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Échec de l'envoi.");
+  return data;
+}
+
 // ── Côté PUBLIC (page de signature, cliente non authentifiée) ──
 
 /** Charge un devis via le RPC sécurisé get_quote_by_token. */
