@@ -741,10 +741,11 @@
 
 <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
-<!-- ═══ THREE.JS + GSAP — defer : ne bloque plus le premier rendu ═══ -->
+<!-- ═══ SCRIPTS — WebGL et GSAP retirés (hero photo + contenu visible d'emblée) ═══ -->
 <!-- three.js retiré : le hero est désormais une photo (plus de WebGL) -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- GSAP retiré : les animations d'apparition sont désactivées (contenu visible
+     immédiatement via .anim-up{opacity:1!important}). Le ticker rAF permanent de
+     GSAP alourdissait la page inutilement. -->
 
 <script>
 // Appareils modestes / reduced-motion : gradient CSS au lieu du WebGL
@@ -889,48 +890,9 @@ function initHero() {
   });
 }
 
-// ═══ GSAP SCROLL ANIMATIONS ═══
-function initAnimations() {
-  if (!window.gsap || !window.ScrollTrigger) {
-    // CDN indisponible : rendre tout visible immédiatement
-    document.querySelectorAll('.anim-up, .anim-scale').forEach(el => {
-      el.style.opacity = '1'; el.style.transform = 'none';
-    });
-    return;
-  }
-  gsap.registerPlugin(ScrollTrigger);
-
-// Hero entrance
-gsap.timeline({ defaults: { ease:'power3.out' } })
-  .to('.hero-content .anim-up:nth-child(1)', { opacity:1, y:0, duration:.7 }, .2)
-  .to('.hero-content .anim-up:nth-child(2)', { opacity:1, y:0, duration:.9 }, .35)
-  .to('.hero-content .anim-up:nth-child(3)', { opacity:1, y:0, duration:.7 }, .6)
-  .to('.hero-content .anim-up:nth-child(4)', { opacity:1, y:0, duration:.7 }, .8);
-
-// Scroll-triggered elements
-gsap.utils.toArray('.cta-card.anim-scale').forEach(el => {
-  gsap.to(el, { opacity:1, scale:1, y:0, duration:.8, ease:'power3.out',
-    scrollTrigger: { trigger:el, start:'top 82%', toggleActions:'play none none reverse' }
-  });
-});
-
-gsap.utils.toArray('.anim-up').forEach(el => {
-  if (el.closest('.hero-content')) return;
-  gsap.to(el, { opacity:1, y:0, duration:.7, ease:'power3.out',
-    scrollTrigger: { trigger:el, start:'top 85%', toggleActions:'play none none reverse' }
-  });
-});
-
-// Stagger step cards
-gsap.utils.toArray('.step-card').forEach((c,i) => {
-  gsap.to(c, { opacity:1, y:0, duration:.6, delay:i*.1, ease:'power3.out',
-    scrollTrigger: { trigger:c, start:'top 82%', toggleActions:'play none none reverse' }
-  });
-});
-}
-
-// Les scripts CDN sont en defer : ils sont chargés au DOMContentLoaded
-document.addEventListener('DOMContentLoaded', () => { initHero(); initAnimations(); });
+// Animations d'apparition supprimées (GSAP retiré). Le contenu est visible
+// immédiatement — voir .anim-up / .anim-scale { opacity:1 !important } dans le <style>.
+document.addEventListener('DOMContentLoaded', () => { initHero(); });
 </script>
 
 <!-- ═══ SUPABASE DATA ═══ -->
@@ -1067,15 +1029,7 @@ async function loadFeatured() {
       <div class="mt"><div><span class="stars">${stars}</span> <span style="font-size:.72rem;color:rgba(255,255,255,.4);">(${parseInt(a.review_count)||0})</span></div><span class="pr">À partir de ${parseInt(a.price_from)||'–'}€</span></div></div></a>`;
   }).join('');
 
-  if (window.gsap && window.ScrollTrigger) {
-    gsap.utils.toArray('.a-card.anim-up').forEach((c,i) => {
-      gsap.to(c,{ opacity:1, y:0, duration:.6, delay:i*.08, ease:'power3.out',
-        scrollTrigger:{ trigger:c, start:'top 85%', toggleActions:'play none none reverse' }
-      });
-    });
-  } else {
-    document.querySelectorAll('.a-card.anim-up').forEach(el => { el.style.opacity='1'; el.style.transform='none'; });
-  }
+  document.querySelectorAll('.a-card.anim-up').forEach(el => { el.style.opacity='1'; el.style.transform='none'; });
 }
 
 window.doSearch = function() {
