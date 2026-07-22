@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Administration — GlamBook</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    body { background: var(--gris-cl); }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 22px 16px 90px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
+    .topbar .logo { font-size:1.3rem; font-weight:900; color:var(--rose); text-decoration:none; letter-spacing:-.03em; }
+    .topbar .logo span { color:var(--or); }
+    .topbar .badge-admin { background:var(--noir); color:#fff; font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:20px; margin-left:8px; }
+    .tabs { display:flex; gap:2px; background:#F3F4F6; border-radius:var(--radius-sm); padding:4px; margin-bottom:22px; max-width:420px; }
+    .tab { flex:1; text-align:center; padding:10px 8px; font-size:.85rem; font-weight:600; color:var(--gris); cursor:pointer; border-radius:var(--radius-xs); }
+    .tab.active { background:#fff; color:var(--noir); box-shadow:var(--shadow); }
+
+    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+    .stat { background:#fff; border:1px solid var(--bord); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); }
+    .stat .n { font-size:1.6rem; font-weight:900; color:var(--rose); letter-spacing:-.02em; }
+    .stat .l { font-size:.72rem; color:var(--gris); font-weight:600; text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
+
+    .row { background:#fff; border:1px solid var(--bord); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); }
+    .row .head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .nm { font-weight:700; font-size:.92rem; }
+    .meta { font-size:.78rem; color:var(--gris); margin-top:2px; }
+    .tag { font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:20px; }
+    .t-yes { background:#ECFDF5; color:#065F46; } .t-no { background:#F3F4F6; color:var(--gris); }
+    .acts { display:flex; gap:6px; flex-wrap:wrap; }
+    .thread { margin-top:10px; border-top:1px solid var(--bord); padding-top:10px; display:flex; flex-direction:column; gap:6px; }
+    .m { font-size:.85rem; padding:7px 11px; border-radius:10px; max-width:80%; }
+    .m.a { background:var(--rose-cl); align-self:flex-start; } .m.b { background:#EEF2FF; align-self:flex-end; }
+    .reason { background:#FEF3C7; border-radius:8px; padding:6px 10px; font-size:.82rem; margin-top:6px; }
+    .resolved { opacity:.55; }
+    .empty { color:var(--gris); text-align:center; padding:26px; font-size:.86rem; }
+    .hide { display:none !important; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .center { text-align:center; padding:40px; color:var(--gris); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="gate" class="center">Vérification des droits…</div>
+
+    <div id="app" class="hide">
+      <div class="topbar">
+        <div><a href="/" class="logo">Glam<span>Book</span></a><span class="badge-admin">ADMIN</span></div>
+        <a href="/dashboard/artist.html" style="font-size:.85rem;color:var(--gris);text-decoration:none;">← Mon tableau de bord</a>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="stats">Statistiques</div>
+        <div class="tab" data-tab="artists">Artistes</div>
+        <div class="tab" data-tab="reports">Signalements <span id="rep-count"></span></div>
+      </div>
+
+      <div id="tab-stats"><div class="stats" id="stats"></div></div>
+      <div id="tab-artists" class="hide"><div id="artists"></div></div>
+      <div id="tab-reports" class="hide"><div id="reports"></div></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { supabase, getCurrentUser } from '/js/supabase.js';
+    import { showToast, esc } from '/js/utils.js';
+
+    const $ = (id) => document.getElementById(id);
+    const rpc = async (fn, args) => { const { data, error } = await supabase.rpc(fn, args||{}); if (error) throw error; return data; };
+    const fmt = (d) => d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '';
+
+    // Garde d'accès
+    const user = await getCurrentUser();
+    if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname)}`; }
+    let admin = false;
+    try { admin = await rpc('is_admin'); } catch {}
+    if (!admin) { $('gate').innerHTML = 'Accès réservé aux administrateurs. <a href="/">Retour</a>'; }
+    else { $('gate').classList.add('hide'); $('app').classList.remove('hide'); init(); }
+
+    // Onglets
+    document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const name = t.getAttribute('data-tab');
+      ['stats','artists','reports'].forEach(n => $('tab-'+n).classList.toggle('hide', n !== name));
+    });
+
+    async function init() { loadStats(); loadArtists(); loadReports(); }
+
+    async function loadStats() {
+      try {
+        const s = await rpc('admin_stats');
+        const cards = [
+          ['Utilisateurs', s.users], ['Artistes', s.artists], ['Artistes vérifiés', s.artists_verified],
+          ['Artistes actifs', s.artists_active], ['Réservations', s.bookings], ['Devis', s.quotes],
+          ['Devis signés', s.quotes_signed], ['Demandes', s.requests], ['Messages', s.messages],
+          ['Signalements ouverts', s.reports_open],
+        ];
+        $('stats').innerHTML = cards.map(([l,n]) => `<div class="stat"><div class="n">${esc(n ?? 0)}</div><div class="l">${esc(l)}</div></div>`).join('');
+      } catch (e) { console.error(e); $('stats').innerHTML = '<div class="empty">Erreur de chargement.</div>'; }
+    }
+
+    async function loadArtists() {
+      try {
+        const rows = await rpc('admin_list_artists');
+        $('artists').innerHTML = rows.length ? rows.map(a => `
+          <div class="row" data-id="${esc(a.id)}">
+            <div class="head">
+              <div>
+                <div class="nm">${esc(a.full_name)} ${a.is_verified?'<span class="tag t-yes">✓ vérifié</span>':'<span class="tag t-no">non vérifié</span>'} ${a.is_active?'<span class="tag t-yes">actif</span>':'<span class="tag t-no">inactif</span>'}</div>
+                <div class="meta">${esc(a.email||'')} · ${esc(a.city||'—')} · ${esc(a.review_count||0)} avis · inscrit le ${esc(fmt(a.created_at))}</div>
+              </div>
+              <div class="acts">
+                <button class="btn btn-ghost btn-sm" data-verify="${a.is_verified?'0':'1'}">${a.is_verified?'Retirer vérif.':'✓ Vérifier'}</button>
+                <button class="btn btn-ghost btn-sm" data-active="${a.is_active?'0':'1'}">${a.is_active?'Désactiver':'Activer'}</button>
+              </div>
+            </div>
+          </div>`).join('') : '<div class="empty">Aucun artiste.</div>';
+        $('artists').querySelectorAll('.row').forEach(row => {
+          const id = row.getAttribute('data-id');
+          row.querySelector('[data-verify]').onclick = async (e) => {
+            try { await rpc('admin_set_artist_verified', { p_artist:id, p_val: e.target.getAttribute('data-verify')==='1' }); showToast('Mis à jour.'); loadArtists(); loadStats(); }
+            catch (err) { console.error(err); showToast('Action impossible.'); }
+          };
+          row.querySelector('[data-active]').onclick = async (e) => {
+            try { await rpc('admin_set_artist_active', { p_artist:id, p_val: e.target.getAttribute('data-active')==='1' }); showToast('Mis à jour.'); loadArtists(); loadStats(); }
+            catch (err) { console.error(err); showToast('Action impossible.'); }
+          };
+        });
+      } catch (e) { console.error(e); $('artists').innerHTML = '<div class="empty">Erreur de chargement.</div>'; }
+    }
+
+    async function loadReports() {
+      try {
+        const rows = await rpc('admin_list_reports');
+        const open = rows.filter(r => !r.resolved_at).length;
+        $('rep-count').textContent = open ? `(${open})` : '';
+        $('reports').innerHTML = rows.length ? rows.map(r => `
+          <div class="row ${r.resolved_at?'resolved':''}" data-id="${esc(r.id)}" data-conv="${esc(r.conversation_id)}">
+            <div class="head">
+              <div>
+                <div class="nm">${esc(r.artist_name)} ↔ ${esc(r.client_name)}</div>
+                <div class="meta">Signalé par ${esc(r.reporter_name)} · ${esc(fmt(r.created_at))} ${r.resolved_at?'· ✓ résolu':''}</div>
+              </div>
+              <div class="acts">
+                <button class="btn btn-ghost btn-sm" data-view>Voir le fil</button>
+                ${r.message_id?'<button class="btn btn-ghost btn-sm" data-delmsg>Supprimer le message</button>':''}
+                <button class="btn btn-ghost btn-sm" data-block>Bloquer</button>
+                ${r.resolved_at?'':'<button class="btn btn-primary btn-sm" data-resolve>Résoudre</button>'}
+              </div>
+            </div>
+            ${r.reason?`<div class="reason">Motif : ${esc(r.reason)}</div>`:''}
+            ${r.message_body?`<div class="reason" style="background:#FEE2E2;">Message signalé : « ${esc(r.message_body)} »</div>`:''}
+            <div class="thread hide" data-thread></div>
+          </div>`).join('') : '<div class="empty">Aucun signalement.</div>';
+
+        $('reports').querySelectorAll('.row').forEach(row => {
+          const id = row.getAttribute('data-id'); const conv = row.getAttribute('data-conv');
+          const r = rows.find(x => x.id === id);
+          row.querySelector('[data-view]').onclick = async () => {
+            const th = row.querySelector('[data-thread]');
+            if (!th.classList.contains('hide')) { th.classList.add('hide'); return; }
+            try {
+              const msgs = await rpc('admin_conversation_messages', { p_conv: conv });
+              th.innerHTML = msgs.length ? msgs.map((m,i) => `<div class="m ${m.sender_id===r.reporter_id?'b':'a'}">${esc(m.body)}</div>`).join('') : '<div class="empty">Aucun message.</div>';
+              th.classList.remove('hide');
+            } catch (e) { console.error(e); showToast('Impossible de charger le fil.'); }
+          };
+          row.querySelector('[data-resolve]')?.addEventListener('click', async () => {
+            try { await rpc('admin_resolve_report', { p_report:id }); showToast('Résolu.'); loadReports(); loadStats(); } catch(e){ console.error(e); showToast('Action impossible.'); }
+          });
+          row.querySelector('[data-delmsg]')?.addEventListener('click', async () => {
+            if (!confirm('Supprimer définitivement ce message ?')) return;
+            try { await rpc('admin_delete_message', { p_msg: r.message_id }); showToast('Message supprimé.'); loadReports(); } catch(e){ console.error(e); showToast('Action impossible.'); }
+          });
+          row.querySelector('[data-block]')?.addEventListener('click', async () => {
+            if (!confirm('Bloquer cette conversation ?')) return;
+            try { await rpc('admin_block_conversation', { p_conv: conv }); showToast('Conversation bloquée.'); } catch(e){ console.error(e); showToast('Action impossible.'); }
+          });
+        });
+      } catch (e) { console.error(e); $('reports').innerHTML = '<div class="empty">Erreur de chargement.</div>'; }
+    }
+  </script>
+</body>
+</html>

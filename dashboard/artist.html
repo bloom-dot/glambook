@@ -202,6 +202,7 @@
     <a class="nav-item" onclick="showTab('espace',this)">🎨 Mon espace</a>
     <div class="nav-section">Compte</div>
     <a class="nav-item" id="link-public-profile" href="/artists.html" target="_blank">👁️ Voir mon profil public</a>
+    <a class="nav-item" id="nav-admin" href="/dashboard/admin.html" style="display:none;">🛡️ Administration</a>
     <a class="nav-item" id="btn-logout" style="color:rgba(255,100,100,.7);">⬅️ Déconnexion</a>
   </aside>
 
@@ -534,6 +535,7 @@ async function init() {
     await supabase.from('profiles').insert({ user_id: user.id, full_name: name, role: 'artist' }).select().maybeSingle();
   }
   profileData = profile;
+  if (profile?.role === 'admin') { const na = document.getElementById('nav-admin'); if (na) na.style.display = 'flex'; }
   const displayName = artist?.display_name || profile?.full_name || user.email;
   document.getElementById('sb-name').textContent   = displayName;
   document.getElementById('dash-greeting').textContent = `Bonjour ${displayName.split(' ')[0]} !`;
