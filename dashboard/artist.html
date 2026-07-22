@@ -7,6 +7,8 @@
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
+  <script>try{if((localStorage.getItem('gb-theme')||'dark')==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+  <script defer src="/js/theme.js"></script>
   <style>
     body { background: var(--gris-cl); }
     .dash-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
@@ -78,7 +80,7 @@
     .stat-card .lbl { font-size: .72rem; color: var(--gris); font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
 
     /* Tabs */
-    .tabs { display: flex; gap: 2px; background: #F3F4F6; border-radius: var(--radius-sm); padding: 4px; margin-bottom: 24px; }
+    .tabs { display: flex; gap: 2px; background:var(--surface-2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 24px; }
     .tab {
       padding: 10px 18px; font-size: .82rem; font-weight: 600; color: var(--gris);
       cursor: pointer; border-radius: var(--radius-xs); transition: all var(--transition);
@@ -103,13 +105,13 @@
     .status-confirmed { background: #ECFDF5; color: #065F46; }
     .status-pending   { background: #FFFBEB; color: #92400E; }
     .status-cancelled { background: #FEF2F2; color: #991B1B; }
-    .chip-d { display:inline-block; background:#fff; border:1px solid var(--bord); border-radius:8px; padding:4px 10px; font-size:.78rem; margin:0 6px 6px 0; }
+    .chip-d { display:inline-block; background:var(--blanc); border:1px solid var(--bord); border-radius:8px; padding:4px 10px; font-size:.78rem; margin:0 6px 6px 0; }
     /* Récurrence hebdomadaire */
     .wk-row { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--gris-cl); flex-wrap:wrap; }
     .wk-row:last-child { border-bottom:none; }
     .wk-name { font-weight:700; font-size:.85rem; width:82px; flex-shrink:0; }
     .wk-slots { display:flex; flex-wrap:wrap; gap:5px; flex:1; align-items:center; }
-    .wk-chip { font-size:.74rem; padding:4px 9px; border-radius:999px; border:1.5px solid var(--bord); background:#fff; color:var(--gris); cursor:pointer; transition:all .15s; }
+    .wk-chip { font-size:.74rem; padding:4px 9px; border-radius:999px; border:1.5px solid var(--bord); background:var(--blanc); color:var(--gris); cursor:pointer; transition:all .15s; }
     .wk-chip:hover { border-color:var(--rose); }
     .wk-chip.on { background:var(--rose); border-color:var(--rose); color:#fff; }
     .wk-quick { font-size:.7rem; color:var(--gris); cursor:pointer; background:none; border:none; text-decoration:underline; padding:2px 4px; }
@@ -144,7 +146,7 @@
     .palette-chip .chip-name { font-size:.68rem; font-weight:700; }
     .section-toggle {
       display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px; background:#fff; border-radius:10px; margin-bottom:8px;
+      padding:14px 16px; background:var(--blanc); border-radius:10px; margin-bottom:8px;
       box-shadow:0 1px 4px rgba(0,0,0,.06);
     }
     .section-toggle .toggle-label { font-size:.9rem; font-weight:600; }
@@ -152,7 +154,7 @@
     .switch { position:relative; display:inline-block; width:42px; height:24px; }
     .switch input { opacity:0; width:0; height:0; }
     .slider { position:absolute; cursor:pointer; inset:0; background:#ccc; border-radius:24px; transition:.3s; }
-    .slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s; }
+    .slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:var(--blanc); border-radius:50%; transition:.3s; }
     input:checked + .slider { background:var(--rose); }
     input:checked + .slider:before { transform:translateX(18px); }
 
@@ -162,7 +164,7 @@
     }
     .preview-cover { height:80px; display:flex; align-items:flex-end; padding:8px 12px; }
     .preview-avatar { width:40px; height:40px; border-radius:50%; border:2px solid #fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.9rem; color:#fff; margin-top:20px; }
-    .preview-body { background:#fff; padding:10px 12px; }
+    .preview-body { background:var(--blanc); padding:10px 12px; }
     .preview-name { font-weight:800; font-size:.85rem; margin-bottom:2px; }
     .preview-btn { display:inline-block; padding:6px 14px; border-radius:8px; font-size:.72rem; font-weight:700; color:#fff; margin-top:8px; }
 
@@ -244,7 +246,7 @@
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Gérer mes disponibilités</h2>
 
       <!-- Récurrence hebdomadaire -->
-      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
+      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
         <div style="margin-bottom:10px;">
           <strong style="font-size:.95rem;">🔁 Récurrence hebdomadaire</strong>
           <div style="font-size:.8rem;color:var(--gris);margin-top:2px;">Définissez vos créneaux type pour chaque jour, puis appliquez-les sur plusieurs semaines d'un coup.</div>
@@ -265,7 +267,7 @@
         <p style="font-size:.74rem;color:var(--gris);margin-top:10px;">💡 Laissez un jour sans créneau pour être indisponible ce jour-là (ex. tous les dimanches). Les créneaux déjà réservés ne sont jamais supprimés.</p>
       </div>
 
-      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
+      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
           <strong id="cal-month-label"></strong>
           <div style="display:flex;gap:8px;">
@@ -342,14 +344,14 @@
         <div class="field">
           <label>Spécialités</label>
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="specialties-check">
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Mariage" class="spec-cb"/> Mariage</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Soirée" class="spec-cb"/> Soirée</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Quotidien" class="spec-cb"/> Quotidien</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Éditorial / Shooting" class="spec-cb"/> Éditorial / Shooting</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Scène / Spectacle" class="spec-cb"/> Scène / Spectacle</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Coiffure" class="spec-cb"/> Coiffure</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Ongles" class="spec-cb"/> Ongles</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:#F3F4F6;padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Airbrush" class="spec-cb"/> Airbrush</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Mariage" class="spec-cb"/> Mariage</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Soirée" class="spec-cb"/> Soirée</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Quotidien" class="spec-cb"/> Quotidien</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Éditorial / Shooting" class="spec-cb"/> Éditorial / Shooting</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Scène / Spectacle" class="spec-cb"/> Scène / Spectacle</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Coiffure" class="spec-cb"/> Coiffure</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Ongles" class="spec-cb"/> Ongles</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Airbrush" class="spec-cb"/> Airbrush</label>
           </div>
         </div>
         <button class="btn btn-primary" id="btn-save-profile">Enregistrer le profil</button>
@@ -378,7 +380,7 @@
     <div id="tab-services" style="display:none;">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Mes prestations</h2>
       <div id="services-list-dash"></div>
-      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-top:16px;">
+      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-top:16px;">
         <p style="font-weight:800;margin-bottom:14px;">Ajouter une prestation</p>
         <div class="form-row">
           <div class="field"><label>Nom</label><input type="text" id="svc-name" placeholder="Maquillage mariée"/></div>
@@ -417,13 +419,13 @@
       </div>
 
       <!-- Palette -->
-      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
+      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
         <p style="font-weight:800;margin-bottom:14px;">🎨 Palette de couleurs</p>
         <div class="palette-grid" id="palette-grid"></div>
       </div>
 
       <!-- Photo de couverture -->
-      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
+      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
         <p style="font-weight:800;margin-bottom:6px;">🖼️ Photo de couverture</p>
         <p style="font-size:.8rem;color:var(--gris);margin-bottom:14px;">La grande bannière en haut de votre profil</p>
         <label class="upload-zone" for="cover-input" style="padding:20px;">
@@ -439,7 +441,7 @@
       </div>
 
       <!-- Sections visibles -->
-      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
+      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
         <p style="font-weight:800;margin-bottom:14px;">📋 Sections affichées</p>
         <div class="section-toggle">
           <div><div class="toggle-label">📸 Portfolio photos</div><div class="toggle-desc">Galerie de vos réalisations</div></div>
@@ -460,7 +462,7 @@
       </div>
 
       <!-- CTA personnalisé -->
-      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:20px;">
+      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:20px;">
         <p style="font-weight:800;margin-bottom:6px;">✏️ Texte du bouton de réservation</p>
         <p style="font-size:.8rem;color:var(--gris);margin-bottom:12px;">Ce que voient vos clientes sur le bouton principal</p>
         <input type="text" id="cta-text" placeholder="Réserver ce créneau" maxlength="40" style="width:100%;padding:10px 12px;border:1.5px solid var(--bord);border-radius:8px;font-size:.9rem;"/>
@@ -791,7 +793,7 @@ async function loadReviews() {
   const el = document.getElementById('reviews-dash');
   if (!data||data.length===0) { el.innerHTML='<p style="color:var(--gris);text-align:center;padding:40px;">Aucun avis pour l\'instant.</p>'; return; }
   el.innerHTML = data.map(r=>`
-    <div style="background:#fff;border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <div style="background:var(--blanc);border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
         <strong style="font-size:.9rem;">${esc(r.reviewer_name||'Cliente')}</strong>
         <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
@@ -826,7 +828,7 @@ async function loadServices() {
   const { data } = await supabase.from('services').select('*').eq('artist_id',artistData?.id).order('price_cents');
   const el = document.getElementById('services-list-dash');
   el.innerHTML = (data||[]).map(s=>`
-    <div style="background:#fff;border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <div style="background:var(--blanc);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06);">
       <div>
         <span style="font-weight:700;font-size:.92rem;">${esc(s.name)}</span>
         <span style="font-size:.78rem;color:var(--gris);margin-left:10px;">${esc(String(s.duration_min))} min</span>
@@ -1069,7 +1071,7 @@ async function loadDemandes() {
   catch (e) { console.error(e); box.innerHTML = `<div style="color:var(--gris);text-align:center;padding:40px;">Impossible de charger les demandes.</div>`; return; }
 
   if (!_requests.length) {
-    box.innerHTML = `<div style="background:#fff;border-radius:var(--radius);padding:40px;text-align:center;box-shadow:var(--shadow);">
+    box.innerHTML = `<div style="background:var(--blanc);border-radius:var(--radius);padding:40px;text-align:center;box-shadow:var(--shadow);">
       <div style="font-size:2rem;margin-bottom:8px;">📭</div>
       <p style="font-weight:700;">Aucune demande en attente</p>
       <p style="font-size:.85rem;color:var(--gris);">Les nouvelles demandes de réservation apparaîtront ici.</p>
@@ -1092,7 +1094,7 @@ async function loadDemandes() {
 
       ${diagnosticHtml(r.diagnostic)}
 
-      <div style="background:#F9FAFB;border-radius:10px;padding:12px 14px;margin-top:8px;">
+      <div style="background:var(--surface-2);border-radius:10px;padding:12px 14px;margin-top:8px;">
         <div style="font-weight:800;font-size:.8rem;margin-bottom:10px;">Aperçu du devis</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:10px;">
           <div class="field" style="flex:1;min-width:120px;"><label>Déplacement (km)</label><input type="number" min="0" step="1" value="0" data-km="${esc(r.id)}"/></div>
@@ -1174,7 +1176,7 @@ async function loadDevis() {
   catch (e) { console.error(e); box.innerHTML = `<div style="color:var(--gris);text-align:center;padding:40px;">Impossible de charger les devis.</div>`; return; }
 
   if (!quotes.length) {
-    box.innerHTML = `<div style="background:#fff;border-radius:var(--radius);padding:40px;text-align:center;box-shadow:var(--shadow);">
+    box.innerHTML = `<div style="background:var(--blanc);border-radius:var(--radius);padding:40px;text-align:center;box-shadow:var(--shadow);">
       <div style="font-size:2rem;margin-bottom:8px;">🧾</div>
       <p style="font-weight:700;margin-bottom:4px;">Aucun devis pour le moment</p>
       <p style="font-size:.85rem;color:var(--gris);margin-bottom:16px;">Créez votre premier devis en quelques clics.</p>

@@ -6,28 +6,30 @@
   <title>Administration — GlamBook</title>
   <meta name="robots" content="noindex"/>
   <link rel="stylesheet" href="/css/main.css"/>
+  <script>try{if((localStorage.getItem('gb-theme')||'dark')==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+  <script defer src="/js/theme.js"></script>
   <style>
     body { background: var(--gris-cl); }
     .wrap { max-width: 1000px; margin: 0 auto; padding: 22px 16px 90px; }
     .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
     .topbar .logo { font-size:1.3rem; font-weight:900; color:var(--rose); text-decoration:none; letter-spacing:-.03em; }
     .topbar .logo span { color:var(--or); }
-    .topbar .badge-admin { background:var(--noir); color:#fff; font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:20px; margin-left:8px; }
-    .tabs { display:flex; gap:2px; background:#F3F4F6; border-radius:var(--radius-sm); padding:4px; margin-bottom:22px; max-width:420px; }
+    .topbar .badge-admin { background:var(--ink); color:#fff; font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:20px; margin-left:8px; }
+    .tabs { display:flex; gap:2px; background:var(--surface-2); border-radius:var(--radius-sm); padding:4px; margin-bottom:22px; max-width:420px; }
     .tab { flex:1; text-align:center; padding:10px 8px; font-size:.85rem; font-weight:600; color:var(--gris); cursor:pointer; border-radius:var(--radius-xs); }
-    .tab.active { background:#fff; color:var(--noir); box-shadow:var(--shadow); }
+    .tab.active { background:var(--blanc); color:var(--noir); box-shadow:var(--shadow); }
 
     .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
-    .stat { background:#fff; border:1px solid var(--bord); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); }
+    .stat { background:var(--blanc); border:1px solid var(--bord); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); }
     .stat .n { font-size:1.6rem; font-weight:900; color:var(--rose); letter-spacing:-.02em; }
     .stat .l { font-size:.72rem; color:var(--gris); font-weight:600; text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
 
-    .row { background:#fff; border:1px solid var(--bord); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); }
+    .row { background:var(--blanc); border:1px solid var(--bord); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); }
     .row .head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
     .nm { font-weight:700; font-size:.92rem; }
     .meta { font-size:.78rem; color:var(--gris); margin-top:2px; }
     .tag { font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:20px; }
-    .t-yes { background:#ECFDF5; color:#065F46; } .t-no { background:#F3F4F6; color:var(--gris); }
+    .t-yes { background:#ECFDF5; color:#065F46; } .t-no { background:var(--surface-2); color:var(--gris); }
     .acts { display:flex; gap:6px; flex-wrap:wrap; }
     .thread { margin-top:10px; border-top:1px solid var(--bord); padding-top:10px; display:flex; flex-direction:column; gap:6px; }
     .m { font-size:.85rem; padding:7px 11px; border-radius:10px; max-width:80%; }
@@ -36,7 +38,7 @@
     .resolved { opacity:.55; }
     .empty { color:var(--gris); text-align:center; padding:26px; font-size:.86rem; }
     .hide { display:none !important; }
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     .center { text-align:center; padding:40px; color:var(--gris); }
   </style>

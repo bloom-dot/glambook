@@ -8,6 +8,8 @@
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
+  <script>try{if((localStorage.getItem('gb-theme')||'dark')==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+  <script defer src="/js/theme.js"></script>
   <style>
     body { background: var(--gris-cl); }
     .wrap { max-width: 760px; margin: 0 auto; padding: 22px 16px 90px; }
@@ -28,7 +30,7 @@
     .danger h3 { color:#991B1B; font-size:.9rem; margin-bottom:6px; }
     .danger p { font-size:.8rem; color:#7F1D1D; margin-bottom:10px; }
     .btn-danger { background:#DC2626; color:#fff; }
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     .toast.error { background:var(--rose-f); }
   </style>

@@ -2,23 +2,38 @@
    GlamBook Design System v2
    ══════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
+/* ══════════════════════════════════════
+   Thème SOMBRE LUXE (par défaut)
+   Bascule en clair : classe .theme-light sur <html>
+   ══════════════════════════════════════ */
 :root {
+  /* Accents de marque (identiques dans les 2 thèmes) */
   --rose:    #E8547A;
   --rose-f:  #C43A60;
-  --rose-cl: #FDE8EF;
-  --or:      #D4AF37;
-  --or-cl:   #FDF8E7;
-  --noir:    #111111;
-  --gris:    #6B7280;
-  --gris-cl: #F9FAFB;
-  --blanc:   #FFFFFF;
-  --bord:    #E5E7EB;
-  --shadow:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,.12);
-  --shadow-glow: 0 4px 24px rgba(232,84,122,.2);
+  --or:      #D4AF37;   /* doré champagne */
+  --champagne: #E7C766;
+  --poudre:  #E8D8CE;   /* rose poudré */
+
+  /* Jetons sensibles au thème — valeurs SOMBRES */
+  --rose-cl: #2A1A20;   /* tuile rose sombre */
+  --or-cl:   #2A2410;
+  --noir:    #F4F1EC;   /* = couleur de texte (ivoire) */
+  --gris:    #9CA3AF;
+  --gris-cl: #0F0F11;   /* = fond de page (noir satiné) */
+  --blanc:   #18181B;   /* = surfaces / cartes */
+  --surface-2: #27272A;
+  --bord:    #2A2A2E;
+  --nav-bg:  rgba(15,15,17,.72);
+  --scroll-thumb: rgba(255,255,255,.16);
+
+  --shadow:  0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 8px 30px rgba(0,0,0,.45);
+  --shadow-lg: 0 18px 50px rgba(0,0,0,.55);
+  --shadow-glow: 0 4px 24px rgba(232,84,122,.22);
+
+  --ink: #111111;      /* toujours foncé (toasts, badges sombres) */
   --radius:  16px;
   --radius-sm: 10px;
   --radius-xs: 6px;
@@ -26,12 +41,34 @@
   --nav-h: 64px;
 }
 
+/* ── Thème CLAIR (bascule) ── */
+html.theme-light {
+  --rose-cl: #FDE8EF;
+  --or-cl:   #FDF8E7;
+  --noir:    #111111;
+  --gris:    #6B7280;
+  --gris-cl: #F9FAFB;
+  --blanc:   #FFFFFF;
+  --surface-2: #F3EFEA;
+  --bord:    #E5E7EB;
+  --nav-bg:  rgba(255,255,255,.85);
+  --scroll-thumb: rgba(0,0,0,.12);
+  --shadow:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.12);
+}
+
+/* Transition douce lors du changement de thème */
+html, body, .nav, .card, .artist-card, .btn, input, select, textarea {
+  transition: background-color .5s ease, color .5s ease, border-color .5s ease, box-shadow .5s ease;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { font-size: 16px; scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--gris-cl);
   color: var(--noir);
   line-height: 1.6;
@@ -42,13 +79,20 @@ body {
 
 /* ── TYPOGRAPHY ── */
 h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -.02em; }
+/* Titres éditoriaux en serif élégante */
+h1, h2, h3, .section-title, .hero-title, .dash-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+h1, .hero-title { font-weight: 700; }
 
 /* ── NAV ── */
 .nav {
-  background: rgba(255,255,255,.85);
+  background: var(--nav-bg);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-bottom: 1px solid rgba(0,0,0,.06);
+  border-bottom: 1px solid var(--bord);
   position: sticky; top: 0; z-index: 100;
   padding: 0 20px;
   transition: background var(--transition);
@@ -245,11 +289,11 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -.02em; }
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0,0,0,.12); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,.2); }
+::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gris); }
 
 /* ── SELECTION ── */
-::selection { background: var(--rose-cl); color: var(--rose); }
+::selection { background: rgba(212,175,55,.28); color: var(--or); }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 640px) {
@@ -281,3 +325,53 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -.02em; }
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+.skeleton { background: linear-gradient(90deg, var(--surface-2) 25%, var(--blanc) 50%, var(--surface-2) 75%); background-size: 200% 100%; }
+
+/* ══════════════════════════════════════
+   Direction artistique « Sombre Luxe » — extras
+   ══════════════════════════════════════ */
+
+/* Élévation + lueur au survol (cartes & boutons) */
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), 0 0 24px rgba(212,175,55,.14); }
+.artist-card:hover { box-shadow: var(--shadow-lg), 0 0 30px rgba(212,175,55,.16); }
+.stat-card:hover, .booking-row:hover { box-shadow: var(--shadow-md), 0 0 20px rgba(232,84,122,.12); }
+.btn-primary:hover { box-shadow: 0 8px 32px rgba(232,84,122,.35), 0 0 18px rgba(232,84,122,.25); }
+.btn-gold:hover { box-shadow: 0 8px 32px rgba(212,175,55,.4), 0 0 18px rgba(212,175,55,.3); }
+
+/* Apparition organique au scroll (activée par js/theme.js) */
+.reveal { opacity: 0; transform: translateY(24px); filter: blur(6px); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1), filter .7s ease; }
+.reveal.in { opacity: 1; transform: none; filter: blur(0); }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; filter: none; transition: none; } }
+
+/* Barre de progression « Gloss / Eyeliner » */
+.gloss-track { position: relative; height: 6px; width: 100%; border-radius: 999px; background: var(--surface-2); overflow: visible; }
+.gloss-fill {
+  position: relative; height: 100%; border-radius: 999px; width: 0%;
+  background: linear-gradient(90deg, #E8D8CE 0%, #E8547A 40%, #E84393 70%, #D4AF37 100%);
+  box-shadow: 0 0 12px rgba(232,67,147,.45);
+  transition: width .6s cubic-bezier(.22,1,.36,1);
+}
+.gloss-fill::before { /* reflet glossy mobile */
+  content: ''; position: absolute; inset: 0 0 0 auto; width: 60px; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  mix-blend-mode: screen; animation: glossSheen 2.2s ease-in-out infinite;
+}
+.gloss-fill::after { /* embout brillant */
+  content: ''; position: absolute; right: 0; top: 50%; width: 14px; height: 14px; transform: translate(50%,-50%);
+  border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff, #D4AF37 55%, #B8962E);
+  box-shadow: 0 0 10px 2px rgba(212,175,55,.7);
+}
+@keyframes glossSheen { 0% { transform: translateX(-40px); } 100% { transform: translateX(0); } }
+.gloss-meta { display: flex; justify-content: space-between; font-size: .74rem; color: var(--gris); margin-top: 8px; }
+
+/* Bouton flottant de bascule de thème */
+.theme-toggle {
+  position: fixed; z-index: 400; bottom: 22px; right: 22px;
+  height: 46px; width: 46px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+  background: var(--blanc); color: var(--or); border: 1px solid var(--bord);
+  box-shadow: var(--shadow-md); transition: transform .2s, box-shadow .2s;
+}
+.theme-toggle:hover { transform: translateY(-2px) scale(1.05); box-shadow: var(--shadow-md), 0 0 20px rgba(212,175,55,.35); }
+.theme-toggle:active { transform: scale(.95); }
+@media (max-width: 640px) { .theme-toggle { bottom: 84px; } }

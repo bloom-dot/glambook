@@ -8,6 +8,8 @@
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
+  <script>try{if((localStorage.getItem('gb-theme')||'dark')==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+  <script defer src="/js/theme.js"></script>
   <style>
     body { background: var(--gris-cl); }
     .chat { max-width: 1000px; margin: 0 auto; height: 100dvh; display: grid; grid-template-columns: 320px 1fr; }
@@ -61,7 +63,7 @@
       .col.mobile-hidden { display:none; }
       .thread-head .back { display:block; }
     }
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
   </style>
 </head>

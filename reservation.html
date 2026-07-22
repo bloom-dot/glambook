@@ -8,6 +8,8 @@
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
+  <script>try{if((localStorage.getItem('gb-theme')||'dark')==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+  <script defer src="/js/theme.js"></script>
   <style>
     .rz { max-width: 640px; margin: 28px auto; padding: 0 16px 80px; }
     .step-indicator { display:flex; gap:0; margin-bottom:24px; }
@@ -72,7 +74,7 @@
     .cam-wrap.detected .fg-check { opacity:1; transform:translate(-50%,-50%) scale(1); }
     .cam-wrap.detected .fg-check path { stroke-dashoffset:0; }
     .cam-wrap.detected .fg-hint { background:rgba(27,138,75,.85); }
-    .cam-wrap.detected .fg-hint .dot { background:#fff; animation:none; }
+    .cam-wrap.detected .fg-hint .dot { background:var(--blanc); animation:none; }
     /* sans détection auto : garder le repère, masquer le balayage */
     .cam-wrap.no-detect .fg-scan { display:none; }
     .fg-note { font-size:.74rem; color:var(--gris); text-align:center; margin:0 0 10px; }
@@ -86,7 +88,7 @@
     .badge2 .k { color:var(--gris); font-weight:600; }
     .diag-list { margin:10px 0; }
     .diag-list .lbl { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--rose); margin:12px 0 6px; }
-    .chip { display:inline-block; background:#F3F4F6; border-radius:8px; padding:5px 11px; font-size:.82rem; margin:0 6px 6px 0; }
+    .chip { display:inline-block; background:var(--surface-2); border-radius:8px; padding:5px 11px; font-size:.82rem; margin:0 6px 6px 0; }
     .disclaimer { font-size:.72rem; font-style:italic; color:var(--gris); margin-top:12px; }
 
     .nav-btns { display:flex; justify-content:space-between; gap:10px; margin-top:8px; }
@@ -94,7 +96,7 @@
     @keyframes spin { to { transform:rotate(360deg); } }
     .center { text-align:center; padding:12px; }
     .hide { display:none !important; }
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     .toast.error { background:var(--rose-f); }
   </style>
@@ -106,6 +108,7 @@
 </div></nav>
 
 <div class="rz">
+  <div class="gloss-track" style="margin-bottom:16px;"><div class="gloss-fill" id="glossFill" style="width:33%;"></div></div>
   <div class="step-indicator">
     <div class="step-dot active" id="sd-a">1 · Prestation</div>
     <div class="step-dot" id="sd-b">2 · Diagnostic</div>
@@ -272,6 +275,7 @@
 
   // ── Navigation entre étapes ──
   function goto(step) {
+    const gf = $('glossFill'); if (gf) gf.style.width = ({ a:'33%', b:'66%', c:'100%' })[step] || '33%';
     for (const s of ['a','b','c']) $('step-'+s).classList.toggle('hide', s !== step);
     $('done').classList.add('hide');
     $('sd-a').className = 'step-dot' + (step==='a'?' active':' done');

@@ -7,6 +7,8 @@
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
+  <script>try{if((localStorage.getItem('gb-theme')||'dark')==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+  <script defer src="/js/theme.js"></script>
   <style>
     body { background: var(--gris-cl); }
     .wrap { max-width: 900px; margin: 0 auto; padding: 24px 18px 96px; }
@@ -65,7 +67,7 @@
     .link-box { display:flex; gap:8px; margin-bottom:16px; }
     .link-box input { font-size:.8rem; }
 
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     .toast.error { background:var(--rose-f); }
     .back-link { font-size:.85rem; color:var(--gris); text-decoration:none; }
@@ -99,7 +101,7 @@
         <div class="field" style="grid-column:1/-1">
           <label>Logo (optionnel)</label>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-            <img id="logoPreview" alt="" style="display:none;height:48px;max-width:160px;object-fit:contain;border-radius:8px;border:1px solid var(--bord);padding:4px;background:#fff;"/>
+            <img id="logoPreview" alt="" style="display:none;height:48px;max-width:160px;object-fit:contain;border-radius:8px;border:1px solid var(--bord);padding:4px;background:var(--blanc);"/>
             <label class="btn btn-ghost btn-sm" for="logoInput" style="margin:0;">Choisir un logo</label>
             <input id="logoInput" type="file" accept="image/*" style="display:none;"/>
             <button type="button" class="btn btn-ghost btn-sm" id="logoRemove" style="display:none;">Retirer</button>

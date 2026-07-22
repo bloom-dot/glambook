@@ -7,6 +7,8 @@
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
+  <script>try{if((localStorage.getItem('gb-theme')||'dark')==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
+  <script defer src="/js/theme.js"></script>
   <style>
     body { background: var(--gris-cl); }
     .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
@@ -49,7 +51,7 @@
     /* Signature */
     .sig-title { font-weight:800; font-size:1.05rem; margin-bottom:2px; }
     .sig-sub { font-size:.82rem; color:var(--gris); margin-bottom:14px; }
-    .pad-frame { position:relative; border:2px dashed var(--bord); border-radius:var(--radius-sm); background:#fff; touch-action:none; }
+    .pad-frame { position:relative; border:2px dashed var(--bord); border-radius:var(--radius-sm); background:var(--blanc); touch-action:none; }
     .pad-frame canvas { display:block; width:100%; height:200px; border-radius:var(--radius-sm); }
     .pad-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#C9CDD4; font-size:.9rem; pointer-events:none; }
     .pad-hint.hidden { display:none; }
@@ -68,7 +70,7 @@
     .center-state p { color:var(--gris); font-size:.9rem; }
     .hide { display:none !important; }
 
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     .toast.error { background:var(--rose-f); }
   </style>
