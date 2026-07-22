@@ -857,9 +857,27 @@ document.getElementById('btn-add-service').addEventListener('click', async () =>
 window.deleteService = async (id) => { await supabase.from('services').delete().eq('id',id); loadServices(); };
 
 // Save profil
+// Géocodage d'une ville française via la Base Adresse Nationale (gratuit, sans clé)
+async function geocodeCity(city) {
+  if (!city || !city.trim()) return null;
+  try {
+    const r = await fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(city.trim()) + '&type=municipality&limit=1');
+    const j = await r.json();
+    const c = j.features?.[0]?.geometry?.coordinates;
+    return c ? { lng: c[0], lat: c[1] } : null;
+  } catch (e) { console.warn('Géocodage impossible', e); return null; }
+}
+
 document.getElementById('btn-save-profile').addEventListener('click', async () => {
   const specialties = [...document.querySelectorAll('.spec-cb:checked')].map(c=>c.value);
-  await supabase.from('profiles').update({ full_name: document.getElementById('p-name').value, city: document.getElementById('p-city').value }).eq('user_id', user.id);
+  const city = document.getElementById('p-city').value.trim();
+  const coords = await geocodeCity(city);
+  await supabase.from('profiles').update({
+    full_name: document.getElementById('p-name').value,
+    city,
+    lat: coords ? coords.lat : null,
+    lng: coords ? coords.lng : null,
+  }).eq('user_id', user.id);
   const displayName = document.getElementById('p-display-name').value.trim();
   await supabase.from('artists').update({
     bio:          document.getElementById('p-bio').value,

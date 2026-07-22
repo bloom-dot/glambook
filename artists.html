@@ -112,6 +112,14 @@
 <div class="filters-bar">
   <div class="filters-inner">
     <input class="filter-input" id="f-city" placeholder="🔍 Ville ou région" type="text"/>
+    <button class="filter-pill" id="f-near" title="Rechercher autour de ma position">📍 Autour de moi</button>
+    <select class="sort-select" id="f-radius" style="margin-left:0;" title="Rayon de recherche">
+      <option value="0">Partout</option>
+      <option value="5">5 km</option>
+      <option value="10">10 km</option>
+      <option value="20">20 km</option>
+      <option value="50">50 km</option>
+    </select>
     <input class="filter-input" id="f-date" type="date"/>
     <button class="filter-pill active" data-service="">Toutes</button>
     <button class="filter-pill" data-service="mariage">Mariage</button>
@@ -147,8 +155,33 @@ let filters   = {
   city:    params.get('city')    || '',
   date:    params.get('date')    || '',
   service: params.get('service') || '',
-  sort:    'rating'
+  sort:    'rating',
+  radius:  0,          // km (0 = partout)
+  center:  null,       // { lat, lng }
+  near:    false       // recherche autour de ma position
 };
+
+// Géocodage ville (Base Adresse Nationale, gratuit) — mis en cache
+const geoCache = new Map();
+async function geocodeCity(city) {
+  if (!city || !city.trim()) return null;
+  const key = city.trim().toLowerCase();
+  if (geoCache.has(key)) return geoCache.get(key);
+  try {
+    const r = await fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(city.trim()) + '&type=municipality&limit=1');
+    const j = await r.json();
+    const c = j.features?.[0]?.geometry?.coordinates;
+    const res = c ? { lng: c[0], lat: c[1] } : null;
+    geoCache.set(key, res);
+    return res;
+  } catch (e) { console.warn('Géocodage impossible', e); return null; }
+}
+function haversineKm(a, b) {
+  const R = 6371, toRad = (x) => x * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(s));
+}
 let page = 0;
 const PAGE_SIZE = 12;
 
@@ -166,6 +199,26 @@ if (filters.service) {
 document.getElementById('f-city').addEventListener('input', debounce(() => { filters.city = document.getElementById('f-city').value; reload(); }, 400));
 document.getElementById('f-date').addEventListener('change', () => { filters.date = document.getElementById('f-date').value; reload(); });
 document.getElementById('f-sort').addEventListener('change', () => { filters.sort = document.getElementById('f-sort').value; reload(); });
+document.getElementById('f-radius').addEventListener('change', () => {
+  filters.radius = parseInt(document.getElementById('f-radius').value) || 0;
+  reload();
+});
+document.getElementById('f-near').addEventListener('click', () => {
+  const btn = document.getElementById('f-near');
+  if (filters.near) { filters.near = false; filters.center = null; btn.classList.remove('active'); reload(); return; }
+  if (!navigator.geolocation) { showToast('Géolocalisation non disponible sur cet appareil.'); return; }
+  btn.textContent = '📍 Localisation…';
+  navigator.geolocation.getCurrentPosition((pos) => {
+    filters.near = true;
+    filters.center = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    if (!filters.radius) { filters.radius = 10; document.getElementById('f-radius').value = '10'; }
+    btn.classList.add('active'); btn.textContent = '📍 Autour de moi';
+    reload();
+  }, (err) => {
+    console.warn(err); btn.textContent = '📍 Autour de moi';
+    showToast('Position non autorisée. Saisissez une ville et choisissez un rayon.');
+  }, { enableHighAccuracy: false, timeout: 8000 });
+});
 document.querySelectorAll('.filter-pill').forEach(p => {
   p.addEventListener('click', () => {
     document.querySelectorAll('.filter-pill').forEach(x => x.classList.remove('active'));
@@ -187,25 +240,49 @@ async function loadArtists(reset) {
   const from = page * PAGE_SIZE;
   const to   = from + PAGE_SIZE - 1;
 
-  // Vue artists_public : profil + photos joints en SQL, ville filtrable
-  // côté serveur → pagination et count justes
+  // Centre de recherche géo : ma position (near) ou géocodage de la ville
+  let center = filters.center;
+  if (filters.radius > 0 && !filters.near) center = await geocodeCity(filters.city);
+  const geoMode = filters.radius > 0 && center && center.lat != null;
+
   let q = supabase
     .from('artists_public')
-    .select('id, slug, display_name, avatar_url, city, region, rating_avg, review_count, price_from, specialties, created_at, photos', { count: 'exact' })
-    .range(from, to);
+    .select('id, slug, display_name, avatar_url, city, region, rating_avg, review_count, price_from, specialties, created_at, photos, lat, lng', { count: 'exact' });
 
-  if (filters.city)    q = q.or(`city.ilike.%${filters.city}%,region.ilike.%${filters.city}%`);
+  if (geoMode) {
+    // Pré-filtre par boîte englobante (rapide côté SQL), rayon exact calculé ensuite
+    const dLat = filters.radius / 111;
+    const dLng = filters.radius / (111 * Math.max(Math.cos(center.lat * Math.PI / 180), 0.01));
+    q = q.not('lat', 'is', null)
+         .gte('lat', center.lat - dLat).lte('lat', center.lat + dLat)
+         .gte('lng', center.lng - dLng).lte('lng', center.lng + dLng)
+         .range(0, 199);
+  } else {
+    q = q.range(from, to);
+    if (filters.city) q = q.or(`city.ilike.%${filters.city}%,region.ilike.%${filters.city}%`);
+  }
+
   if (filters.service) q = q.contains('specialties', [filters.service]);
   if (filters.date) q = q.in('id',
     (await supabase.from('availabilities').select('artist_id').eq('date', filters.date).eq('is_available', true).eq('is_booked', false)).data?.map(r => r.artist_id) || []
   );
 
-  if (filters.sort === 'rating')      q = q.order('rating_avg', { ascending: false });
-  if (filters.sort === 'price_asc')   q = q.order('price_from', { ascending: true });
-  if (filters.sort === 'price_desc')  q = q.order('price_from', { ascending: false });
-  if (filters.sort === 'recent')      q = q.order('created_at', { ascending: false });
+  if (!geoMode) {
+    if (filters.sort === 'rating')      q = q.order('rating_avg', { ascending: false });
+    if (filters.sort === 'price_asc')   q = q.order('price_from', { ascending: true });
+    if (filters.sort === 'price_desc')  q = q.order('price_from', { ascending: false });
+    if (filters.sort === 'recent')      q = q.order('created_at', { ascending: false });
+  }
 
-  const { data, count, error } = await q;
+  let { data, count, error } = await q;
+
+  // Mode géo : distance exacte (Haversine), filtre au rayon, tri par proximité
+  if (geoMode && data) {
+    data = data.map(a => ({ ...a, _dist: haversineKm(center, { lat: a.lat, lng: a.lng }) }))
+               .filter(a => a._dist <= filters.radius)
+               .sort((x, y) => x._dist - y._dist);
+    count = data.length;
+  }
 
   const grid = document.getElementById('artists-grid');
   if (reset) grid.innerHTML = '';
@@ -219,7 +296,9 @@ async function loadArtists(reset) {
       </div>`;
     document.getElementById('btn-load-more').style.display = 'none';
     document.getElementById('results-meta').textContent = '';
-    document.getElementById('header-sub').textContent = filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses';
+    document.getElementById('header-sub').textContent = geoMode
+      ? (filters.near ? `Aucune maquilleuse à moins de ${filters.radius} km de vous` : `Aucune maquilleuse à moins de ${filters.radius} km de ${filters.city || 'cette ville'}`)
+      : (filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses');
     return;
   }
 
@@ -243,7 +322,7 @@ async function loadArtists(reset) {
           </div>
           <div>
             <div class="artist-name">${name}</div>
-            <div class="artist-city">📍 ${city}</div>
+            <div class="artist-city">📍 ${city}${a._dist != null ? ` · à ${a._dist < 10 ? a._dist.toFixed(1) : Math.round(a._dist)} km` : ''}</div>
           </div>
         </div>
         <div class="tags">${(a.specialties || []).slice(0,3).map(s => `<span class="tag">${esc(s)}</span>`).join('')}</div>
@@ -256,12 +335,14 @@ async function loadArtists(reset) {
   });
 
   page++;
-  document.getElementById('btn-load-more').style.display = page * PAGE_SIZE < count ? 'inline-flex' : 'none';
+  document.getElementById('btn-load-more').style.display = (!geoMode && page * PAGE_SIZE < count) ? 'inline-flex' : 'none';
 
-  const sub = filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses';
+  const sub = geoMode
+    ? (filters.near ? `Autour de vous · ${filters.radius} km` : `Autour de ${filters.city || 'la ville'} · ${filters.radius} km`)
+    : (filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses');
   document.getElementById('header-sub').textContent = sub + (filters.date ? ` — ${new Date(filters.date).toLocaleDateString('fr-FR')}` : '');
   document.getElementById('results-meta').textContent = `${count} maquilleuse${count > 1 ? 's' : ''} trouvée${count > 1 ? 's' : ''}`;
-  if (filters.city) {
+  if (filters.city && !geoMode) {
     document.title = `Maquilleuses à ${filters.city} — GlamBook`;
     document.querySelector('.page-header h1').textContent = `Maquilleuses professionnelles à ${filters.city}`;
   }
