@@ -35,6 +35,7 @@
     }
     .nav-item:hover { background: rgba(255,255,255,.04); color: rgba(255,255,255,.9); }
     .nav-item.active { background: rgba(232,84,122,.1); color: var(--rose); border-left-color: var(--rose); }
+    .nav-badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; margin-left:auto; background:var(--rose); color:#fff; font-size:.65rem; font-weight:800; border-radius:9px; }
     .nav-section { font-size: .65rem; font-weight: 700; letter-spacing: .1em; color: rgba(255,255,255,.2); padding: 18px 24px 6px; text-transform: uppercase; }
 
     /* Mobile nav */
@@ -190,9 +191,9 @@
     <a class="nav-item" onclick="showTab('reservations',this)">📅 Réservations</a>
     <a class="nav-item active" onclick="showTab('disponibilites',this)">🗓️ Disponibilités</a>
     <a class="nav-item" onclick="showTab('avis',this)">⭐ Avis clients</a>
-    <a class="nav-item" href="/messages.html">💬 Messages</a>
+    <a class="nav-item" id="nav-msg" href="/messages.html">💬 Messages</a>
     <a class="nav-item" href="/dashboard/diagnostic.html">🔬 Diagnostic</a>
-    <a class="nav-item" onclick="showTab('demandes',this)">📥 Demandes</a>
+    <a class="nav-item" id="nav-dem" onclick="showTab('demandes',this)">📥 Demandes</a>
     <a class="nav-item" onclick="showTab('devis',this)">🧾 Devis</a>
     <div class="nav-section">Profil</div>
     <a class="nav-item" onclick="showTab('profil',this)">✏️ Mon profil</a>
@@ -352,6 +353,12 @@
         </div>
         <button class="btn btn-primary" id="btn-save-profile">Enregistrer le profil</button>
       </div>
+
+      <div style="margin-top:24px;border:1px solid #FECACA;background:#FEF2F2;border-radius:var(--radius);padding:18px;">
+        <p style="color:#991B1B;font-weight:800;font-size:.9rem;margin-bottom:6px;">Supprimer mon compte</p>
+        <p style="font-size:.8rem;color:#7F1D1D;margin-bottom:12px;">Action définitive : profil, prestations, disponibilités, devis, demandes, messages et diagnostics seront supprimés (droit à l'effacement — RGPD).</p>
+        <button class="btn btn-sm" style="background:#DC2626;color:#fff;" id="btn-delete-account">Supprimer définitivement mon compte</button>
+      </div>
     </div>
 
     <!-- ═══ ONGLET PHOTOS ═══ -->
@@ -494,6 +501,7 @@ import { supabase, getCurrentUser, esc } from '/js/supabase.js';
 import { listMyQuotes, getShareToken, signatureUrl, deleteQuote } from '/js/devis/store.js';
 import { euros } from '/js/devis/model.js';
 import { listArtistRequests, validateRequestToQuote, declineRequest } from '/js/booking/store.js';
+import { myConversations } from '/js/chat/store.js';
 
 // Auth check
 const user = await getCurrentUser();
@@ -569,7 +577,33 @@ async function init() {
   loadReviews();
   loadPhotos();
   loadServices();
+  updateNavBadges();
 }
+
+// Badges de non-lus dans la navigation
+function setBadge(id, n) {
+  const el = document.getElementById(id); if (!el) return;
+  let b = el.querySelector('.nav-badge');
+  if (n > 0) { if (!b) { b = document.createElement('span'); b.className = 'nav-badge'; el.appendChild(b); } b.textContent = n > 9 ? '9+' : n; }
+  else if (b) b.remove();
+}
+async function updateNavBadges() {
+  try { const c = await myConversations(); setBadge('nav-msg', (c||[]).reduce((s,x)=>s+(Number(x.unread)||0),0)); } catch {}
+  try { const r = await listArtistRequests('pending'); setBadge('nav-dem', (r||[]).length); } catch {}
+}
+
+// Suppression de compte
+document.getElementById('btn-delete-account')?.addEventListener('click', async () => {
+  if (!confirm('Supprimer définitivement votre compte et toutes vos données ? Cette action est irréversible.')) return;
+  if (!confirm('Dernière confirmation : voulez-vous vraiment tout supprimer ?')) return;
+  try {
+    const { error } = await supabase.rpc('delete_my_account');
+    if (error) throw error;
+    await supabase.auth.signOut().catch(()=>{});
+    alert('Votre compte a été supprimé.');
+    location.href = '/';
+  } catch (e) { console.error(e); showToast('Suppression impossible : ' + (e.message||'')); }
+});
 
 // Bookings
 let currentBookingFilter = 'all';

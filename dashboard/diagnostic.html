@@ -60,7 +60,13 @@
     <!-- Scan -->
     <div class="panel">
       <h2>Scanner un visage</h2>
-      <div id="scanHost"></div>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:.78rem;color:var(--gris);margin-bottom:14px;cursor:pointer;">
+        <input type="checkbox" id="scanConsent" style="width:auto;margin-top:2px;flex-shrink:0;"/>
+        <span>J'atteste avoir recueilli le consentement de la cliente pour analyser sa photo par une IA. <b>La photo n'est pas conservée</b> ; seul le diagnostic est enregistré. Analyse cosmétique, non médicale.</span>
+      </label>
+      <div id="scanGate" style="pointer-events:none;opacity:.45;transition:opacity .2s;">
+        <div id="scanHost"></div>
+      </div>
     </div>
 
     <!-- Résultat -->
@@ -120,6 +126,13 @@
         </div>
         <div class="disclaimer">Diagnostic cosmétique généré par IA, à titre indicatif — ne constitue pas un avis médical.</div>`;
     }
+
+    // Consentement : déverrouille le scan
+    $('scanConsent').addEventListener('change', (e) => {
+      const on = e.target.checked;
+      $('scanGate').style.pointerEvents = on ? 'auto' : 'none';
+      $('scanGate').style.opacity = on ? '1' : '.45';
+    });
 
     // Scan → diagnostic
     const scan = createFaceScan($('scanHost'), {

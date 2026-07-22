@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mon espace — GlamBook</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    body { background: var(--gris-cl); }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 22px 16px 90px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .topbar .logo { font-size:1.3rem; font-weight:900; color:var(--rose); text-decoration:none; letter-spacing:-.03em; }
+    .topbar .logo span { color:var(--or); }
+    .topbar a.nav { font-size:.85rem; color:var(--gris); text-decoration:none; margin-left:14px; }
+    .topbar a.nav:hover { color:var(--rose); }
+    h2 { font-size:1.05rem; font-weight:800; margin:22px 0 12px; }
+    .card { background:var(--blanc); border:1px solid var(--bord); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .card .nm { font-weight:700; font-size:.92rem; }
+    .card .meta { font-size:.8rem; color:var(--gris); margin-top:2px; }
+    .pill { font-size:.7rem; font-weight:700; padding:4px 11px; border-radius:20px; text-transform:uppercase; letter-spacing:.03em; }
+    .p-sent { background:#FFFBEB; color:#92400E; } .p-signed { background:#ECFDF5; color:#065F46; }
+    .p-pending { background:#EEF2FF; color:#3730A3; } .p-quoted { background:#FDF2F8; color:#9D174D; }
+    .empty { color:var(--gris); text-align:center; padding:26px; font-size:.86rem; }
+    .danger { margin-top:36px; border:1px solid #FECACA; background:#FEF2F2; border-radius:var(--radius); padding:16px 18px; }
+    .danger h3 { color:#991B1B; font-size:.9rem; margin-bottom:6px; }
+    .danger p { font-size:.8rem; color:#7F1D1D; margin-bottom:10px; }
+    .btn-danger { background:#DC2626; color:#fff; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .toast.error { background:var(--rose-f); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="/" class="logo">Glam<span>Book</span></a>
+      <div><a href="/messages.html" class="nav">💬 Messages</a><a href="/" class="nav">Accueil</a></div>
+    </div>
+
+    <h2>Mes devis</h2>
+    <div id="quotes"><div class="empty">Chargement…</div></div>
+
+    <h2>Mes demandes de réservation</h2>
+    <div id="requests"><div class="empty">Chargement…</div></div>
+
+    <div class="danger">
+      <h3>Supprimer mon compte</h3>
+      <p>Cette action est définitive : vos données personnelles, demandes et messages seront supprimés (droit à l'effacement — RGPD).</p>
+      <button class="btn btn-danger btn-sm" id="btnDelete">Supprimer définitivement mon compte</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { supabase, getCurrentUser } from '/js/supabase.js';
+    import { euros } from '/js/devis/model.js';
+    import { showToast, esc } from '/js/utils.js';
+
+    const $ = (id) => document.getElementById(id);
+    const STATUS = { sent:['À signer','p-sent'], signed:['Signé','p-signed'], pending:['En attente','p-pending'], quoted:['Devis reçu','p-quoted'], declined:['Refusé','p-pending'] };
+    const fmt = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) : '';
+
+    const user = await getCurrentUser();
+    if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname)}`; }
+
+    // Devis reçus (RPC sécurisé par email)
+    (async () => {
+      try {
+        const { data, error } = await supabase.rpc('my_quotes');
+        if (error) throw error;
+        const rows = data || [];
+        $('quotes').innerHTML = rows.length ? rows.map(q => {
+          const [lbl, cls] = STATUS[q.status] || ['—','p-sent'];
+          return `<div class="card">
+            <div><div class="nm">${esc(q.quote_number || 'Devis')} · ${esc(q.mua_name || '')}</div>
+              <div class="meta">${esc(euros(q.total_cents))} · reçu le ${esc(fmt(q.created_at))}</div></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="pill ${cls}">${lbl}</span>
+              <a class="btn btn-primary btn-sm" href="/signature.html?t=${encodeURIComponent(q.share_token)}">${q.status==='signed'?'Voir':'Consulter & signer'}</a>
+            </div></div>`;
+        }).join('') : '<div class="empty">Aucun devis pour le moment.</div>';
+      } catch (e) { console.error(e); $('quotes').innerHTML = '<div class="empty">Impossible de charger vos devis.</div>'; }
+    })();
+
+    // Demandes de réservation (RLS : les siennes)
+    (async () => {
+      try {
+        const { data, error } = await supabase.from('booking_requests')
+          .select('id,event_date,event_address,services_snapshot,status,created_at')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        const rows = data || [];
+        $('requests').innerHTML = rows.length ? rows.map(r => {
+          const [lbl, cls] = STATUS[r.status] || ['—','p-pending'];
+          const svc = (r.services_snapshot || []).map(s => s.name).join(', ');
+          return `<div class="card">
+            <div><div class="nm">${esc(svc || 'Prestation')}</div>
+              <div class="meta">${r.event_date ? '📅 ' + esc(new Date(r.event_date).toLocaleString('fr-FR',{dateStyle:'long',timeStyle:'short'})) : ''} ${r.event_address ? '· ' + esc(r.event_address) : ''}</div></div>
+            <span class="pill ${cls}">${lbl}</span></div>`;
+        }).join('') : '<div class="empty">Aucune demande pour le moment.</div>';
+      } catch (e) { console.error(e); $('requests').innerHTML = '<div class="empty">Impossible de charger vos demandes.</div>'; }
+    })();
+
+    // Suppression de compte
+    $('btnDelete').onclick = async () => {
+      if (!confirm('Supprimer définitivement votre compte et toutes vos données ? Cette action est irréversible.')) return;
+      if (!confirm('Dernière confirmation : voulez-vous vraiment tout supprimer ?')) return;
+      try {
+        const { error } = await supabase.rpc('delete_my_account');
+        if (error) throw error;
+        await supabase.auth.signOut().catch(()=>{});
+        alert('Votre compte a été supprimé. À bientôt.');
+        location.href = '/';
+      } catch (e) { console.error(e); showToast('Suppression impossible : ' + (e.message||''), 'error'); }
+    };
+  </script>
+</body>
+</html>

@@ -42,12 +42,18 @@ module.exports = async function handler(req, res) {
   const authHeader = req.headers.authorization || '';
   const jwt = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!jwt) return res.status(401).json({ error: 'Authentification requise' });
+  let userId = null;
   try {
     const u = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
       headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${jwt}` }
     });
     if (!u.ok) return res.status(401).json({ error: 'Session invalide' });
+    userId = (await u.json())?.id;
   } catch { return res.status(401).json({ error: 'Session invalide' }); }
+
+  // Rate limiting : max 30 diagnostics / heure / utilisateur
+  const rlOk = await rateLimit(userId, 'face-diagnostic', 30, 60);
+  if (!rlOk) return res.status(429).json({ error: 'Trop de diagnostics. Réessayez dans un moment.' });
 
   const { image } = req.body || {};
   if (!image || typeof image !== 'string' || !/^data:image\/(png|jpe?g|webp);base64,/.test(image)) {
@@ -102,6 +108,26 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Erreur lors du diagnostic.' });
   }
 };
+
+// Rate limiting via la table api_usage (service role). true = autorisé.
+async function rateLimit(userId, endpoint, max, minutes) {
+  if (!userId) return true;
+  const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const h = { apikey: key, Authorization: `Bearer ${key}` };
+  try {
+    const since = new Date(Date.now() - minutes * 60000).toISOString();
+    const cRes = await fetch(
+      `${url}/rest/v1/api_usage?user_id=eq.${userId}&endpoint=eq.${encodeURIComponent(endpoint)}&created_at=gte.${encodeURIComponent(since)}&select=id`,
+      { headers: { ...h, Prefer: 'count=exact', Range: '0-0' } });
+    const cr = cRes.headers.get('content-range');
+    const total = cr && cr.includes('/') ? parseInt(cr.split('/')[1], 10) : 0;
+    if (total >= max) return false;
+    await fetch(`${url}/rest/v1/api_usage`, {
+      method: 'POST', headers: { ...h, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ user_id: userId, endpoint }) });
+    return true;
+  } catch (e) { console.error('rateLimit err', e); return true; } // en cas d'erreur, ne pas bloquer
+}
 
 // Normalise / valide la sortie de l'IA pour garantir le schéma
 function normalize(p) {

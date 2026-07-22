@@ -79,6 +79,40 @@ export function subscribeMessages(convId, onInsert) {
   return () => { try { supabase.removeChannel(channel); } catch (_) {} };
 }
 
+/** Signale un message / une conversation (modération). */
+export async function reportConversation(conversationId, messageId, reason) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Non connecté.');
+  const { error } = await supabase.from('message_reports').insert({
+    reporter_id: user.id, conversation_id: conversationId,
+    message_id: messageId || null, reason: reason || null,
+  });
+  if (error) throw error;
+}
+
+/** Bloque une conversation (l'auteur du blocage empêche tout nouvel envoi). */
+export async function blockConversation(conversationId) {
+  const user = await getCurrentUser();
+  const { error } = await supabase.from('conversations')
+    .update({ blocked_by: user.id }).eq('id', conversationId);
+  if (error) throw error;
+}
+
+/** Débloque une conversation (uniquement si on l'avait bloquée). */
+export async function unblockConversation(conversationId) {
+  const { error } = await supabase.from('conversations')
+    .update({ blocked_by: null }).eq('id', conversationId);
+  if (error) throw error;
+}
+
+/** Détecte un partage de coordonnées (téléphone/email) dans un message. */
+export function looksLikeContactInfo(text) {
+  const t = String(text || '');
+  const email = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(t);
+  const phone = /(?:(?:\+|00)\d{1,3}[\s.-]?)?(?:\d[\s.-]?){9,}/.test(t.replace(/\s+/g, ' '));
+  return email || phone;
+}
+
 /** Abonnement temps réel à toutes mes conversations (pour rafraîchir la liste). */
 export function subscribeMyMessages(onAny) {
   const channel = supabase

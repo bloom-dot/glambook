@@ -52,6 +52,10 @@ module.exports = async function handler(req, res) {
     if (!userRes.ok) return res.status(401).json({ error: 'Session invalide' });
     const user = await userRes.json();
 
+    // Rate limiting : max 60 envois / heure / artiste
+    const allowed = await rateLimit(supabaseUrl, serviceKey, user.id, 'send-quote', 60, 60);
+    if (!allowed) return res.status(429).json({ error: "Trop d'envois. Réessayez dans un moment." });
+
     // 2) Charger le devis + le user_id du propriétaire (embed artists)
     const qRes = await fetch(
       `${supabaseUrl}/rest/v1/quotes?id=eq.${quoteId}` +
@@ -124,6 +128,25 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: "Erreur lors de l'envoi du devis" });
   }
 };
+
+// Rate limiting via la table api_usage (service role). true = autorisé.
+async function rateLimit(url, key, userId, endpoint, max, minutes) {
+  if (!userId) return true;
+  const h = { apikey: key, Authorization: `Bearer ${key}` };
+  try {
+    const since = new Date(Date.now() - minutes * 60000).toISOString();
+    const cRes = await fetch(
+      `${url}/rest/v1/api_usage?user_id=eq.${userId}&endpoint=eq.${encodeURIComponent(endpoint)}&created_at=gte.${encodeURIComponent(since)}&select=id`,
+      { headers: { ...h, Prefer: 'count=exact', Range: '0-0' } });
+    const cr = cRes.headers.get('content-range');
+    const total = cr && cr.includes('/') ? parseInt(cr.split('/')[1], 10) : 0;
+    if (total >= max) return false;
+    await fetch(`${url}/rest/v1/api_usage`, {
+      method: 'POST', headers: { ...h, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ user_id: userId, endpoint }) });
+    return true;
+  } catch (e) { console.error('rateLimit err', e); return true; }
+}
 
 function emailHtml({ clientName, muaName, quoteNumber, total, link, logoUrl }) {
   // Les images en data: URL sont bloquées par la plupart des messageries → on n'affiche

@@ -71,7 +71,7 @@
   <div class="col" id="listCol">
     <div class="col-head">
       <span class="ttl">Messages</span>
-      <a href="/" id="homeLink">Accueil</a>
+      <span><a href="/mes-devis.html" style="font-size:.8rem;color:var(--gris);text-decoration:none;margin-right:12px;">Mes devis</a><a href="/" id="homeLink" style="font-size:.8rem;color:var(--gris);text-decoration:none;">Accueil</a></span>
     </div>
     <div class="secure-note">🔒 Messagerie sécurisée — aucune coordonnée personnelle n'est partagée.</div>
     <div class="conv-list" id="convList">
@@ -85,6 +85,10 @@
       <button class="back" id="backBtn">←</button>
       <div class="av" id="threadAv">?</div>
       <div><div class="nm" id="threadName">—</div><div class="sub">🔒 Conversation sécurisée</div></div>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" id="reportBtn" title="Signaler">⚠️ Signaler</button>
+        <button class="btn btn-ghost btn-sm" id="blockBtn" title="Bloquer">🚫 Bloquer</button>
+      </div>
     </div>
     <div class="msgs" id="msgs">
       <div class="empty"><div class="ic">✉️</div><p style="font-size:.9rem;">Sélectionnez une conversation pour discuter.</p></div>
@@ -100,14 +104,15 @@
 
 <script type="module">
   import { getCurrentUser } from '/js/supabase.js';
-  import { startConversation, myConversations, getMessages, sendMessage, markRead, subscribeMessages } from '/js/chat/store.js';
+  import { startConversation, myConversations, getMessages, sendMessage, markRead, subscribeMessages,
+           reportConversation, blockConversation, unblockConversation, looksLikeContactInfo } from '/js/chat/store.js';
   import { showToast, esc } from '/js/utils.js';
 
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
   const artistParam = params.get('artist');
 
-  let me = null, convs = [], activeId = null, unsub = null;
+  let me = null, convs = [], activeId = null, unsub = null, activeConv = null;
 
   const initials = (n) => (n || '?').trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
   const timeShort = (d) => d ? new Date(d).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }) : '';
@@ -153,10 +158,12 @@
     if (unsub) { unsub(); unsub = null; }
     renderList();
     const c = convs.find(x => x.id === id);
+    activeConv = c;
     $('threadHead').style.display = 'flex';
     $('composer').style.display = 'flex';
     $('threadAv').textContent = initials(c?.other_name);
     $('threadName').textContent = c?.other_name || 'Conversation';
+    updateBlockUI(c);
 
     // Vue mobile : montrer le fil
     $('threadCol').classList.remove('mobile-hidden');
@@ -197,10 +204,44 @@
     box.scrollTop = box.scrollHeight;
   }
 
+  function updateBlockUI(c) {
+    const blocked = c && c.blocked_by;
+    const byMe = blocked && c.blocked_by === me.id;
+    $('blockBtn').textContent = blocked ? (byMe ? '↩︎ Débloquer' : '🚫 Bloqué') : '🚫 Bloquer';
+    $('blockBtn').disabled = !!(blocked && !byMe);
+    $('input').disabled = !!blocked;
+    $('sendBtn').disabled = !!blocked;
+    $('input').placeholder = blocked
+      ? (byMe ? 'Vous avez bloqué cette conversation.' : 'Conversation bloquée.')
+      : 'Écrivez votre message…';
+  }
+
+  $('reportBtn').onclick = async () => {
+    if (!activeId) return;
+    const reason = prompt('Signaler cette conversation — précisez la raison (optionnel) :', '');
+    if (reason === null) return;
+    try { await reportConversation(activeId, null, reason); showToast('Signalement envoyé. Merci.'); }
+    catch (e) { console.error(e); showToast('Échec du signalement.'); }
+  };
+
+  $('blockBtn').onclick = async () => {
+    if (!activeId || !activeConv) return;
+    const byMe = activeConv.blocked_by === me.id;
+    try {
+      if (byMe) { await unblockConversation(activeId); activeConv.blocked_by = null; showToast('Conversation débloquée.'); }
+      else { if (!confirm('Bloquer cette conversation ? Vous ne pourrez plus échanger de messages.')) return;
+             await blockConversation(activeId); activeConv.blocked_by = me.id; showToast('Conversation bloquée.'); }
+      updateBlockUI(activeConv);
+      loadConversations();
+    } catch (e) { console.error(e); showToast('Action impossible.'); }
+  };
+
   async function doSend() {
     const inp = $('input');
     const text = inp.value.trim();
     if (!text || !activeId) return;
+    if (looksLikeContactInfo(text) &&
+        !confirm('Ce message semble contenir des coordonnées personnelles (email/téléphone). Pour votre sécurité, GlamBook recommande de tout garder dans la messagerie. Envoyer quand même ?')) return;
     inp.value = ''; inp.style.height = 'auto';
     try {
       const msg = await sendMessage(activeId, text);

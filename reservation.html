@@ -158,6 +158,10 @@
           <div class="fg-hint"><span class="dot"></span><span id="camHintTxt">Centrez votre visage</span></div>
         </div>
       </div>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:.78rem;color:var(--gris);margin-bottom:12px;cursor:pointer;">
+        <input type="checkbox" id="scanConsent" style="width:auto;margin-top:2px;flex-shrink:0;"/>
+        <span>J'accepte que ma photo soit analysée par une intelligence artificielle afin de générer des conseils maquillage. <b>La photo n'est pas conservée</b> ; seul le diagnostic (texte) est enregistré. Analyse cosmétique, non médicale. <a href="/legal/confidentialite.html" target="_blank" style="color:var(--rose);">En savoir plus</a>.</span>
+      </label>
       <div class="scan-actions" style="margin-bottom:10px;">
         <button class="btn btn-secondary" id="btnCam">📷 Caméra</button>
         <button class="btn btn-primary hide" id="btnCapture" style="display:none;">Prendre la photo</button>
@@ -203,6 +207,7 @@
       <p style="color:var(--gris);font-size:.9rem;">La maquilleuse va préparer votre devis personnalisé et vous l'enverra par email pour signature. À très vite ✨</p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;">
         <a id="doneContact" class="btn btn-primary">💬 Discuter avec la maquilleuse</a>
+        <a href="/mes-devis.html" class="btn btn-secondary">Mon espace</a>
         <a href="/" class="btn btn-ghost">Retour à l'accueil</a>
       </div>
     </div>
@@ -289,7 +294,13 @@
   // ── ÉTAPE B : caméra / upload ──
   let detectApi = null, detectTimer = null, stableCount = 0, autoShot = false;
 
+  function consentOK() {
+    if (!$('scanConsent').checked) { showToast('Merci de cocher le consentement avant le scan.', 'error'); return false; }
+    return true;
+  }
+
   $('btnCam').onclick = async () => {
+    if (!consentOK()) return;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
       const v = $('video');
@@ -396,6 +407,7 @@
 
   $('fileInput').onchange = (e) => {
     const file = e.target.files?.[0]; if (!file) return;
+    if (!consentOK()) { e.target.value = ''; return; }
     const img = new Image();
     img.onload = () => usePhoto(frameToDataUrl(img, img.naturalWidth, img.naturalHeight));
     img.onerror = () => showToast('Image illisible.', 'error');
