@@ -248,52 +248,126 @@ export function buildQuotePdf(quote) {
   return doc;
 }
 
-/** Prévisualise le PDF dans une modale intégrée (évite les pop-ups bloqués par le navigateur). */
-export function previewQuotePdf(quote) {
-  const doc = buildQuotePdf(quote);
-  const name = `${quote.quoteNumber || 'devis'}.pdf`;
-  const url = doc.output('bloburl');
-  showPdfModal(url, name);
-}
+const escHtml = (s) => String(s ?? '')
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-/** Affiche un PDF (blob URL) dans une superposition plein écran, avec repli téléchargement. */
-function showPdfModal(url, name) {
+/**
+ * Prévisualise le devis en HTML dans une modale intégrée.
+ * Universel : fonctionne sur mobile ET desktop, sans pop-up ni PDF en iframe.
+ * Le bouton « Télécharger le PDF » fournit le fichier réel.
+ */
+export function previewQuotePdf(quote) {
   document.getElementById('gb-pdf-modal')?.remove();
+  const t = computeTotals(quote);
 
   const ov = document.createElement('div');
   ov.id = 'gb-pdf-modal';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;flex-direction:column;';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;flex-direction:column;'
+    + 'font-family:Inter,-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;';
 
+  // Barre d'actions
   const bar = document.createElement('div');
-  bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#111;color:#fff;';
-  bar.innerHTML = '<span style="font-weight:700;font-size:.9rem;">Aperçu du devis</span>';
-
+  bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;'
+    + 'background:#111;color:#fff;flex:0 0 auto;';
+  bar.innerHTML = '<span style="font-weight:800;font-size:.95rem;">Aperçu du devis</span>';
   const actions = document.createElement('div');
   actions.style.cssText = 'display:flex;gap:8px;';
-  const dl = document.createElement('a');
-  dl.href = url; dl.download = name; dl.textContent = '⬇ Télécharger';
-  dl.style.cssText = 'background:#E8547A;color:#fff;text-decoration:none;font-weight:700;font-size:.82rem;padding:8px 16px;border-radius:8px;';
-  const openTab = document.createElement('a');
-  openTab.href = url; openTab.target = '_blank'; openTab.rel = 'noopener'; openTab.textContent = 'Ouvrir';
-  openTab.style.cssText = 'background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);text-decoration:none;font-weight:700;font-size:.82rem;padding:8px 16px;border-radius:8px;';
+  const dl = document.createElement('button');
+  dl.textContent = '⬇ Télécharger le PDF';
+  dl.style.cssText = 'background:#E8547A;color:#fff;border:none;font-weight:700;font-size:.82rem;padding:9px 16px;border-radius:8px;cursor:pointer;';
+  dl.onclick = () => downloadQuotePdf(quote);
   const close = document.createElement('button');
   close.textContent = 'Fermer';
-  close.style.cssText = 'background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:700;font-size:.82rem;padding:8px 16px;border-radius:8px;cursor:pointer;';
-  actions.append(dl, openTab, close);
+  close.style.cssText = 'background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:700;font-size:.82rem;padding:9px 16px;border-radius:8px;cursor:pointer;';
+  actions.append(dl, close);
   bar.appendChild(actions);
 
-  const frame = document.createElement('iframe');
-  frame.src = url;
-  frame.setAttribute('title', 'Aperçu PDF');
-  frame.style.cssText = 'flex:1;width:100%;border:0;background:#525659;';
+  // Zone défilante + feuille
+  const scroll = document.createElement('div');
+  scroll.style.cssText = 'flex:1 1 auto;overflow:auto;padding:20px 12px;-webkit-overflow-scrolling:touch;';
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'max-width:720px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25);';
+  sheet.innerHTML = quoteToHtml(quote, t);
+  scroll.appendChild(sheet);
 
-  ov.append(bar, frame);
+  ov.append(bar, scroll);
   document.body.appendChild(ov);
 
-  const cleanup = () => { ov.remove(); setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 1000); };
+  const cleanup = () => ov.remove();
   close.onclick = cleanup;
   ov.addEventListener('click', (e) => { if (e.target === ov) cleanup(); });
-  document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { cleanup(); document.removeEventListener('keydown', esc); } });
+  document.addEventListener('keydown', function onEsc(e){ if (e.key === 'Escape') { cleanup(); document.removeEventListener('keydown', onEsc); } });
+}
+
+/** Rendu HTML du devis (miroir du PDF), responsive. */
+function quoteToHtml(q, t) {
+  const line = (it) => `<tr>
+    <td style="padding:9px 6px;border-bottom:1px solid #F3F4F6;">${escHtml(it.title)}</td>
+    <td style="padding:9px 6px;border-bottom:1px solid #F3F4F6;text-align:center;">${escHtml(it.qty)}</td>
+    <td style="padding:9px 6px;border-bottom:1px solid #F3F4F6;text-align:right;">${escHtml(euros(it.unitPriceCents))}</td>
+    <td style="padding:9px 6px;border-bottom:1px solid #F3F4F6;text-align:right;font-weight:700;">${escHtml(euros((Number(it.qty)||0)*Math.round(Number(it.unitPriceCents)||0)))}</td>
+  </tr>`;
+  const items = (q.items || []).filter(it => it.title).map(line).join('');
+  const travelRow = t.travelCents > 0
+    ? `<tr><td style="padding:9px 6px;border-bottom:1px solid #F3F4F6;">Frais de déplacement (${escHtml(q.travelDistanceKm)} km × ${escHtml(euros(q.travelRateCents))}/km)</td><td></td><td></td><td style="padding:9px 6px;border-bottom:1px solid #F3F4F6;text-align:right;font-weight:700;">${escHtml(euros(t.travelCents))}</td></tr>`
+    : '';
+  const party = (label, lines) => `<div style="flex:1;min-width:180px;">
+    <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#E8547A;margin-bottom:6px;border-bottom:1px solid #E5E7EB;padding-bottom:3px;">${label}</div>
+    ${lines.filter(Boolean).map((l,i)=>`<div style="font-size:${i===0?'14px':'12.5px'};font-weight:${i===0?'700':'400'};color:${i===0?'#111':'#6B7280'};margin-bottom:2px;">${escHtml(l)}</div>`).join('')}
+  </div>`;
+  const eventBand = (q.eventDate || q.client.eventAddress) ? `
+    <div style="background:#FDE8EF;border-radius:8px;padding:10px 14px;margin:14px 0;font-size:13px;color:#C43A60;">
+      <b>Prestation prévue :</b> <span style="color:#111;">${escHtml(dateFR(q.eventDate, true))}${q.client.eventAddress ? ' — ' + escHtml(q.client.eventAddress) : ''}</span>
+    </div>` : '';
+  const tvaRow = q.vatExempt
+    ? `<div style="font-style:italic;font-size:12px;color:#6B7280;text-align:right;margin:2px 0;">TVA non applicable, art. 293 B du CGI</div>`
+    : `<div style="display:flex;justify-content:space-between;font-size:13px;color:#6B7280;padding:3px 0;">TVA (${escHtml(q.vatRate)} %)<b style="color:#111;">${escHtml(euros(t.vatCents))}</b></div>`;
+  const depositRows = t.depositCents > 0 ? `
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:#6B7280;padding:3px 0;">Acompte à la réservation<b style="color:#111;">${escHtml(euros(t.depositCents))}</b></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:#6B7280;padding:3px 0;">Solde le jour J<b style="color:#111;">${escHtml(euros(t.balanceCents))}</b></div>` : '';
+  const terms = q.paymentTerms ? `<div style="margin-top:14px;font-size:12.5px;color:#6B7280;"><b style="color:#111;">Conditions de paiement :</b> ${escHtml(q.paymentTerms)}</div>` : '';
+  const notes = q.notes ? `<div style="margin-top:6px;font-size:12.5px;color:#6B7280;">${escHtml(q.notes)}</div>` : '';
+  const signed = q.signatureData
+    ? `<div style="margin-top:6px;"><img src="${escHtml(q.signatureData)}" alt="Signature" style="max-height:70px;"/><div style="font-size:11px;color:#6B7280;">${escHtml([q.signedName, q.signedAt ? dateFR(q.signedAt, true) : ''].filter(Boolean).join(' — '))}</div></div>`
+    : `<div style="margin-top:6px;height:64px;border:1px dashed #E5E7EB;border-radius:6px;"></div>`;
+
+  return `
+    <div style="background:#111;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:20px;font-weight:900;color:#E8547A;letter-spacing:-.03em;">Glam<span style="color:#D4AF37;">Book</span></div>
+      <div style="text-align:right;color:#fff;">
+        <div style="font-weight:800;">${escHtml(q.quoteNumber || 'DEVIS')}</div>
+        <div style="font-size:11px;color:#bbb;">Émis le ${escHtml(dateFR(new Date()))}${q.validUntil ? ' · valable jusqu’au ' + escHtml(dateFR(q.validUntil)) : ''}</div>
+      </div>
+    </div>
+    <div style="padding:20px 22px;">
+      <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px;">
+        ${party('Prestataire', [q.mua.name, q.mua.address, q.mua.siret ? 'SIRET : '+q.mua.siret : '', q.mua.email, q.mua.phone])}
+        ${party('Cliente', [q.client.name, q.client.email, q.client.phone])}
+      </div>
+      ${eventBand}
+      <table style="width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px;">
+        <thead><tr style="background:#111;color:#fff;">
+          <th style="padding:8px 6px;text-align:left;font-size:11px;text-transform:uppercase;">Prestation</th>
+          <th style="padding:8px 6px;text-align:center;font-size:11px;">Qté</th>
+          <th style="padding:8px 6px;text-align:right;font-size:11px;">P.U.</th>
+          <th style="padding:8px 6px;text-align:right;font-size:11px;">Total</th>
+        </tr></thead>
+        <tbody>${items}${travelRow}</tbody>
+      </table>
+      <div style="max-width:300px;margin-left:auto;margin-top:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:#6B7280;padding:3px 0;">Total HT<b style="color:#111;">${escHtml(euros(t.subtotalCents))}</b></div>
+        ${tvaRow}
+        <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:800;border-top:2px solid #E8547A;margin-top:6px;padding-top:8px;">Total TTC<span style="color:#C43A60;">${escHtml(euros(t.totalCents))}</span></div>
+        ${depositRows}
+      </div>
+      ${terms}${notes}
+      <div style="margin-top:20px;border-top:1px solid #E5E7EB;padding-top:12px;">
+        <div style="font-weight:800;font-size:13px;">Bon pour accord</div>
+        <div style="font-size:11px;color:#6B7280;">Date &amp; signature de la cliente</div>
+        ${signed}
+      </div>
+    </div>`;
 }
 
 /** Renvoie une dataURL du PDF (pour embed <iframe> ou téléchargement). */
