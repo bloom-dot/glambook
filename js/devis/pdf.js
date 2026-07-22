@@ -248,11 +248,52 @@ export function buildQuotePdf(quote) {
   return doc;
 }
 
-/** Ouvre le PDF dans un nouvel onglet (prévisualisation). */
+/** Prévisualise le PDF dans une modale intégrée (évite les pop-ups bloqués par le navigateur). */
 export function previewQuotePdf(quote) {
   const doc = buildQuotePdf(quote);
+  const name = `${quote.quoteNumber || 'devis'}.pdf`;
   const url = doc.output('bloburl');
-  window.open(url, '_blank');
+  showPdfModal(url, name);
+}
+
+/** Affiche un PDF (blob URL) dans une superposition plein écran, avec repli téléchargement. */
+function showPdfModal(url, name) {
+  document.getElementById('gb-pdf-modal')?.remove();
+
+  const ov = document.createElement('div');
+  ov.id = 'gb-pdf-modal';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;flex-direction:column;';
+
+  const bar = document.createElement('div');
+  bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#111;color:#fff;';
+  bar.innerHTML = '<span style="font-weight:700;font-size:.9rem;">Aperçu du devis</span>';
+
+  const actions = document.createElement('div');
+  actions.style.cssText = 'display:flex;gap:8px;';
+  const dl = document.createElement('a');
+  dl.href = url; dl.download = name; dl.textContent = '⬇ Télécharger';
+  dl.style.cssText = 'background:#E8547A;color:#fff;text-decoration:none;font-weight:700;font-size:.82rem;padding:8px 16px;border-radius:8px;';
+  const openTab = document.createElement('a');
+  openTab.href = url; openTab.target = '_blank'; openTab.rel = 'noopener'; openTab.textContent = 'Ouvrir';
+  openTab.style.cssText = 'background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);text-decoration:none;font-weight:700;font-size:.82rem;padding:8px 16px;border-radius:8px;';
+  const close = document.createElement('button');
+  close.textContent = 'Fermer';
+  close.style.cssText = 'background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:700;font-size:.82rem;padding:8px 16px;border-radius:8px;cursor:pointer;';
+  actions.append(dl, openTab, close);
+  bar.appendChild(actions);
+
+  const frame = document.createElement('iframe');
+  frame.src = url;
+  frame.setAttribute('title', 'Aperçu PDF');
+  frame.style.cssText = 'flex:1;width:100%;border:0;background:#525659;';
+
+  ov.append(bar, frame);
+  document.body.appendChild(ov);
+
+  const cleanup = () => { ov.remove(); setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 1000); };
+  close.onclick = cleanup;
+  ov.addEventListener('click', (e) => { if (e.target === ov) cleanup(); });
+  document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { cleanup(); document.removeEventListener('keydown', esc); } });
 }
 
 /** Renvoie une dataURL du PDF (pour embed <iframe> ou téléchargement). */
