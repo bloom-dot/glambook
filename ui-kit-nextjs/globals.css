@@ -1,0 +1,75 @@
+/* ═══════════════════════════════════════════════════
+   GlamBook — globals.css (Direction artistique Sombre Luxe)
+   Option A : polices via ce @import (simple).
+   Option B (recommandée en prod Next.js) : next/font — voir README.
+   ═══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Polices (fallback si next/font non utilisé) */
+  --font-heading: 'Cormorant Garamond', 'Playfair Display', serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+  /* ── Thème CLAIR ── */
+  --bg: #FBF9F7;          /* blanc satiné chaud */
+  --surface: #FFFFFF;
+  --surface-2: #F3EFEA;
+  --text: #1A1A1D;
+  --muted: #6B7280;
+  --border: #E7E2DB;
+  --champagne: #B8962E;   /* doré assombri pour contraste sur clair */
+  --poudre: #E8D8CE;
+}
+
+.dark {
+  /* ── Thème SOMBRE LUXE (par défaut) ── */
+  --bg: #0F0F11;          /* noir satiné */
+  --surface: #18181B;
+  --surface-2: #27272A;
+  --text: #F4F1EC;        /* ivoire */
+  --muted: #9CA3AF;
+  --border: #2A2A2E;
+  --champagne: #D4AF37;   /* doré champagne */
+  --poudre: #E8D8CE;      /* rose poudré */
+}
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    /* Transition fluide lors du changement de thème */
+    transition: background-color .5s var(--tw-ease, ease), color .5s ease;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    letter-spacing: .005em;
+    font-weight: 600;
+  }
+
+  /* Les surfaces héritent aussi de la transition de thème */
+  .theme-transition, .theme-transition * {
+    transition: background-color .5s ease, border-color .5s ease, color .5s ease, box-shadow .5s ease;
+  }
+
+  ::selection { background: rgba(212,175,55,.28); }
+}
+
+@layer components {
+  /* Bouton doré champagne réutilisable */
+  .btn-champagne {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 font-sans font-semibold text-noir-900;
+    background: linear-gradient(135deg, #E7C766 0%, #D4AF37 100%);
+    box-shadow: 0 4px 16px rgba(212,175,55,.25);
+    transition: transform .2s var(--tw-ease, ease), box-shadow .2s ease;
+  }
+  .btn-champagne:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(212,175,55,.4); }
+}
