@@ -54,8 +54,9 @@
     .filter-input {
       padding: 8px 14px; border: 1.5px solid var(--bord); border-radius: 24px;
       font-size: .8rem; min-width: 160px; color: var(--noir); font-family: inherit;
-      transition: all var(--transition);
+      background: var(--blanc); transition: all var(--transition);
     }
+    .filter-input::placeholder { color: var(--gris); }
     .filter-input:focus { outline: none; border-color: var(--rose); box-shadow: 0 0 0 3px rgba(232,84,122,.1); }
 
     .results-meta { color: var(--gris); font-size: .82rem; margin-bottom: 20px; font-weight: 500; }
@@ -66,7 +67,7 @@
     .sort-select {
       margin-left: auto; padding: 8px 14px; border: 1.5px solid var(--bord);
       border-radius: 24px; font-size: .8rem; cursor: pointer; font-family: inherit;
-      transition: all var(--transition);
+      background: var(--blanc); color: var(--noir); transition: all var(--transition);
     }
     .sort-select:focus { outline: none; border-color: var(--rose); }
 
@@ -234,7 +235,7 @@ async function loadArtists(reset) {
     el.setAttribute('aria-label', `Voir le profil de ${name}`);
     el.innerHTML = `
       <img class="artist-card-cover" src="${coverUrl}" alt="Réalisations de ${name}" loading="lazy"
-           onerror="this.style.cssText='height:200px;display:flex;background:linear-gradient(135deg,#FDE8EF,#F9FAFB)'"/>
+           onerror="this.style.cssText='height:200px;display:flex;background:linear-gradient(135deg,rgba(232,84,122,.14),#27272A)'"/>
       <div class="artist-card-body">
         <div class="artist-card-header">
           <div class="artist-avatar avatar-placeholder" style="width:52px;height:52px;font-size:1.1rem;margin-top:-30px;border:3px solid #fff;flex-shrink:0;overflow:hidden;">
