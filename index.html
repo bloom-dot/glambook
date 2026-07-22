@@ -626,6 +626,58 @@
   </div>
 </section>
 
+<!-- ═══ BANDEAU PRO — recrutement maquilleuses (style Doctolib "Vous êtes praticien ?") ═══ -->
+<style>
+  .pro-band { max-width: 1120px; margin: 40px auto 8px; padding: 0 20px; }
+  .pro-band-inner {
+    display: grid; grid-template-columns: 1.05fr .95fr; align-items: stretch;
+    border-radius: 22px; overflow: hidden;
+    border: 1px solid var(--bord, #27272A);
+    background: linear-gradient(135deg, #141416 0%, #1B1618 100%);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  }
+  .pro-band-text { padding: 44px 40px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+  .pro-band-text .eyebrow { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--champagne, #E7C766); font-weight: 700; }
+  .pro-band-text h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.3rem; line-height: 1.08; font-weight: 600; color: #F4F4F5; margin: 0; }
+  .pro-band-text h2 em { font-style: italic; background: linear-gradient(100deg,#E8D8CE,#D4AF37 55%,#E11D48); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .pro-band-text p { color: var(--text-secondary, #A1A1AA); font-size: 1rem; line-height: 1.55; margin: 0; max-width: 46ch; }
+  .pro-band-perks { list-style: none; padding: 0; margin: 6px 0 4px; display: flex; flex-wrap: wrap; gap: 10px 20px; }
+  .pro-band-perks li { color: #D4D4D8; font-size: .92rem; display: flex; align-items: center; gap: 8px; }
+  .pro-band-perks li::before { content: '✓'; color: var(--champagne, #E7C766); font-weight: 800; }
+  .pro-band-cta { margin-top: 8px; }
+  .pro-band-media { position: relative; min-height: 320px; }
+  .pro-band-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pro-band-media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #1B1618 0%, rgba(27,22,24,.35) 26%, transparent 60%); }
+  @media (max-width: 760px) {
+    .pro-band-inner { grid-template-columns: 1fr; }
+    .pro-band-media { min-height: 220px; order: -1; }
+    .pro-band-media::after { background: linear-gradient(0deg, #1B1618 0%, transparent 55%); }
+    .pro-band-text { padding: 30px 24px; }
+    .pro-band-text h2 { font-size: 1.9rem; }
+  }
+</style>
+<section class="pro-band">
+  <div class="pro-band-inner anim-up">
+    <div class="pro-band-text">
+      <span class="eyebrow">Vous &ecirc;tes maquilleuse ?</span>
+      <h2>D&eacute;veloppez votre activit&eacute; et faites <em>briller</em> votre talent.</h2>
+      <p>Cr&eacute;ez votre profil en quelques minutes, mettez en avant votre portfolio et recevez des demandes de r&eacute;servation qualifi&eacute;es, sans commission &agrave; l'inscription.</p>
+      <ul class="pro-band-perks">
+        <li>Profil &amp; portfolio gratuits</li>
+        <li>Agenda et dispos en ligne</li>
+        <li>Devis &amp; paiements int&eacute;gr&eacute;s</li>
+        <li>0&euro; de frais d'inscription</li>
+      </ul>
+      <div class="pro-band-cta">
+        <a href="/auth/register.html?role=artist" class="btn-glow">Cr&eacute;er mon profil pro &#8594;</a>
+      </div>
+    </div>
+    <div class="pro-band-media">
+      <img src="/img/bandeau-pro.jpg" alt="Maquilleuse professionnelle au travail" loading="lazy"/>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer class="footer-imm">
   <div class="inner">
@@ -646,7 +698,7 @@
 <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
 <!-- ═══ THREE.JS + GSAP — defer : ne bloque plus le premier rendu ═══ -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- three.js retiré : le hero est désormais une photo (plus de WebGL) -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -659,6 +711,10 @@ function heroFallback() {
 }
 
 function initHero() {
+  // Le hero est désormais une photo (voir .hero-wrap background-image).
+  // Le canvas WebGL est masqué : on n'initialise plus THREE.js pour
+  // économiser CPU/GPU/batterie et libérer le thread principal.
+  return;
   const lowEnd = (navigator.hardwareConcurrency || 8) <= 4
     || matchMedia('(prefers-reduced-motion: reduce)').matches
     || (navigator.deviceMemory && navigator.deviceMemory <= 4);

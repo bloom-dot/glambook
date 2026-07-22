@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glambook-v8';
+const CACHE_NAME = 'glambook-v9';
 const ASSETS = [
   '/',
   '/index.html',
