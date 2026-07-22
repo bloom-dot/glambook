@@ -103,6 +103,17 @@
     .status-pending   { background: #FFFBEB; color: #92400E; }
     .status-cancelled { background: #FEF2F2; color: #991B1B; }
     .chip-d { display:inline-block; background:#fff; border:1px solid var(--bord); border-radius:8px; padding:4px 10px; font-size:.78rem; margin:0 6px 6px 0; }
+    /* Récurrence hebdomadaire */
+    .wk-row { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--gris-cl); flex-wrap:wrap; }
+    .wk-row:last-child { border-bottom:none; }
+    .wk-name { font-weight:700; font-size:.85rem; width:82px; flex-shrink:0; }
+    .wk-slots { display:flex; flex-wrap:wrap; gap:5px; flex:1; align-items:center; }
+    .wk-chip { font-size:.74rem; padding:4px 9px; border-radius:999px; border:1.5px solid var(--bord); background:#fff; color:var(--gris); cursor:pointer; transition:all .15s; }
+    .wk-chip:hover { border-color:var(--rose); }
+    .wk-chip.on { background:var(--rose); border-color:var(--rose); color:#fff; }
+    .wk-quick { font-size:.7rem; color:var(--gris); cursor:pointer; background:none; border:none; text-decoration:underline; padding:2px 4px; }
+    .wk-quick:hover { color:var(--rose); }
+    .wk-off { font-size:.72rem; color:#B45309; font-style:italic; }
 
     /* Calendrier dispo */
     .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 16px; }
@@ -229,6 +240,29 @@
     <!-- ═══ ONGLET DISPONIBILITÉS ═══ -->
     <div id="tab-disponibilites">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Gérer mes disponibilités</h2>
+
+      <!-- Récurrence hebdomadaire -->
+      <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
+        <div style="margin-bottom:10px;">
+          <strong style="font-size:.95rem;">🔁 Récurrence hebdomadaire</strong>
+          <div style="font-size:.8rem;color:var(--gris);margin-top:2px;">Définissez vos créneaux type pour chaque jour, puis appliquez-les sur plusieurs semaines d'un coup.</div>
+        </div>
+        <div id="wk-template"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px;">
+          <button class="btn btn-secondary btn-sm" id="btn-save-template">Enregistrer le modèle</button>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:.82rem;color:var(--gris);">Appliquer sur</span>
+            <select id="wk-weeks" style="padding:7px 9px;border:1.5px solid var(--bord);border-radius:8px;font-size:.85rem;">
+              <option value="4">4 semaines</option>
+              <option value="8" selected>8 semaines</option>
+              <option value="12">12 semaines</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-apply-template">Appliquer</button>
+        </div>
+        <p style="font-size:.74rem;color:var(--gris);margin-top:10px;">💡 Laissez un jour sans créneau pour être indisponible ce jour-là (ex. tous les dimanches). Les créneaux déjà réservés ne sont jamais supprimés.</p>
+      </div>
+
       <div style="background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
           <strong id="cal-month-label"></strong>
@@ -531,6 +565,7 @@ async function init() {
   }
   loadBookings('all');
   renderCalendar();
+  loadTemplate();
   loadReviews();
   loadPhotos();
   loadServices();
@@ -633,6 +668,86 @@ window.saveSlots = async function() {
   }
   showToast('Créneaux enregistrés !');
 };
+
+// ── Récurrence hebdomadaire ──
+const WEEKDAYS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+let templateSlots = [[],[],[],[],[],[],[]]; // 0=Lundi … 6=Dimanche
+
+async function loadTemplate() {
+  templateSlots = [[],[],[],[],[],[],[]];
+  const { data } = await supabase.from('availability_templates').select('weekday,slots').eq('artist_id', artistData?.id);
+  (data||[]).forEach(r => { if (r.weekday>=0 && r.weekday<=6) templateSlots[r.weekday] = r.slots || []; });
+  renderTemplate();
+}
+
+function renderTemplate() {
+  const box = document.getElementById('wk-template');
+  if (!box) return;
+  box.innerHTML = WEEKDAYS.map((name, wd) => `
+    <div class="wk-row" data-wd="${wd}">
+      <div class="wk-name">${name}</div>
+      <div class="wk-slots">
+        <button type="button" class="wk-quick" data-quick="all">tous</button>
+        <button type="button" class="wk-quick" data-quick="none">aucun</button>
+        ${ALL_SLOTS.map(s => `<button type="button" class="wk-chip ${templateSlots[wd].includes(s)?'on':''}" data-slot="${s}">${s}</button>`).join('')}
+        <span class="wk-off" data-off ${templateSlots[wd].length?'style="display:none"':''}>· indisponible</span>
+      </div>
+    </div>`).join('');
+  box.querySelectorAll('.wk-row').forEach(row => {
+    const wd = +row.getAttribute('data-wd');
+    const refreshOff = () => { const off = row.querySelector('[data-off]'); if (off) off.style.display = templateSlots[wd].length ? 'none' : ''; };
+    row.querySelectorAll('.wk-chip').forEach(chip => {
+      chip.onclick = () => {
+        const s = chip.getAttribute('data-slot');
+        const arr = templateSlots[wd], i = arr.indexOf(s);
+        if (i>=0) arr.splice(i,1); else arr.push(s);
+        chip.classList.toggle('on');
+        refreshOff();
+      };
+    });
+    row.querySelectorAll('.wk-quick').forEach(q => {
+      q.onclick = () => {
+        templateSlots[wd] = q.getAttribute('data-quick')==='all' ? [...ALL_SLOTS] : [];
+        row.querySelectorAll('.wk-chip').forEach(c => c.classList.toggle('on', templateSlots[wd].includes(c.getAttribute('data-slot'))));
+        refreshOff();
+      };
+    });
+  });
+}
+
+async function saveTemplate() {
+  const rows = WEEKDAYS.map((_, wd) => ({ artist_id: artistData?.id, weekday: wd, slots: templateSlots[wd], updated_at: new Date().toISOString() }));
+  const { error } = await supabase.from('availability_templates').upsert(rows, { onConflict: 'artist_id,weekday' });
+  if (error) { console.error(error); showToast('Erreur lors de l\'enregistrement du modèle.'); return; }
+  showToast('Modèle enregistré ✅');
+}
+
+async function applyTemplate() {
+  const weeks = +document.getElementById('wk-weeks').value || 8;
+  if (!confirm(`Appliquer votre modèle sur les ${weeks} prochaines semaines ?\nLes créneaux non réservés de cette période seront remplacés par le modèle.`)) return;
+  const start = new Date(); start.setHours(0,0,0,0);
+  const end = new Date(start); end.setDate(end.getDate() + weeks*7);
+  const iso = (d) => d.toISOString().split('T')[0];
+  // 1) supprimer les créneaux NON réservés de la période
+  await supabase.from('availabilities').delete()
+    .eq('artist_id', artistData?.id).eq('is_booked', false)
+    .gte('date', iso(start)).lte('date', iso(end));
+  // 2) générer les créneaux du modèle (upsert en ignorant les doublons = créneaux réservés préservés)
+  const rows = [];
+  for (let d = new Date(start); d < end; d.setDate(d.getDate()+1)) {
+    const wd = (d.getDay()+6)%7; // 0=Lundi
+    for (const s of templateSlots[wd]) rows.push({ artist_id: artistData?.id, date: iso(d), time_slot: s, is_available: true, is_booked: false });
+  }
+  if (rows.length) {
+    const { error } = await supabase.from('availabilities').upsert(rows, { onConflict: 'artist_id,date,time_slot', ignoreDuplicates: true });
+    if (error) { console.error(error); showToast('Erreur lors de l\'application.'); return; }
+  }
+  showToast(`Modèle appliqué sur ${weeks} semaines ✅`);
+  renderCalendar();
+}
+
+document.getElementById('btn-save-template')?.addEventListener('click', saveTemplate);
+document.getElementById('btn-apply-template')?.addEventListener('click', applyTemplate);
 
 // Avis
 async function loadReviews() {
