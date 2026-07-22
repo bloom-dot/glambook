@@ -798,7 +798,7 @@ async function loadReviews() {
         <strong style="font-size:.9rem;">${esc(r.reviewer_name||'Cliente')}</strong>
         <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
       </div>
-      <p style="font-size:.85rem;color:#4B5563;">${esc(r.comment||'')}</p>
+      <p style="font-size:.85rem;color:var(--gris);">${esc(r.comment||'')}</p>
       <p style="font-size:.72rem;color:var(--gris);margin-top:6px;">${new Date(r.created_at).toLocaleDateString('fr-FR')}</p>
     </div>`).join('');
 }
