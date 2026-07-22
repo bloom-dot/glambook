@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Réserver avec diagnostic — GlamBook</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8547A"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    .rz { max-width: 640px; margin: 28px auto; padding: 0 16px 80px; }
+    .step-indicator { display:flex; gap:0; margin-bottom:24px; }
+    .step-dot { flex:1; text-align:center; padding:10px 4px; font-size:.76rem; font-weight:700; border-bottom:3px solid var(--bord); color:var(--gris); }
+    .step-dot.active { border-color:var(--rose); color:var(--rose); }
+    .step-dot.done   { border-color:#10B981; color:#10B981; }
+    .panel { background:var(--blanc); border:1px solid var(--bord); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:16px; }
+    .panel h2 { font-size:1.05rem; font-weight:800; margin-bottom:4px; }
+    .panel .h-sub { font-size:.83rem; color:var(--gris); margin-bottom:16px; }
+    .field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+    .field label { font-size:.75rem; font-weight:600; color:var(--gris); }
+    input, textarea { font-family:inherit; font-size:.92rem; padding:11px 13px; border:1.5px solid var(--bord); border-radius:var(--radius-sm); width:100%; }
+    input:focus, textarea:focus { outline:none; border-color:var(--rose); }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media(max-width:520px){ .grid2 { grid-template-columns:1fr; } }
+
+    .svc { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1.5px solid var(--bord); border-radius:var(--radius-sm); margin-bottom:8px; cursor:pointer; transition:all var(--transition); }
+    .svc:hover { border-color:var(--rose); }
+    .svc.sel { border-color:var(--rose); background:var(--rose-cl); }
+    .svc input { width:auto; }
+    .svc .nm { font-weight:600; font-size:.9rem; flex:1; }
+    .svc .pr { font-weight:800; color:var(--rose-f); }
+
+    .cam-wrap { position:relative; background:#000; border-radius:var(--radius-sm); overflow:hidden; aspect-ratio:3/4; max-height:360px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; }
+    .cam-wrap video, .cam-wrap img { width:100%; height:100%; object-fit:cover; }
+    .cam-placeholder { color:#777; font-size:.9rem; text-align:center; padding:20px; }
+    .scan-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .scan-actions .btn { flex:1; }
+
+    .diag { }
+    .diag-badges { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .badge2 { display:inline-flex; align-items:center; gap:6px; background:var(--rose-cl); color:var(--rose-f); font-weight:700; font-size:.8rem; padding:6px 12px; border-radius:999px; }
+    .badge2 .k { color:var(--gris); font-weight:600; }
+    .diag-list { margin:10px 0; }
+    .diag-list .lbl { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--rose); margin:12px 0 6px; }
+    .chip { display:inline-block; background:#F3F4F6; border-radius:8px; padding:5px 11px; font-size:.82rem; margin:0 6px 6px 0; }
+    .disclaimer { font-size:.72rem; font-style:italic; color:var(--gris); margin-top:12px; }
+
+    .nav-btns { display:flex; justify-content:space-between; gap:10px; margin-top:8px; }
+    .spinner { width:36px;height:36px;border:3px solid var(--bord);border-top-color:var(--rose);border-radius:50%;animation:spin .8s linear infinite;margin:20px auto; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .center { text-align:center; padding:12px; }
+    .hide { display:none !important; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--noir); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .toast.error { background:var(--rose-f); }
+  </style>
+</head>
+<body>
+<nav class="nav"><div class="nav-inner">
+  <a href="/" class="nav-logo">Glam<span>Book</span></a>
+  <div class="nav-links"><a href="javascript:history.back()">← Retour</a></div>
+</div></nav>
+
+<div class="rz">
+  <div class="step-indicator">
+    <div class="step-dot active" id="sd-a">1 · Prestation</div>
+    <div class="step-dot" id="sd-b">2 · Diagnostic</div>
+    <div class="step-dot" id="sd-c">3 · Confirmation</div>
+  </div>
+
+  <!-- ÉTAPE A -->
+  <div id="step-a">
+    <div class="panel">
+      <h2>Vos prestations</h2>
+      <div class="h-sub">Sélectionnez une ou plusieurs prestations.</div>
+      <div id="svc-list"><div class="center"><div class="spinner"></div></div></div>
+    </div>
+    <div class="panel">
+      <h2>Événement</h2>
+      <div class="h-sub">Quand et où aura lieu la prestation ?</div>
+      <div class="grid2">
+        <div class="field"><label>Date &amp; heure</label><input id="event_date" type="datetime-local"/></div>
+        <div class="field"><label>Téléphone</label><input id="cli_phone" type="tel"/></div>
+      </div>
+      <div class="field"><label>Adresse de l'événement</label><input id="event_address" placeholder="N°, rue, ville"/></div>
+      <div class="grid2">
+        <div class="field"><label>Votre nom</label><input id="cli_name"/></div>
+        <div class="field"><label>Email</label><input id="cli_email" type="email"/></div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <span></span>
+      <button class="btn btn-primary" id="toB">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE B -->
+  <div id="step-b" class="hide">
+    <div class="panel">
+      <h2>Diagnostic visage</h2>
+      <div class="h-sub">Prenez une photo (ou importez-en une) pour recevoir des conseils maquillage personnalisés. Votre photo n'est pas conservée.</div>
+      <div class="cam-wrap" id="camWrap">
+        <div class="cam-placeholder" id="camPlaceholder">Activez la caméra ou importez une photo</div>
+        <video id="video" autoplay playsinline class="hide"></video>
+        <img id="shot" class="hide" alt="Aperçu"/>
+      </div>
+      <div class="scan-actions" style="margin-bottom:10px;">
+        <button class="btn btn-secondary" id="btnCam">📷 Caméra</button>
+        <button class="btn btn-primary hide" id="btnCapture" style="display:none;">Prendre la photo</button>
+        <label class="btn btn-ghost" for="fileInput" style="margin:0;">🖼️ Importer</label>
+        <input id="fileInput" type="file" accept="image/*" capture="user" class="hide"/>
+      </div>
+      <button class="btn btn-ghost btn-sm hide" id="btnRetake">↺ Reprendre</button>
+      <canvas id="canvas" class="hide"></canvas>
+
+      <div id="diagArea" class="hide">
+        <div class="center" id="diagLoading"><div class="spinner"></div><p style="font-size:.85rem;color:var(--gris)">Analyse en cours…</p></div>
+        <div id="diagResult" class="hide diag"></div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-ghost" id="backA">← Retour</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" id="skipB">Passer</button>
+        <button class="btn btn-primary" id="toC" disabled>Continuer →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE C -->
+  <div id="step-c" class="hide">
+    <div class="panel">
+      <h2>Récapitulatif</h2>
+      <div class="h-sub">Vérifiez votre demande avant de l'envoyer à la maquilleuse.</div>
+      <div id="recap"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-ghost" id="backB">← Retour</button>
+      <button class="btn btn-primary" id="submitReq">Envoyer ma demande</button>
+    </div>
+  </div>
+
+  <!-- SUCCÈS -->
+  <div id="done" class="hide">
+    <div class="panel center" style="padding:44px 22px;">
+      <div style="font-size:2.6rem;margin-bottom:10px;">💌</div>
+      <h2 style="margin-bottom:6px;">Demande envoyée !</h2>
+      <p style="color:var(--gris);font-size:.9rem;">La maquilleuse va préparer votre devis personnalisé et vous l'enverra par email pour signature. À très vite ✨</p>
+      <a href="/" class="btn btn-primary" style="margin-top:18px;">Retour à l'accueil</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { supabase, getCurrentUser, getProfile } from '/js/supabase.js';
+  import { getArtistServices, requestFaceDiagnostic, createBookingRequest } from '/js/booking/store.js';
+  import { euros } from '/js/devis/model.js';
+  import { showToast, esc } from '/js/utils.js';
+
+  const $ = (id) => document.getElementById(id);
+  const artistId = new URLSearchParams(location.search).get('artist');
+
+  const state = {
+    services: [],        // catalogue
+    selected: new Set(), // ids sélectionnés
+    diagnostic: null,
+    imageData: null,
+  };
+  let stream = null;
+
+  // Auth requise
+  const user = await getCurrentUser();
+  if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`; }
+  if (!artistId) { showToast("Artiste introuvable.", 'error'); }
+
+  // ── ÉTAPE A : services + préremplissage ──
+  (async () => {
+    try {
+      state.services = await getArtistServices(artistId);
+      $('svc-list').innerHTML = state.services.length
+        ? state.services.map(s => `
+          <label class="svc" data-id="${esc(s.id)}">
+            <input type="checkbox" value="${esc(s.id)}"/>
+            <span class="nm">${esc(s.name)}</span>
+            <span class="pr">${esc(euros(s.price_cents))}</span>
+          </label>`).join('')
+        : `<p style="color:var(--gris);font-size:.86rem;">Cette maquilleuse n'a pas encore publié de prestations.</p>`;
+      $('svc-list').querySelectorAll('.svc').forEach(el => {
+        const cb = el.querySelector('input');
+        el.onclick = (e) => { if (e.target !== cb) cb.checked = !cb.checked; sync(el, cb); };
+        cb.onchange = () => sync(el, cb);
+      });
+    } catch (e) { console.error(e); $('svc-list').innerHTML = '<p style="color:var(--gris)">Erreur de chargement.</p>'; }
+
+    // Préremplir contact
+    if (user) {
+      $('cli_email').value = user.email || '';
+      try { const p = await getProfile(user.id); if (p) { $('cli_name').value = p.full_name || ''; $('cli_phone').value = p.phone || ''; } } catch {}
+    }
+  })();
+
+  function sync(el, cb) {
+    el.classList.toggle('sel', cb.checked);
+    cb.checked ? state.selected.add(cb.value) : state.selected.delete(cb.value);
+  }
+
+  // ── Navigation entre étapes ──
+  function goto(step) {
+    for (const s of ['a','b','c']) $('step-'+s).classList.toggle('hide', s !== step);
+    $('done').classList.add('hide');
+    $('sd-a').className = 'step-dot' + (step==='a'?' active':' done');
+    $('sd-b').className = 'step-dot' + (step==='b'?' active':(step==='c'?' done':''));
+    $('sd-c').className = 'step-dot' + (step==='c'?' active':'');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  $('toB').onclick = () => {
+    if (state.selected.size === 0) return showToast('Sélectionnez au moins une prestation.', 'error');
+    if (!$('event_date').value) return showToast("Indiquez la date de l'événement.", 'error');
+    if (!$('cli_name').value || !$('cli_email').value) return showToast('Renseignez vos nom et email.', 'error');
+    goto('b');
+  };
+  $('backA').onclick = () => { stopCam(); goto('a'); };
+  $('skipB').onclick = () => { stopCam(); buildRecap(); goto('c'); };
+  $('toC').onclick = () => { stopCam(); buildRecap(); goto('c'); };
+  $('backB').onclick = () => goto('b');
+
+  // ── ÉTAPE B : caméra / upload ──
+  $('btnCam').onclick = async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      const v = $('video');
+      v.srcObject = stream; v.classList.remove('hide');
+      $('camPlaceholder').classList.add('hide'); $('shot').classList.add('hide');
+      $('btnCapture').style.display = ''; $('btnCapture').classList.remove('hide');
+    } catch (e) { console.error(e); showToast("Impossible d'accéder à la caméra. Importez une photo.", 'error'); }
+  };
+
+  $('btnCapture').onclick = () => {
+    const v = $('video');
+    const data = frameToDataUrl(v, v.videoWidth, v.videoHeight);
+    usePhoto(data);
+  };
+
+  $('fileInput').onchange = (e) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const img = new Image();
+    img.onload = () => usePhoto(frameToDataUrl(img, img.naturalWidth, img.naturalHeight));
+    img.onerror = () => showToast('Image illisible.', 'error');
+    img.src = URL.createObjectURL(file);
+  };
+
+  $('btnRetake').onclick = () => {
+    state.imageData = null; state.diagnostic = null;
+    $('shot').classList.add('hide'); $('shot').src = '';
+    $('diagArea').classList.add('hide'); $('diagResult').classList.add('hide');
+    $('btnRetake').classList.add('hide'); $('toC').disabled = true;
+    $('camPlaceholder').classList.remove('hide');
+  };
+
+  // Réduit l'image à max 768px et renvoie une dataURL JPEG
+  function frameToDataUrl(source, w, h) {
+    const MAX = 768;
+    const scale = Math.min(1, MAX / Math.max(w, h));
+    const cw = Math.round(w * scale), ch = Math.round(h * scale);
+    const c = $('canvas'); c.width = cw; c.height = ch;
+    c.getContext('2d').drawImage(source, 0, 0, cw, ch);
+    return c.toDataURL('image/jpeg', 0.85);
+  }
+
+  async function usePhoto(dataUrl) {
+    stopCam();
+    state.imageData = dataUrl;
+    $('video').classList.add('hide'); $('camPlaceholder').classList.add('hide');
+    $('btnCapture').style.display = 'none';
+    const shot = $('shot'); shot.src = dataUrl; shot.classList.remove('hide');
+    $('btnRetake').classList.remove('hide');
+    // Lancer le diagnostic
+    $('diagArea').classList.remove('hide'); $('diagLoading').classList.remove('hide'); $('diagResult').classList.add('hide');
+    try {
+      const diag = await requestFaceDiagnostic(dataUrl);
+      state.diagnostic = diag;
+      renderDiagnostic(diag);
+      $('toC').disabled = false;
+    } catch (e) {
+      console.error(e);
+      $('diagLoading').classList.add('hide');
+      $('diagArea').classList.remove('hide');
+      $('diagResult').classList.remove('hide');
+      $('diagResult').innerHTML = `<p style="color:var(--gris);font-size:.86rem;">Diagnostic indisponible (${esc(e.message)}). Vous pouvez continuer sans.</p>`;
+      $('toC').disabled = false;
+    }
+  }
+
+  function renderDiagnostic(d) {
+    $('diagLoading').classList.add('hide');
+    const r = $('diagResult'); r.classList.remove('hide');
+    const list = (arr) => arr?.length ? arr.map(x => `<span class="chip">${esc(x)}</span>`).join('') : '<span style="color:var(--gris);font-size:.83rem;">—</span>';
+    r.innerHTML = `
+      <div class="diag-badges">
+        <span class="badge2"><span class="k">Sous-ton</span> ${esc(d.sous_ton)}</span>
+        <span class="badge2"><span class="k">Peau</span> ${esc(d.type_de_peau)}</span>
+      </div>
+      <div class="diag-list">
+        <div class="lbl">Sensibilités / imperfections</div>${list(d.sensibilite_ou_imperfections)}
+        <div class="lbl">Recommandations produits</div>${list(d.recommandations_produits)}
+      </div>
+      <div class="disclaimer">Diagnostic cosmétique généré par IA, à titre indicatif — ne constitue pas un avis médical.</div>`;
+  }
+
+  function stopCam() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
+
+  // ── ÉTAPE C : récapitulatif ──
+  function buildRecap() {
+    const chosen = state.services.filter(s => state.selected.has(s.id));
+    const total = chosen.reduce((sum, s) => sum + s.price_cents, 0);
+    const dt = $('event_date').value ? new Date($('event_date').value).toLocaleString('fr-FR', { dateStyle:'long', timeStyle:'short' }) : '—';
+    let diagHtml = '';
+    if (state.diagnostic) {
+      diagHtml = `<div class="diag-list" style="border-top:1px solid var(--bord);margin-top:12px;padding-top:10px;">
+        <div class="lbl">Diagnostic visage</div>
+        <span class="chip">Sous-ton : ${esc(state.diagnostic.sous_ton)}</span>
+        <span class="chip">Peau : ${esc(state.diagnostic.type_de_peau)}</span>
+        ${(state.diagnostic.recommandations_produits||[]).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}
+      </div>`;
+    }
+    $('recap').innerHTML = `
+      ${chosen.map(s => `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:.9rem;"><span>${esc(s.name)}</span><b>${esc(euros(s.price_cents))}</b></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-top:2px solid var(--rose);margin-top:6px;font-weight:800;">
+        <span>Sous-total prestations</span><span style="color:var(--rose-f)">${esc(euros(total))}</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--gris);margin-top:4px;">Les frais de déplacement éventuels seront calculés par la maquilleuse selon l'adresse.</p>
+      <div style="margin-top:12px;font-size:.86rem;">
+        <div><b>Événement :</b> ${esc(dt)}</div>
+        <div><b>Adresse :</b> ${esc($('event_address').value || '—')}</div>
+        <div><b>Contact :</b> ${esc($('cli_name').value)} · ${esc($('cli_email').value)} · ${esc($('cli_phone').value||'—')}</div>
+      </div>
+      ${diagHtml}`;
+  }
+
+  $('submitReq').onclick = async () => {
+    const btn = $('submitReq'); btn.disabled = true; btn.textContent = 'Envoi…';
+    try {
+      const chosen = state.services.filter(s => state.selected.has(s.id));
+      await createBookingRequest({
+        artistId,
+        clientName: $('cli_name').value.trim(),
+        clientEmail: $('cli_email').value.trim(),
+        clientPhone: $('cli_phone').value.trim(),
+        eventAddress: $('event_address').value.trim(),
+        eventDate: $('event_date').value ? new Date($('event_date').value).toISOString() : '',
+        services: chosen,
+        travelDistanceKm: 0,
+        diagnostic: state.diagnostic,
+      });
+      $('step-c').classList.add('hide');
+      $('done').classList.remove('hide');
+      $('sd-c').className = 'step-dot done';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      console.error(e); showToast(e.message || "Erreur lors de l'envoi.", 'error');
+      btn.disabled = false; btn.textContent = 'Envoyer ma demande';
+    }
+  };
+
+  window.addEventListener('beforeunload', stopCam);
+</script>
+</body>
+</html>

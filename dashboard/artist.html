@@ -102,6 +102,7 @@
     .status-confirmed { background: #ECFDF5; color: #065F46; }
     .status-pending   { background: #FFFBEB; color: #92400E; }
     .status-cancelled { background: #FEF2F2; color: #991B1B; }
+    .chip-d { display:inline-block; background:#fff; border:1px solid var(--bord); border-radius:8px; padding:4px 10px; font-size:.78rem; margin:0 6px 6px 0; }
 
     /* Calendrier dispo */
     .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 16px; }
@@ -178,6 +179,7 @@
     <a class="nav-item" onclick="showTab('reservations',this)">📅 Réservations</a>
     <a class="nav-item active" onclick="showTab('disponibilites',this)">🗓️ Disponibilités</a>
     <a class="nav-item" onclick="showTab('avis',this)">⭐ Avis clients</a>
+    <a class="nav-item" onclick="showTab('demandes',this)">📥 Demandes</a>
     <a class="nav-item" onclick="showTab('devis',this)">🧾 Devis</a>
     <div class="nav-section">Profil</div>
     <a class="nav-item" onclick="showTab('profil',this)">✏️ Mon profil</a>
@@ -258,6 +260,15 @@
     <div id="tab-avis" style="display:none;">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Avis de mes clientes</h2>
       <div id="reviews-dash"></div>
+    </div>
+
+    <!-- ═══ ONGLET DEMANDES ═══ -->
+    <div id="tab-demandes" style="display:none;">
+      <div style="margin-bottom:16px;">
+        <h2 style="font-size:1.1rem;font-weight:800;">Demandes de réservation</h2>
+        <p style="font-size:.82rem;color:var(--gris);">Consultez la fiche diagnostic de la cliente, ajustez le déplacement, puis validez le devis.</p>
+      </div>
+      <div id="demandes-list"><div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div></div>
     </div>
 
     <!-- ═══ ONGLET DEVIS ═══ -->
@@ -446,6 +457,7 @@
 import { supabase, getCurrentUser, esc } from '/js/supabase.js';
 import { listMyQuotes, getShareToken, signatureUrl, deleteQuote } from '/js/devis/store.js';
 import { euros } from '/js/devis/model.js';
+import { listArtistRequests, validateRequestToQuote, declineRequest } from '/js/booking/store.js';
 
 // Auth check
 const user = await getCurrentUser();
@@ -863,14 +875,133 @@ document.getElementById('btn-save-espace').addEventListener('click', async () =>
 
 // Navigation onglets
 window.showTab = function(name, triggerEl) {
-  ['reservations','disponibilites','avis','devis','profil','photos','services','espace'].forEach(t => {
+  ['reservations','disponibilites','avis','demandes','devis','profil','photos','services','espace'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
   });
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   if (triggerEl) triggerEl.classList.add('active');
   if (name === 'espace') initEspace();
   if (name === 'devis') loadDevis();
+  if (name === 'demandes') loadDemandes();
 };
+
+// ── Demandes de réservation (avec diagnostic visage) ──
+let _requests = [];
+
+function diagnosticHtml(d) {
+  if (!d) return `<p style="font-size:.82rem;color:var(--gris);margin:8px 0;">Pas de diagnostic visage fourni.</p>`;
+  const chips = (arr) => (arr && arr.length) ? arr.map(x => `<span class="chip-d">${esc(x)}</span>`).join('') : '<span style="color:var(--gris);font-size:.8rem;">—</span>';
+  return `<div style="background:var(--rose-cl);border-radius:10px;padding:12px 14px;margin:10px 0;">
+    <div style="font-weight:800;font-size:.8rem;color:var(--rose-f);margin-bottom:8px;">💄 Fiche diagnostic visage</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <span class="chip-d"><b>Sous-ton :</b> ${esc(d.sous_ton || '—')}</span>
+      <span class="chip-d"><b>Peau :</b> ${esc(d.type_de_peau || '—')}</span>
+    </div>
+    <div style="font-size:.72rem;font-weight:700;color:var(--gris);margin:6px 0 4px;">Sensibilités / imperfections</div>${chips(d.sensibilite_ou_imperfections)}
+    <div style="font-size:.72rem;font-weight:700;color:var(--gris);margin:8px 0 4px;">Recommandations produits</div>${chips(d.recommandations_produits)}
+  </div>`;
+}
+
+function reqPreviewTotal(r, km, rateEuros) {
+  const svc = (r.services || []).reduce((s, x) => s + (x.price_cents || 0), 0);
+  const travel = Math.round((Number(km) || 0) * (Number(rateEuros) || 0) * 100);
+  return { svc, travel, total: svc + travel };
+}
+
+async function loadDemandes() {
+  const box = document.getElementById('demandes-list');
+  box.innerHTML = `<div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div>`;
+  try { _requests = await listArtistRequests('pending'); }
+  catch (e) { console.error(e); box.innerHTML = `<div style="color:var(--gris);text-align:center;padding:40px;">Impossible de charger les demandes.</div>`; return; }
+
+  if (!_requests.length) {
+    box.innerHTML = `<div style="background:#fff;border-radius:var(--radius);padding:40px;text-align:center;box-shadow:var(--shadow);">
+      <div style="font-size:2rem;margin-bottom:8px;">📭</div>
+      <p style="font-weight:700;">Aucune demande en attente</p>
+      <p style="font-size:.85rem;color:var(--gris);">Les nouvelles demandes de réservation apparaîtront ici.</p>
+    </div>`;
+    return;
+  }
+
+  box.innerHTML = _requests.map(r => {
+    const dt = r.eventDate ? new Date(r.eventDate).toLocaleString('fr-FR', { dateStyle:'long', timeStyle:'short' }) : '—';
+    const p = reqPreviewTotal(r, 0, 0.5);
+    return `<div class="booking-row" style="display:block;padding:18px;" data-id="${esc(r.id)}">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+        <div class="client-name" style="font-size:1rem;">${esc(r.clientName || 'Cliente')}</div>
+        <div style="font-size:.78rem;color:var(--gris);">${esc(r.clientEmail)} · ${esc(r.clientPhone || '—')}</div>
+      </div>
+      <div class="booking-meta" style="margin-bottom:8px;">📅 ${esc(dt)} — 📍 ${esc(r.eventAddress || '—')}</div>
+
+      <div style="font-size:.72rem;font-weight:700;color:var(--gris);margin-bottom:4px;">Prestations demandées</div>
+      ${(r.services||[]).map(s => `<div style="display:flex;justify-content:space-between;font-size:.86rem;padding:3px 0;"><span>${esc(s.name)}</span><b>${esc(euros(s.price_cents))}</b></div>`).join('')}
+
+      ${diagnosticHtml(r.diagnostic)}
+
+      <div style="background:#F9FAFB;border-radius:10px;padding:12px 14px;margin-top:8px;">
+        <div style="font-weight:800;font-size:.8rem;margin-bottom:10px;">Aperçu du devis</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:10px;">
+          <div class="field" style="flex:1;min-width:120px;"><label>Déplacement (km)</label><input type="number" min="0" step="1" value="0" data-km="${esc(r.id)}"/></div>
+          <div class="field" style="flex:1;min-width:120px;"><label>Tarif/km (€)</label><input type="number" min="0" step="0.05" value="0.50" data-rate="${esc(r.id)}"/></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.86rem;"><span>Prestations</span><b>${esc(euros(p.svc))}</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:.86rem;"><span>Déplacement</span><b data-travel="${esc(r.id)}">${esc(euros(0))}</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:1.05rem;font-weight:800;border-top:2px solid var(--rose);margin-top:6px;padding-top:8px;"><span>Total estimé</span><span style="color:var(--rose-f)" data-total="${esc(r.id)}">${esc(euros(p.svc))}</span></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:flex-end;">
+        <button class="btn btn-ghost btn-sm" data-decline="${esc(r.id)}">Refuser</button>
+        <button class="btn btn-primary btn-sm" data-validate="${esc(r.id)}">Valider et envoyer le devis</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Recalcul live du total par carte
+  box.querySelectorAll('input[data-km], input[data-rate]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const id = inp.getAttribute('data-km') || inp.getAttribute('data-rate');
+      const km = box.querySelector(`input[data-km="${id}"]`).value;
+      const rate = box.querySelector(`input[data-rate="${id}"]`).value;
+      const r = _requests.find(x => x.id === id);
+      const p = reqPreviewTotal(r, km, rate);
+      box.querySelector(`[data-travel="${id}"]`).textContent = euros(p.travel);
+      box.querySelector(`[data-total="${id}"]`).textContent = euros(p.total);
+    });
+  });
+
+  // Refuser
+  box.querySelectorAll('button[data-decline]').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm('Refuser cette demande ?')) return;
+      try { await declineRequest(btn.getAttribute('data-decline')); showToast('Demande refusée.'); loadDemandes(); }
+      catch (e) { console.error(e); showToast('Action impossible.'); }
+    };
+  });
+
+  // Valider et envoyer le devis
+  box.querySelectorAll('button[data-validate]').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.getAttribute('data-validate');
+      const r = _requests.find(x => x.id === id);
+      const km = box.querySelector(`input[data-km="${id}"]`).value;
+      const rate = box.querySelector(`input[data-rate="${id}"]`).value;
+      btn.disabled = true; btn.textContent = 'Envoi…';
+      try {
+        const mua = { name: profileData?.full_name || user.email, email: user.email, phone: profileData?.phone || '' };
+        const res = await validateRequestToQuote(r, mua, {
+          travelDistanceKm: Number(km) || 0,
+          travelRateCents: Math.round((Number(rate) || 0) * 100),
+          vatExempt: true,
+        });
+        showToast(res.emailed ? 'Devis envoyé à la cliente par email ✅' : 'Devis créé — lien de signature prêt.');
+        loadDemandes();
+      } catch (e) {
+        console.error(e); showToast(e.message || "Erreur lors de l'envoi.");
+        btn.disabled = false; btn.textContent = 'Valider et envoyer le devis';
+      }
+    };
+  });
+}
 
 // ── Devis ──
 const DEVIS_STATUS = {
