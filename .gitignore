@@ -3,3 +3,6 @@ node_modules/
 *.log
 .env
 .env.local
+
+# Originaux d images (double extension) — non versionnés
+img/*.jpg.png
