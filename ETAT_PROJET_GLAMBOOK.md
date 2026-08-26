@@ -1,7 +1,7 @@
 # GlamBook — État du projet (passation)
 
 > Fichier de reprise pour continuer le projet dans un nouveau chat.
-> Dernière mise à jour : 26 août 2026.
+> Dernière mise à jour : 26 août 2026 — images catégories publiées (commit 06be25e), puis audit du parcours et corrections (§13).
 
 ---
 
@@ -60,7 +60,7 @@ git add -A; git commit -m "message"; git push
 - `api/` — fonctions serverless : `face-diagnostic.js` (OpenAI), `send-quote.js` (Resend), `sitemap.js`. Rate limiting via table `api_usage`.
 - `legal/` — `mentions-legales.html`, `cgu.html`, `cgv.html`, `confidentialite.html`.
 - `img/` — visuels (hero, portrait, bandeau-pro, cat-mariage, cat-soiree…). Filigranes des IA rognés au préalable.
-- `sw.js` — service worker (`CACHE_NAME` actuel **`glambook-v9`**, network-first pour `.js` et `.css`).
+- `sw.js` — service worker (`CACHE_NAME` actuel **`glambook-v11`**, network-first pour `.js` et `.css`).
 - `vercel.json` — routes + en-têtes de sécurité (CSP stricte, HSTS…).
 - `ui-kit-nextjs/` — kit UI Next.js « Sombre Luxe » (composants de référence, non utilisé par l'app vanilla).
 
@@ -123,18 +123,19 @@ Non configurées (optionnelles) :
 
 ## 9. TÂCHES À FINIR (reprise)
 
-### A. Images des catégories (en cours)
-Les tuiles **Quotidien, Shooting, Scène** (et « Toutes ») n'ont pas encore de photo (emoji placeholder). Prompts anglais fournis pour **Nano Banana** (Gemini), style éditorial dark luxe cohérent avec Mariage/Soirée.
-- Fichiers attendus dans `img/` : `cat-quotidien.jpg`, `cat-shooting.jpg`, `cat-scene.jpg` (et optionnellement `cat-toutes.jpg`).
-- **À faire par Claude** quand Fernand dépose les images : rogner le filigrane IA (recadrage PIL/Pillow, coin bas-droite) + câbler `<img>` dans les tuiles de `index.html` (remplacer les `<span class="ph">emoji</span>`).
+### A. Images des catégories — ✅ TERMINÉ (26 août 2026)
+Les 6 tuiles de la section « Explorez par prestation » ont désormais toutes une photo.
+- Ajoutés dans `img/` : `cat-quotidien.jpg`, `cat-shooting.jpg`, `cat-scene.jpg`, `cat-toutes.jpg` (538×310, JPEG qualité 82, 17-41 Ko chacun).
+- Générés avec Nano Banana (Gemini) — **aucun filigrane visible** sur ces images, aucun rognage n'a été nécessaire, seulement un recadrage au ratio des tuiles existantes.
+- `index.html` lignes ~592-595 : les `<span class="ph">emoji</span>` remplacés par des `<img loading="lazy">` avec `alt` descriptif.
+- `sw.js` : `CACHE_NAME` passé en `glambook-v10`.
+- `.gitignore` : ajout de `images/` (dossier de travail des originaux IA, non versionné).
+- Publié dans le commit `06be25e`.
 
-**Prompt de base (identique sur les 3)** :
+**Prompts de référence** (si une image doit être régénérée) — base commune :
 > Editorial beauty photography, cinematic close-up, luminous textured skin, deep charcoal/black background, soft warm lighting with champagne and gold highlights, refined luxury mood, gold/rose/nude palette, landscape 16:9 format, high resolution, photorealistic, no text, no logo, no watermark.
 
-- **Quotidien** : + natural "no-makeup makeup", fresh glowing complexion, softly flushed cheeks, glossy nude lips, soft daylight.
-- **Shooting** : + high-fashion makeup, bold graphic eyeliner or metallic gold eyelids, sculpted cheekbones, dramatic studio lighting.
-- **Scène** : + spectacular stage makeup, glitter, shimmer, theatrical gaze, subtle colored stage lighting, cabaret look.
-- **Toutes (option)** : elegant flat-lay of pro makeup brushes/products on dark satin surface, golden reflections, top-down.
+Variantes : **Quotidien** + natural "no-makeup makeup", fresh glowing complexion, glossy nude lips, soft daylight — **Shooting** + high-fashion makeup, bold graphic eyeliner, metallic gold eyelids, sculpted cheekbones, dramatic studio lighting — **Scène** + spectacular stage makeup, glitter, shimmer, theatrical gaze, cabaret look — **Toutes** : elegant flat-lay of pro makeup brushes/products on dark satin, golden reflections, top-down.
 
 ### B. Mentions légales (en attente des infos de Fernand)
 Placeholders à remplir :
@@ -171,7 +172,39 @@ Placeholders à remplir :
 
 ## 12. Prochaine action suggérée à la reprise
 
-1. Générer les 3-4 images catégories (Nano Banana) → les déposer dans `img/` → demander à Claude de rogner + câbler.
-2. Fournir les infos éditeur → Claude remplit les mentions légales + confidentialité, harmonise l'email de contact.
-3. Publier : `git add -A; git commit -m "..."; git push`.
-4. Tester l'envoi de devis par email (arrive sur fernandmani61@gmail.com tant qu'il n'y a pas de domaine).
+1. Fournir les infos éditeur (raison sociale, adresse, SIRET ou « immatriculation en cours », directeur de la publication) → Claude remplit les mentions légales + confidentialité et harmonise l'email de contact.
+2. Tester l'envoi de devis par email (arrive sur fernandmani61@gmail.com tant qu'il n'y a pas de domaine vérifié chez Resend).
+3. Confirmer le secret hCaptcha dans Supabase (Attack Protection).
+
+**Publication** : double-cliquer sur `publier.bat` à la racine du projet (supprime les verrous `.lock`, demande un message de commit, puis `add` + `commit` + `push`). Vercel redéploie automatiquement en ~1 min.
+
+---
+
+## 13. Audit du parcours et corrections (26 août 2026)
+
+Audit du code réel confronté à la base de production. Ce qui a été trouvé et corrigé :
+
+### Corrigé
+| Problème | Détail | Fichier |
+|---|---|---|
+| **Base Supabase en pause** | Projet en statut `INACTIVE` (pause auto du plan FREE après ~7 j d'inactivité) : plus d'auth, plus d'artistes, plus de devis en prod. Relancé. | Supabase |
+| **Filtre par prestation cassé** | Les liens et pastilles envoyaient les slugs (`mariage`, `soiree`…) mais la base stockait les libellés (`Mariage`, `Soirée`, `Éditorial / Shooting`…). `contains()` ne matchait jamais → 0 résultat sur toutes les catégories. Base migrée vers les slugs + `specialtyLabel()` pour l'affichage. | `js/utils.js`, `js/supabase.js`, `artists.html`, `artist.html`, `index.html`, `dashboard/artist.html`, base |
+| **Géolocalisation et caméra bloquées** | `Permissions-Policy: camera=(), geolocation=()` interdisait ces API **au site lui-même** : le bouton « Autour de moi » et la caméra du diagnostic ne pouvaient pas fonctionner en production. Passé en `camera=(self)`, `geolocation=(self)`. | `vercel.json` |
+| **Onglet Portfolio inaccessible sur mobile** | La nav mobile appelait `showTab('portfolio')`, or l'onglet s'appelle `photos` → tous les onglets passaient en `display:none`, écran vide. | `dashboard/artist.html` |
+| **`showToast` non importé** | Les messages d'erreur de géolocalisation levaient un `ReferenceError` : échec silencieux côté cliente. | `artists.html` |
+| **Tunnel de réservation orphelin** | `reservation.html` (flux demande → devis → signature) n'était lié depuis aucune page ; `artist.html` renvoyait vers `booking.html`, qui exige des `services` et `availabilities` — tables vides. Aucune cliente ne pouvait aboutir. | `artist.html`, `reservation.html` |
+
+### Choix retenu : deux modes de réservation selon l'artiste
+- MUA **avec** prestations tarifées → réservation directe par créneau (`booking.html`) + lien secondaire « Ou demander un devis personnalisé ».
+- MUA **sans** prestations → la carte bascule en « Demander un devis » (`reservation.html`).
+- `reservation.html` accepte désormais une demande sans prestation au catalogue : nouveau champ « Votre besoin » (obligatoire dans ce cas), transmis en `booking_requests.note`.
+- Le dashboard MUA affiche ce message et signale « devis à chiffrer librement » quand le catalogue est vide.
+
+### Reste à traiter
+- **Mise en veille de la base** : le projet FREE se remettra en pause après ~7 jours sans activité. Prévoir un ping automatique (cron Vercel) ou le passage en Pro.
+- **Diagnostic visage IA** : `OPENAI_API_KEY` absente → l'endpoint renvoie 501 systématiquement.
+- **Stripe** : `STRIPE_SECRET_KEY` absente. Le code bascule proprement en réservation sans paiement, mais `create-checkout.js` et `stripe-webhook.js` instancient Stripe hors `try/catch` (500 brut si appelés).
+- **Logo MUA dans l'email de devis** : stocké en `data:` URL, filtré par `send-quote.js` → jamais visible dans l'email reçu.
+- **Redirection après inscription** : `auth/register.html` ignore `?redirect=`, la cliente perd la fiche artiste consultée.
+- **Stats dashboard** : « ce mois » compare le mois sans l'année.
+- **Nom « GlamBook »** : une plateforme homonyme (glambook.com, Glambook Ltd.) opère sur le même créneau en France depuis 2023 et a déposé la marque en classe 35 pour les places de marché de services de beauté. À arbitrer avant tout achat de domaine ou dépôt.

@@ -246,7 +246,7 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { supabase, getCurrentUser, esc, safeUrl } from '/js/supabase.js';
+import { supabase, getCurrentUser, esc, safeUrl, specialtyLabel } from '/js/supabase.js';
 
 // URL propre /artiste/<slug> (rewrite Vercel) ou fallback ?id=UUID
 const slugMatch = location.pathname.match(/^\/artiste\/([^/]+)\/?$/);
@@ -366,7 +366,7 @@ async function load() {
 
   // Spécialités
   document.getElementById('specialties-tags').innerHTML = (a.specialties || [])
-    .map(s => `<span class="tag">${esc(s)}</span>`).join('');
+    .map(s => `<span class="tag">${esc(specialtyLabel(s))}</span>`).join('');
 
   // Réseaux sociaux — masqués pour les guests
   if (!isGuest) {
@@ -382,6 +382,48 @@ async function load() {
       `<span style="font-size:.78rem;color:var(--gris);">🔒 Réseaux sociaux — <a href="/auth/register.html" style="color:var(--rose);font-weight:700;">Créer un compte</a> pour voir</span>`;
   }
 
+
+// ── Réservation : deux modes selon l'artiste ──────────────────────────
+// Si la maquilleuse a saisi des prestations tarifées, on garde la réservation
+// directe par créneau. Sinon la carte bascule en demande de devis.
+function quoteUrl() {
+  return '/reservation.html?artist=' + encodeURIComponent(artistId);
+}
+
+function switchToQuoteMode() {
+  const card = document.getElementById('booking-card');
+  if (!card) return;
+  const h3 = card.querySelector('h3');
+  if (h3) h3.textContent = 'Demander un devis';
+  // On masque sans supprimer : d'autres handlers du module référencent
+  // #book-date, #slots-section et #btn-book sans garde.
+  const dateField = document.getElementById('book-date')?.closest('.field');
+  if (dateField) dateField.style.display = 'none';
+  const slots = document.getElementById('slots-section');
+  if (slots) slots.style.display = 'none';
+  const btn = document.getElementById('btn-book');
+  if (!btn) return;
+  btn.style.display = 'none';
+  const link = document.createElement('a');
+  link.className = 'btn btn-primary btn-full';
+  link.style.marginTop = '16px';
+  link.textContent = 'Demander un devis';
+  link.href = quoteUrl();
+  btn.parentNode.insertBefore(link, btn);
+}
+
+function addQuoteLink() {
+  const btn = document.getElementById('btn-book');
+  if (!btn || document.getElementById('btn-quote')) return;
+  const link = document.createElement('a');
+  link.id = 'btn-quote';
+  link.className = 'btn btn-ghost btn-full';
+  link.style.marginTop = '8px';
+  link.textContent = 'Ou demander un devis personnalisé';
+  link.href = quoteUrl();
+  btn.parentNode.insertBefore(link, btn.nextSibling);
+}
+
   // Services — visibles pour tous (pour donner envie), mais réservation bloquée
   const { data: services } = await supabase.from('services').select('*').eq('artist_id', artistId).order('price_cents');
   const sl = document.getElementById('services-list');
@@ -394,8 +436,10 @@ async function load() {
         </div>
         <div class="svc-dur">${esc(String(s.duration_min))} min · ${esc(s.description || '')}</div>
       </div>`).join('');
+    addQuoteLink();
   } else {
-    sl.innerHTML = '<p style="color:var(--gris);font-size:.85rem;">Tarifs sur demande</p>';
+    sl.innerHTML = '<p style="color:var(--gris);font-size:.85rem;">Cette maquilleuse travaille sur devis personnalisé.</p>';
+    switchToQuoteMode();
   }
 
   // Portfolio — photos déjà jointes par la vue ; 2 visibles + flou pour les guests

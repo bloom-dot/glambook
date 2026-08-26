@@ -344,14 +344,14 @@
         <div class="field">
           <label>Spécialités</label>
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="specialties-check">
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Mariage" class="spec-cb"/> Mariage</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Soirée" class="spec-cb"/> Soirée</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Quotidien" class="spec-cb"/> Quotidien</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Éditorial / Shooting" class="spec-cb"/> Éditorial / Shooting</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Scène / Spectacle" class="spec-cb"/> Scène / Spectacle</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Coiffure" class="spec-cb"/> Coiffure</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Ongles" class="spec-cb"/> Ongles</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="Airbrush" class="spec-cb"/> Airbrush</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="mariage" class="spec-cb"/> Mariage</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="soiree" class="spec-cb"/> Soirée</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="quotidien" class="spec-cb"/> Quotidien</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="editorial" class="spec-cb"/> Éditorial / Shooting</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="scene" class="spec-cb"/> Scène / Spectacle</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="coiffure" class="spec-cb"/> Coiffure</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="ongles" class="spec-cb"/> Ongles</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="airbrush" class="spec-cb"/> Airbrush</label>
           </div>
         </div>
         <button class="btn btn-primary" id="btn-save-profile">Enregistrer le profil</button>
@@ -488,7 +488,7 @@
     <div class="mobile-nav-item" onclick="showTab('profil',this);document.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
       <span class="mn-icon">✏️</span>Profil
     </div>
-    <div class="mobile-nav-item" onclick="showTab('portfolio',this);document.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
+    <div class="mobile-nav-item" onclick="showTab('photos',this);document.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
       <span class="mn-icon">🖼️</span>Photos
     </div>
     <div class="mobile-nav-item" onclick="showTab('services',this);document.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
@@ -500,7 +500,7 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { supabase, getCurrentUser, esc } from '/js/supabase.js';
+import { supabase, getCurrentUser, esc, specialtyLabel } from '/js/supabase.js';
 import { listMyQuotes, getShareToken, signatureUrl, deleteQuote } from '/js/devis/store.js';
 import { euros } from '/js/devis/model.js';
 import { listArtistRequests, validateRequestToQuote, declineRequest } from '/js/booking/store.js';
@@ -1108,7 +1108,13 @@ async function loadDemandes() {
       <div class="booking-meta" style="margin-bottom:8px;">📅 ${esc(dt)} — 📍 ${esc(r.eventAddress || '—')}</div>
 
       <div style="font-size:.72rem;font-weight:700;color:var(--gris);margin-bottom:4px;">Prestations demandées</div>
-      ${(r.services||[]).map(s => `<div style="display:flex;justify-content:space-between;font-size:.86rem;padding:3px 0;"><span>${esc(s.name)}</span><b>${esc(euros(s.price_cents))}</b></div>`).join('')}
+      ${(r.services||[]).length
+        ? (r.services||[]).map(s => `<div style="display:flex;justify-content:space-between;font-size:.86rem;padding:3px 0;"><span>${esc(s.name)}</span><b>${esc(euros(s.price_cents))}</b></div>`).join('')
+        : `<div style="font-size:.86rem;color:var(--gris);padding:3px 0;">Aucune prestation au catalogue — devis à chiffrer librement.</div>`}
+      ${r.note ? `<div style="background:var(--surface-2);border-radius:10px;padding:10px 12px;margin-top:8px;">
+        <div style="font-weight:800;font-size:.75rem;color:var(--gris);margin-bottom:4px;">Message de la cliente</div>
+        <div style="font-size:.86rem;white-space:pre-wrap;">${esc(r.note)}</div>
+      </div>` : ''}
 
       ${diagnosticHtml(r.diagnostic)}
 

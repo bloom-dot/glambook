@@ -121,6 +121,10 @@
       <h2>Vos prestations</h2>
       <div class="h-sub">Sélectionnez une ou plusieurs prestations.</div>
       <div id="svc-list"><div class="center"><div class="spinner"></div></div></div>
+      <div class="field" style="margin-top:14px;">
+        <label id="note-label">Précisions (facultatif)</label>
+        <textarea id="cli_note" rows="3" placeholder="Nombre de personnes, style souhaité, contraintes horaires…"></textarea>
+      </div>
     </div>
     <div class="panel">
       <h2>Événement</h2>
@@ -253,7 +257,13 @@
             <span class="nm">${esc(s.name)}</span>
             <span class="pr">${esc(euros(s.price_cents))}</span>
           </label>`).join('')
-        : `<p style="color:var(--gris);font-size:.86rem;">Cette maquilleuse n'a pas encore publié de prestations.</p>`;
+        : `<p style="color:var(--gris);font-size:.86rem;">Cette maquilleuse travaille sur devis personnalisé : décrivez votre besoin ci-dessous, elle vous répondra avec une proposition chiffrée.</p>`;
+      if (!state.services.length) {
+        const sub = document.querySelector('#step-a .h-sub');
+        if (sub) sub.textContent = 'Décrivez la prestation souhaitée.';
+        const lbl = $('note-label');
+        if (lbl) lbl.textContent = 'Votre besoin';
+      }
       $('svc-list').querySelectorAll('.svc').forEach(el => {
         const cb = el.querySelector('input');
         el.onclick = (e) => { if (e.target !== cb) cb.checked = !cb.checked; sync(el, cb); };
@@ -285,7 +295,8 @@
   }
 
   $('toB').onclick = () => {
-    if (state.selected.size === 0) return showToast('Sélectionnez au moins une prestation.', 'error');
+    if (state.services.length && state.selected.size === 0) return showToast('Sélectionnez au moins une prestation.', 'error');
+    if (!state.services.length && !$('cli_note').value.trim()) return showToast('Décrivez la prestation souhaitée.', 'error');
     if (!$('event_date').value) return showToast("Indiquez la date de l'événement.", 'error');
     if (!$('cli_name').value || !$('cli_email').value) return showToast('Renseignez vos nom et email.', 'error');
     goto('b');
@@ -523,6 +534,7 @@
         eventAddress: $('event_address').value.trim(),
         eventDate: $('event_date').value ? new Date($('event_date').value).toISOString() : '',
         services: chosen,
+        note: $('cli_note').value.trim() || null,
         travelDistanceKm: 0,
         diagnostic: state.diagnostic,
       });

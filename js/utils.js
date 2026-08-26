@@ -25,3 +25,19 @@ export function showToast(msg, type = 'success') {
   t.className = `toast show ${type}`;
   setTimeout(() => t.classList.remove('show'), 2800);
 }
+
+// ── Spécialités : la base stocke des slugs, l'UI affiche des libellés ──
+export const SPECIALTY_LABELS = {
+  mariage:   'Mariage',
+  soiree:    'Soirée',
+  quotidien: 'Quotidien',
+  editorial: 'Éditorial / Shooting',
+  scene:     'Scène / Spectacle',
+  coiffure:  'Coiffure',
+  ongles:    'Ongles',
+  airbrush:  'Airbrush'
+};
+
+export function specialtyLabel(slug) {
+  return SPECIALTY_LABELS[slug] || slug;
+}

@@ -921,7 +921,7 @@ document.addEventListener('DOMContentLoaded', () => { initHero(); });
 
 <!-- ═══ SUPABASE DATA ═══ -->
 <script type="module">
-import { supabase, esc, safeUrl, getProfile } from '/js/supabase.js';
+import { supabase, esc, safeUrl, getProfile, specialtyLabel } from '/js/supabase.js';
 
 document.getElementById('search-date').min = new Date().toISOString().split('T')[0];
 
@@ -1049,7 +1049,7 @@ async function loadFeatured() {
         <div class="av">${avatarUrl ? `<img src="${avatarUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>` : name[0]}</div>
         <div><div class="nm">${name}</div><div class="ct">\u{1F4CD} ${city}</div></div>
       </div>
-      <div class="tg">${(a.specialties||[]).slice(0,3).map(s=>'<span>'+esc(s)+'</span>').join('')}</div>
+      <div class="tg">${(a.specialties||[]).slice(0,3).map(s=>'<span>'+esc(specialtyLabel(s))+'</span>').join('')}</div>
       <div class="mt"><div><span class="stars">${stars}</span> <span style="font-size:.72rem;color:rgba(255,255,255,.4);">(${parseInt(a.review_count)||0})</span></div><span class="pr">À partir de ${parseInt(a.price_from)||'–'}€</span></div></div></a>`;
   }).join('');
 

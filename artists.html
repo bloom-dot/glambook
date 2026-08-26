@@ -149,7 +149,8 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { supabase, esc, safeUrl } from '/js/supabase.js';
+import { supabase, esc, safeUrl, specialtyLabel } from '/js/supabase.js';
+import { showToast } from '/js/utils.js';
 
 const params  = new URLSearchParams(location.search);
 let filters   = {
@@ -339,7 +340,7 @@ async function loadArtists(reset) {
             <div class="artist-city">📍 ${city}${a._dist != null ? ` · à ${a._dist < 10 ? a._dist.toFixed(1) : Math.round(a._dist)} km` : ''}</div>
           </div>
         </div>
-        <div class="tags">${(a.specialties || []).slice(0,3).map(s => `<span class="tag">${esc(s)}</span>`).join('')}</div>
+        <div class="tags">${(a.specialties || []).slice(0,3).map(s => `<span class="tag">${esc(specialtyLabel(s))}</span>`).join('')}</div>
         <div class="artist-card-meta">
           <div><span class="stars">${stars}</span> <span style="font-size:.8rem;color:var(--gris);">(${parseInt(a.review_count)||0})</span></div>
           <div class="artist-price">À partir de ${parseInt(a.price_from)||'–'}€</div>
