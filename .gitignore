@@ -6,3 +6,6 @@ node_modules/
 
 # Originaux d images (double extension) — non versionnés
 img/*.jpg.png
+
+# Dossier de travail des originaux IA (non versionne)
+images/
