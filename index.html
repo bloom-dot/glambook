@@ -74,7 +74,11 @@
     .nav-logo { color: #fff; }
     .nav-links a { color: rgba(255,255,255,.55); }
     .nav-links a:hover { background: rgba(232,84,122,.1); color: #fff; }
-    .nav-links .btn-nav { background: linear-gradient(135deg, var(--rose), var(--gb-rose-deep)); box-shadow: 0 0 20px rgba(232,84,122,.25); color: #fff; }
+    .nav-links .btn-nav { background: var(--gb-cta); box-shadow: 0 4px 18px rgba(212,175,55,.22); color: var(--gb-cta-ink); font-weight: 700; }
+    .nav-links .btn-nav:hover { box-shadow: 0 6px 26px rgba(212,175,55,.34); color: var(--gb-cta-ink); background: var(--gb-cta); }
+    /* Deconnexion : action rare, donc discrete (charte, niveau 4) */
+    .nav-links .nav-quiet { color: var(--gb-ink-3); font-size: .84rem; }
+    .nav-links .nav-quiet:hover { color: var(--gb-ink-2); background: transparent; }
 
     /* ═══════════════════════════════════
        SECTION 1 — HERO (3D immersif)
@@ -98,6 +102,12 @@
     .hero-content {
       position: relative; z-index: 2; text-align: center; max-width: 800px;
     }
+    /* Icones : trait de 1,5 px, jamais de remplissage (charte) */
+    .gb-ico { width: 1em; height: 1em; display: block; flex: 0 0 auto; }
+    .hero-badge .gb-ico { width: .95em; height: .95em; display: inline-block; vertical-align: -.12em; }
+    .step-icon .gb-ico { width: 24px; height: 24px; color: var(--gb-champagne); }
+    .reas-item .ri .gb-ico, .cta-card .icon .gb-ico { width: 26px; height: 26px; }
+    .hsb-near .gb-ico { width: 20px; height: 20px; margin: 0 auto; }
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
       background: rgba(212,175,55,.08); border: 1px solid rgba(212,175,55,.2);
@@ -138,26 +148,34 @@
 
     /* ── Buttons ── */
     .btn-glow {
-      background: linear-gradient(120deg, var(--gb-powder) 0%, var(--gb-gold) 45%, var(--gb-rose-deep) 100%); color: var(--gb-cta-ink);
+      background: var(--gb-cta); color: var(--gb-cta-ink);
       padding: 16px 36px; border-radius: 12px; font-size: .95rem; font-weight: 800; letter-spacing: .01em;
       border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-      box-shadow: 0 0 32px rgba(196,58,96,.28); transition: all .3s; font-family: 'Plus Jakarta Sans', inherit;
+      box-shadow: 0 6px 22px rgba(212,175,55,.2); transition: all .3s; font-family: 'Plus Jakarta Sans', inherit;
     }
-    .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 0 52px rgba(196,58,96,.45); }
+    .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212,175,55,.34); }
     .btn-outline {
       background: transparent; color: rgba(255,255,255,.75); padding: 16px 36px;
       border-radius: 12px; font-size: .95rem; font-weight: 600;
       border: 1.5px solid rgba(255,255,255,.12); cursor: pointer;
       text-decoration: none; transition: all .3s; font-family: inherit;
     }
-    .btn-outline:hover { border-color: rgba(232,84,122,.4); color: #fff; background: rgba(232,84,122,.06); }
+    .btn-outline:hover { border-color: rgba(212,175,55,.45); color: var(--gb-ink); background: transparent; }
+    /* Niveau 2 : contour rose — l'alternative, jamais un second aplat dore */
+    .btn-line {
+      background: transparent; color: var(--gb-rose); border: 1.5px solid var(--gb-rose);
+      padding: 16px 38px; border-radius: 12px; font-size: .95rem; font-weight: 700;
+      cursor: pointer; text-decoration: none; display: inline-flex;
+      transition: all .3s; font-family: inherit;
+    }
+    .btn-line:hover { background: var(--gb-rose-tint); }
     .btn-gold {
-      background: linear-gradient(135deg, var(--or), var(--gb-champagne)); color: var(--gb-cta-ink);
+      background: var(--gb-cta); color: var(--gb-cta-ink);
       padding: 16px 40px; border-radius: 12px; font-size: .95rem; font-weight: 800;
       border: none; cursor: pointer; text-decoration: none; display: inline-flex;
-      box-shadow: 0 0 32px rgba(212,175,55,.25); transition: all .3s; font-family: inherit;
+      box-shadow: 0 6px 22px rgba(212,175,55,.2); transition: all .3s; font-family: inherit;
     }
-    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(212,175,55,.4); }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212,175,55,.34); }
 
     /* ── Scroll indicator ── */
     .scroll-hint {
@@ -222,7 +240,7 @@
     .hsb-field select option { background: var(--gb-surface); color: var(--gb-ink); }
     .hsb-near { flex: 0 0 auto; width: 46px; border-radius: 12px; border: 1px solid var(--bord-strong); background: rgba(255,255,255,.03); color: var(--gb-champagne); font-size: 1.05rem; cursor: pointer; transition: background .2s, border-color .2s; }
     .hsb-near:hover { background: rgba(212,175,55,.12); border-color: rgba(212,175,55,.4); }
-    .hsb-go { flex: 0 0 auto; padding: 0 26px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: .9rem; color: var(--gb-cta-ink); background: linear-gradient(100deg, var(--gb-powder), var(--gb-gold) 55%, var(--gb-rose-deep)); box-shadow: 0 0 26px rgba(212,175,55,.25); transition: box-shadow .2s, transform .2s; font-family: inherit; }
+    .hsb-go { flex: 0 0 auto; padding: 0 26px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: .9rem; color: var(--gb-cta-ink); background: var(--gb-cta); box-shadow: 0 4px 20px rgba(212,175,55,.22); transition: box-shadow .2s, transform .2s; font-family: inherit; }
     .hsb-go:hover { box-shadow: 0 0 42px rgba(212,175,55,.42); transform: translateY(-1px); }
     .hero-secondary { margin-top: 18px; font-size: .82rem; }
     .hero-secondary a { color: rgba(255,255,255,.6); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.22); padding-bottom: 1px; transition: color .2s, border-color .2s; }
@@ -371,7 +389,10 @@
     }
     .cta-artist::before { background: radial-gradient(ellipse at 50% 100%, rgba(212,175,55,.08), transparent 70%); }
     .cta-artist:hover { border-color: rgba(212,175,55,.2); }
-    .cta-card .icon { font-size: 2.5rem; margin-bottom: 20px; display: block; }
+    .cta-card .icon { display: flex; width: 54px; height: 54px; margin: 0 auto 20px; align-items: center;
+      justify-content: center; border-radius: 16px; color: var(--gb-champagne);
+      background: linear-gradient(135deg, rgba(232,216,206,.12), rgba(212,175,55,.07));
+      border: 1px solid rgba(212,175,55,.18); }
     .cta-card h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; position: relative; }
     .cta-card p { font-size: .9rem; color: var(--gb-ink-2); line-height: 1.6; margin-bottom: 28px; max-width: 300px; margin-left: auto; margin-right: auto; position: relative; }
     .cta-card .btn { position: relative; }
@@ -379,9 +400,9 @@
     /* La carte entiere est un lien : curseur main sur toute la surface,
        et le bouton reagit au survol de la carte, pas seulement de lui-meme. */
     .cta-card { display: block; text-decoration: none; color: inherit; cursor: pointer; }
-    .cta-card .btn-glow, .cta-card .btn-gold { position: relative; z-index: 2; }
-    .cta-card:hover .btn-glow { transform: translateY(-2px); box-shadow: 0 0 52px rgba(196,58,96,.45); }
-    .cta-card:hover .btn-gold { transform: translateY(-2px); box-shadow: 0 0 48px rgba(212,175,55,.4); }
+    .cta-card .btn-glow, .cta-card .btn-line { position: relative; z-index: 2; }
+    .cta-card:hover .btn-glow { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212,175,55,.34); }
+    .cta-card:hover .btn-line { background: var(--gb-rose-tint); }
     .cta-card:focus-visible { outline: 2px solid var(--gb-champagne); outline-offset: 3px; }
 
     /* ═══════════════════════════════════
@@ -401,7 +422,10 @@
       text-align: center; transition: all .3s;
     }
     .reas-item:hover { border-color: rgba(232,84,122,.15); }
-    .reas-item .ri { font-size: 1.6rem; margin-bottom: 14px; display: block; }
+    .reas-item .ri { display: flex; width: 46px; height: 46px; margin: 0 auto 14px; align-items: center;
+      justify-content: center; border-radius: 12px; color: var(--gb-champagne);
+      background: linear-gradient(135deg, rgba(232,216,206,.12), rgba(212,175,55,.07));
+      border: 1px solid rgba(212,175,55,.18); }
     .reas-item h4 { font-size: .9rem; font-weight: 700; margin-bottom: 8px; }
     .reas-item p { font-size: .8rem; color: var(--gb-ink-2); line-height: 1.6; }
 
@@ -537,7 +561,7 @@
   <canvas id="hero-canvas"></canvas>
   <div class="hero-content">
     <div class="hero-halo" aria-hidden="true"></div>
-    <div class="hero-badge anim-up">&#10024; LA PLATEFORME N&deg;1 DES MAKEUP ARTISTS</div>
+    <div class="hero-badge anim-up"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></svg> LA PLATEFORME N&deg;1 DES MAKEUP ARTISTS</div>
     <h1 class="hero-title anim-up">
       Trouvez votre<br/><span class="glow">maquilleuse <em>id&eacute;ale</em></span>
     </h1>
@@ -549,11 +573,11 @@
         <label>Prestation</label>
         <select id="search-service">
           <option value="">Toutes</option>
-          <option value="mariage">&#128141; Mariage</option>
-          <option value="soiree">&#127769; Soir&eacute;e</option>
-          <option value="quotidien">&#9728;&#65039; Quotidien</option>
-          <option value="editorial">&#128247; Shooting</option>
-          <option value="scene">&#127917; Sc&egrave;ne</option>
+          <option value="mariage">Mariage</option>
+          <option value="soiree">Soir&eacute;e</option>
+          <option value="quotidien">Quotidien</option>
+          <option value="editorial">Shooting</option>
+          <option value="scene">Sc&egrave;ne</option>
         </select>
       </div>
       <div class="hsb-field">
@@ -564,7 +588,7 @@
         <label>Date</label>
         <input type="date" id="search-date"/>
       </div>
-      <button type="button" class="hsb-near" onclick="doSearchNear(this)" title="Rechercher autour de moi" aria-label="Rechercher autour de moi">&#128205;</button>
+      <button type="button" class="hsb-near" onclick="doSearchNear(this)" title="Rechercher autour de moi" aria-label="Rechercher autour de moi"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></button>
       <button type="submit" class="hsb-go">Rechercher</button>
     </form>
     <div class="hero-secondary anim-up">
@@ -631,25 +655,25 @@
   </div>
   <div class="steps-grid">
     <div class="step-card anim-up">
-      <div class="step-icon">&#128269;</div>
+      <div class="step-icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg></div>
       <div class="step-num">&Eacute;tape 1</div>
       <h3>Explorez</h3>
       <p>Parcourez les profils par ville, date et sp&eacute;cialit&eacute;.</p>
     </div>
     <div class="step-card anim-up">
-      <div class="step-icon">&#128156;</div>
+      <div class="step-icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h7M4 12h7M4 18h7"/><path d="M17 4v16"/><path d="m14 7 3-3 3 3"/><path d="m20 17-3 3-3-3"/></svg></div>
       <div class="step-num">&Eacute;tape 2</div>
       <h3>Comparez</h3>
       <p>Portfolios, avis clients et tarifs en un coup d'&oelig;il.</p>
     </div>
     <div class="step-card anim-up">
-      <div class="step-icon">&#128197;</div>
+      <div class="step-icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg></div>
       <div class="step-num">&Eacute;tape 3</div>
       <h3>R&eacute;servez</h3>
       <p>Choisissez votre cr&eacute;neau et confirmez en ligne.</p>
     </div>
     <div class="step-card anim-up">
-      <div class="step-icon">&#10024;</div>
+      <div class="step-icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 14 9l6.5 2-6.5 2-2 6.5-2-6.5L3.5 11 10 9Z"/></svg></div>
       <div class="step-num">&Eacute;tape 4</div>
       <h3>Brillez</h3>
       <p>Votre artiste confirme. Il ne reste plus qu'&agrave; briller.</p>
@@ -683,16 +707,16 @@
   </div>
   <div class="cta-grid">
     <a href="/artists.html" class="cta-card cta-client anim-scale">
-      <span class="icon">&#128132;</span>
+      <span class="icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 2-.9 2-2 0-.6-.2-1-.6-1.4-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h1.6A4.5 4.5 0 0 0 21 9.8C21 6 17 3 12 3Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg></span>
       <h3>Je cherche une maquilleuse</h3>
       <p>Mariage, soir&eacute;e, shooting&hellip; Trouvez l'artiste parfaite pour votre occasion.</p>
       <span class="btn-glow">Explorer les artistes</span>
     </a>
     <a href="/auth/register.html?role=artist" class="cta-card cta-artist anim-scale">
-      <span class="icon">&#9997;&#65039;</span>
+      <span class="icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5 3 21l6.5-6.5Z"/><path d="M14.6 3.9a2 2 0 0 1 2.8 0l2.7 2.7a2 2 0 0 1 0 2.8l-6.9 6.9-5.5-5.5Z"/></svg></span>
       <h3>Je suis makeup artist</h3>
       <p>Cr&eacute;ez votre profil gratuitement, g&eacute;rez vos dispos et recevez des r&eacute;servations.</p>
-      <span class="btn-gold">Cr&eacute;er mon profil</span>
+      <span class="btn-line">Cr&eacute;er mon profil</span>
     </a>
   </div>
 </section>
@@ -704,17 +728,17 @@
   </div>
   <div class="reas-grid">
     <div class="reas-item anim-up">
-      <span class="ri">&#128274;</span>
+      <span class="ri"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
       <h4>R&eacute;servation s&eacute;curis&eacute;e</h4>
       <p>Vos donn&eacute;es sont prot&eacute;g&eacute;es. Annulation gratuite jusqu'&agrave; 48h avant le rendez-vous.</p>
     </div>
     <div class="reas-item anim-up">
-      <span class="ri">&#9989;</span>
+      <span class="ri"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
       <h4>Artistes v&eacute;rifi&eacute;es</h4>
       <p>Chaque profil est valid&eacute;. Portfolios authentiques et avis clients r&eacute;els.</p>
     </div>
     <div class="reas-item anim-up">
-      <span class="ri">&#128172;</span>
+      <span class="ri"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg></span>
       <h4>Support r&eacute;actif</h4>
       <p>&Eacute;quipe disponible pour vous accompagner avant et apr&egrave;s votre r&eacute;servation.</p>
     </div>
@@ -937,8 +961,8 @@ async function loadMe() {
   // Nav : refléter l'état connecté (sans toucher au reste de la barre)
   const navAuth = document.getElementById('nav-auth');
   if (navAuth) navAuth.innerHTML =
-    `<a href="${spaceHref}" class="hide-mobile">Mon espace</a>` +
-    '<a href="#" id="nav-logout" class="btn-nav btn">Déconnexion</a>';
+    `<a href="${spaceHref}" class="btn-nav btn">Mon espace</a>` +
+    '<a href="#" id="nav-logout" class="nav-quiet">Déconnexion</a>';
   const logout = document.getElementById('nav-logout');
   if (logout) logout.addEventListener('click', async (e) => {
     e.preventDefault();

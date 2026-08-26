@@ -168,25 +168,44 @@ h1, .hero-title { font-weight: 700; }
 .btn:disabled { opacity: .45; pointer-events: none; }
 .btn:active { transform: scale(.97); }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--rose) 0%, var(--rose-f) 100%);
-  color: var(--blanc);
-  box-shadow: var(--shadow-glow);
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,84,122,.3); }
+/* ══════════════════════════════════════════════════════════
+   Hiérarchie des actions — charte « Sombre Luxe »
+   Un seul bouton doré par écran. L'or agit, le rose qualifie.
+   1. .btn-primary  aplat doré      → l'action attendue
+   2. .btn-secondary contour rose   → l'alternative de marque
+   3. .btn-ghost     contour neutre → action tertiaire
+   4. .btn-quiet     lien souligné  → déconnexion, annuler, retour
+   ══════════════════════════════════════════════════════════ */
 
-.btn-secondary { background: var(--blanc); color: var(--rose); border: 2px solid var(--rose); }
-.btn-secondary:hover { background: var(--rose-cl); }
-
-.btn-ghost { background: transparent; color: var(--gris); border: 1.5px solid var(--bord); }
-.btn-ghost:hover { border-color: var(--rose); color: var(--rose); background: var(--rose-cl); }
-
+.btn-primary,
 .btn-gold {
-  background: linear-gradient(135deg, var(--or) 0%, #F5D060 100%);
-  color: var(--blanc);
-  box-shadow: 0 4px 16px rgba(212,175,55,.25);
+  background: var(--gb-cta);
+  color: var(--gb-cta-ink);
+  box-shadow: 0 6px 22px rgba(212,175,55,.2);
 }
-.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(212,175,55,.35); }
+.btn-primary:hover,
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212,175,55,.34); }
+
+.btn-secondary {
+  background: transparent; color: var(--gb-rose);
+  border: 1.5px solid var(--gb-rose);
+}
+.btn-secondary:hover { background: var(--gb-rose-tint); border-color: var(--gb-rose); }
+
+.btn-ghost { background: transparent; color: var(--gb-ink-2); border: 1.5px solid var(--gb-line-strong); }
+.btn-ghost:hover { border-color: var(--gb-champagne); color: var(--gb-ink); background: transparent; }
+
+.btn-quiet {
+  background: none; border: none; padding: 12px 6px;
+  color: var(--gb-ink-3); text-decoration: underline;
+  text-underline-offset: 4px; text-decoration-color: var(--gb-line-strong);
+  box-shadow: none;
+}
+.btn-quiet:hover { color: var(--gb-ink-2); text-decoration-color: var(--gb-ink-3); }
+
+/* Aplat rose : uniquement avec la version foncée, la seule lisible sous du blanc */
+.btn-rose-solid { background: var(--gb-rose-deep); color: #fff; }
+.btn-rose-solid:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(196,58,96,.35); }
 
 .btn-sm { padding: 8px 16px; font-size: .8rem; border-radius: var(--radius-xs); }
 .btn-full { width: 100%; }
@@ -373,8 +392,8 @@ h1, .hero-title { font-weight: 700; }
 .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), 0 0 24px rgba(212,175,55,.14); }
 .artist-card:hover { box-shadow: var(--shadow-lg), 0 0 30px rgba(212,175,55,.16); }
 .stat-card:hover, .booking-row:hover { box-shadow: var(--shadow-md), 0 0 20px rgba(232,84,122,.12); }
-.btn-primary:hover { box-shadow: 0 8px 32px rgba(232,84,122,.35), 0 0 18px rgba(232,84,122,.25); }
-.btn-gold:hover { box-shadow: 0 8px 32px rgba(212,175,55,.4), 0 0 18px rgba(212,175,55,.3); }
+.btn-primary:hover,
+.btn-gold:hover { box-shadow: 0 10px 34px rgba(212,175,55,.4), 0 0 18px rgba(212,175,55,.3); }
 
 /* CTA luxe : dégradé champagne → or → rose */
 .btn-lux {

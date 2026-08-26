@@ -18,6 +18,9 @@
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
+
+    /* Icones : trait de 1,5 px, jamais de remplissage (charte « Sombre Luxe ») */
+    .gb-ico { width: 1em; height: 1em; flex: 0 0 auto; vertical-align: -.14em; display: inline-block; }
   <style>
     .page-header {
       background: linear-gradient(160deg, #0F0610 0%, #2D0818 40%, #1A0A12 100%);
@@ -110,8 +113,8 @@
 
 <div class="filters-bar">
   <div class="filters-inner">
-    <input class="filter-input" id="f-city" placeholder="🔍 Ville ou région" type="text"/>
-    <button class="filter-pill" id="f-near" title="Rechercher autour de ma position">📍 Autour de moi</button>
+    <input class="filter-input" id="f-city" placeholder="Ville ou région" type="text"/>
+    <button class="filter-pill" id="f-near" title="Rechercher autour de ma position"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> Autour de moi</button>
     <select class="sort-select" id="f-radius" style="margin-left:0;" title="Rayon de recherche">
       <option value="0">Partout</option>
       <option value="5">5 km</option>
@@ -221,15 +224,15 @@ document.getElementById('f-near').addEventListener('click', () => {
   const btn = document.getElementById('f-near');
   if (filters.near) { filters.near = false; filters.center = null; btn.classList.remove('active'); reload(); return; }
   if (!navigator.geolocation) { showToast('Géolocalisation non disponible sur cet appareil.'); return; }
-  btn.textContent = '📍 Localisation…';
+  btn.textContent = 'Localisation…';
   navigator.geolocation.getCurrentPosition((pos) => {
     filters.near = true;
     filters.center = { lat: pos.coords.latitude, lng: pos.coords.longitude };
     if (!filters.radius) { filters.radius = 10; document.getElementById('f-radius').value = '10'; }
-    btn.classList.add('active'); btn.textContent = '📍 Autour de moi';
+    btn.classList.add('active'); btn.innerHTML = '<svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> Autour de moi';
     reload();
   }, (err) => {
-    console.warn(err); btn.textContent = '📍 Autour de moi';
+    console.warn(err); btn.innerHTML = '<svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> Autour de moi';
     showToast('Position non autorisée. Saisissez une ville et choisissez un rayon.');
   }, { enableHighAccuracy: false, timeout: 8000 });
 });
@@ -304,7 +307,7 @@ async function loadArtists(reset) {
   if (error || !data || data.length === 0) {
     if (reset) grid.innerHTML = `
       <div class="no-results" style="grid-column:1/-1;">
-        <div class="icon">💄</div>
+        <div class="icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 2-.9 2-2 0-.6-.2-1-.6-1.4-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h1.6A4.5 4.5 0 0 0 21 9.8C21 6 17 3 12 3Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg></div>
         <h3>Aucune maquilleuse trouvée</h3>
         <p>Essayez d'élargir votre recherche ou de changer la date.</p>
       </div>`;
@@ -336,7 +339,7 @@ async function loadArtists(reset) {
           </div>
           <div>
             <div class="artist-name">${name}</div>
-            <div class="artist-city">📍 ${city}${a._dist != null ? ` · à ${a._dist < 10 ? a._dist.toFixed(1) : Math.round(a._dist)} km` : ''}</div>
+            <div class="artist-city"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> ${city}${a._dist != null ? ` · à ${a._dist < 10 ? a._dist.toFixed(1) : Math.round(a._dist)} km` : ''}</div>
           </div>
         </div>
         <div class="tags">${(a.specialties || []).slice(0,3).map(s => `<span class="tag">${esc(specialtyLabel(s))}</span>`).join('')}</div>

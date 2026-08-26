@@ -16,6 +16,9 @@
   <meta name="theme-color" content="#E8547A"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
+
+    /* Icones : trait de 1,5 px, jamais de remplissage (charte « Sombre Luxe ») */
+    .gb-ico { width: 1em; height: 1em; flex: 0 0 auto; vertical-align: -.14em; display: inline-block; }
   <style>
     .cover { width:100%; height:320px; object-fit:cover; background:linear-gradient(135deg, rgba(232,84,122,.14), #27272A); display:block; }
     .profile-header {
@@ -109,9 +112,8 @@
   }
   .photo-blur-overlay img { filter: blur(6px); transform: scale(1.05); pointer-events: none; }
   .photo-blur-overlay::after {
-    content: '🔒'; position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem; background: rgba(0,0,0,.25);
+    content: ''; position: absolute; inset: 0;
+    background: rgba(0,0,0,.25) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23E7C766" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>') center / 28px 28px no-repeat;
   }
 
   /* Booking guest */
@@ -228,7 +230,7 @@
       <button class="btn btn-primary btn-full" id="btn-book" disabled style="margin-top:16px;">
         Réserver ce créneau
       </button>
-      <a class="btn btn-ghost btn-full" id="btn-contact" style="margin-top:8px;">💬 Contacter</a>
+      <a class="btn btn-ghost btn-full" id="btn-contact" style="margin-top:8px;"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg> Contacter</a>
       <p style="font-size:.75rem;color:var(--gris);text-align:center;margin-top:10px;">
         Annulation gratuite jusqu'à 48h avant · Messagerie sécurisée
       </p>
@@ -238,7 +240,7 @@
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-close" onclick="closeLightbox()"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
   <img id="lightbox-img" src="" alt=""/>
 </div>
 
@@ -348,7 +350,7 @@ async function load() {
   }
 
   document.getElementById('artist-name').textContent = p.full_name || 'Maquilleuse';
-  document.getElementById('artist-city').textContent = '📍 ' + (p.city || p.region || 'France');
+  document.getElementById('artist-city').textContent = '' + (p.city || p.region || 'France');
   document.getElementById('artist-bio').textContent = a.bio || 'Maquilleuse professionnelle passionnée.';
   document.getElementById('booking-price').textContent = a.price_from ? `À partir de ${a.price_from}€` : 'Sur devis';
 
@@ -361,7 +363,7 @@ async function load() {
   // Badges
   const bz = document.getElementById('badges-zone');
   if (a.is_verified) bz.innerHTML += '<span class="badge badge-vert">✓ Vérifiée</span> ';
-  if (a.review_count >= 10) bz.innerHTML += '<span class="badge badge-or">⭐ Top artiste</span>';
+  if (a.review_count >= 10) bz.innerHTML += '<span class="badge badge-or"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.2 1.1 6.1L12 16.8 6.7 19.7l1.1-6.1L3.4 9.4l6-.8Z"/></svg> Top artiste</span>';
 
   // Spécialités
   document.getElementById('specialties-tags').innerHTML = (a.specialties || [])
@@ -371,14 +373,14 @@ async function load() {
   if (!isGuest) {
     const socials = [];
     const igUrl = safeUrl(a.instagram), ttUrl = safeUrl(a.tiktok), ytUrl = safeUrl(a.youtube), wsUrl = safeUrl(a.website);
-    if (igUrl) socials.push(`<a class="social-link" href="${esc(igUrl)}" target="_blank" rel="noopener noreferrer">📸 Instagram</a>`);
-    if (ttUrl) socials.push(`<a class="social-link" href="${esc(ttUrl)}" target="_blank" rel="noopener noreferrer">🎵 TikTok</a>`);
+    if (igUrl) socials.push(`<a class="social-link" href="${esc(igUrl)}" target="_blank" rel="noopener noreferrer"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="14" rx="3"/><circle cx="12" cy="14" r="3.4"/><path d="M9 7l1.4-2.4h3.2L15 7"/></svg> Instagram</a>`);
+    if (ttUrl) socials.push(`<a class="social-link" href="${esc(ttUrl)}" target="_blank" rel="noopener noreferrer"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5.5l11-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg> TikTok</a>`);
     if (ytUrl) socials.push(`<a class="social-link" href="${esc(ytUrl)}" target="_blank" rel="noopener noreferrer">▶️ YouTube</a>`);
-    if (wsUrl) socials.push(`<a class="social-link" href="${esc(wsUrl)}" target="_blank" rel="noopener noreferrer">🌐 Site web</a>`);
+    if (wsUrl) socials.push(`<a class="social-link" href="${esc(wsUrl)}" target="_blank" rel="noopener noreferrer"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z"/></svg> Site web</a>`);
     document.getElementById('social-links').innerHTML = socials.join('');
   } else {
     document.getElementById('social-links').innerHTML =
-      `<span style="font-size:.78rem;color:var(--gris);">🔒 Réseaux sociaux — <a href="/auth/register.html" style="color:var(--rose);font-weight:700;">Créer un compte</a> pour voir</span>`;
+      `<span style="font-size:.78rem;color:var(--gris);"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Réseaux sociaux — <a href="/auth/register.html" style="color:var(--rose);font-weight:700;">Créer un compte</a> pour voir</span>`;
   }
 
 
