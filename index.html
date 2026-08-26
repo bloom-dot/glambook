@@ -62,7 +62,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="GlamBook"/>
   <link rel="stylesheet" href="/css/main.css"/>
-  <script>try{if((localStorage.getItem('gb-theme')||'dark')==='light')document.documentElement.classList.add('theme-light');}catch(e){}</script>
   <script defer src="/js/theme.js"></script>
   <style>
     :root {
@@ -295,11 +294,6 @@
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
       position: relative;
     }
-    .steps-grid::before {
-      content: ''; position: absolute; top: 40px; left: 10%; right: 10%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(232,84,122,.2), rgba(212,175,55,.2), transparent);
-    }
     .step-card {
       text-align: center; padding: 32px 16px 28px; border-radius: 20px;
       background: var(--bg-card); border: 1px solid var(--border-subtle);
@@ -431,7 +425,6 @@
     @media (max-width: 768px) {
       .trust-row { grid-template-columns: repeat(2, 1fr); gap: 16px; }
       .steps-grid { grid-template-columns: 1fr 1fr; }
-      .steps-grid::before { display: none; }
       .cta-grid { grid-template-columns: 1fr; }
       .reas-grid { grid-template-columns: 1fr; }
       .hero-title { font-size: clamp(2rem, 8vw, 3rem); }

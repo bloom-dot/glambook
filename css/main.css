@@ -5,18 +5,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 /* ══════════════════════════════════════
-   Thème SOMBRE LUXE (par défaut)
-   Bascule en clair : classe .theme-light sur <html>
+   Thème SOMBRE LUXE — thème unique
+   La bascule clair/sombre a été retirée (charte « Sombre Luxe »).
    ══════════════════════════════════════ */
 :root {
-  /* Accents de marque (identiques dans les 2 thèmes) */
+  /* Accents de marque */
   --rose:    #E8547A;
   --rose-f:  #C43A60;
   --or:      #D4AF37;   /* doré champagne */
   --champagne: #E7C766;
   --poudre:  #E8D8CE;   /* rose poudré */
 
-  /* Jetons sensibles au thème — valeurs SOMBRES */
+  /* Fonds, surfaces et texte */
   --rose-cl: #2A1A20;   /* tuile rose sombre */
   --or-cl:   #2A2410;
   --noir:    #F4F4F5;   /* = couleur de texte (blanc cassé) */
@@ -43,29 +43,6 @@
   --nav-h: 64px;
 }
 
-/* ── Thème CLAIR (bascule) ── */
-html.theme-light {
-  --rose-cl: #FDE8EF;
-  --or-cl:   #FDF8E7;
-  --noir:    #111111;
-  --gris:    #6B7280;
-  --gris-cl: #F9FAFB;
-  --blanc:   #FFFFFF;
-  --surface-2: #F3EFEA;
-  --bord:    #E5E7EB;
-  --bord-strong: #D1D5DB;
-  --glass:   rgba(255,255,255,.7);
-  --nav-bg:  rgba(255,255,255,.85);
-  --scroll-thumb: rgba(0,0,0,.12);
-  --shadow:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,.12);
-}
-
-/* Transition douce lors du changement de thème */
-html, body, .nav, .card, .artist-card, .btn, input, select, textarea {
-  transition: background-color .5s ease, color .5s ease, border-color .5s ease, box-shadow .5s ease;
-}
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -382,14 +359,3 @@ h1, .hero-title { font-weight: 700; }
 @keyframes glossSheen { 0% { transform: translateX(-40px); } 100% { transform: translateX(0); } }
 .gloss-meta { display: flex; justify-content: space-between; font-size: .74rem; color: var(--gris); margin-top: 8px; }
 
-/* Bouton flottant de bascule de thème */
-.theme-toggle {
-  position: fixed; z-index: 400; bottom: 22px; right: 22px;
-  height: 46px; width: 46px; border-radius: 50%; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
-  background: var(--blanc); color: var(--or); border: 1px solid var(--bord);
-  box-shadow: var(--shadow-md); transition: transform .2s, box-shadow .2s;
-}
-.theme-toggle:hover { transform: translateY(-2px) scale(1.05); box-shadow: var(--shadow-md), 0 0 20px rgba(212,175,55,.35); }
-.theme-toggle:active { transform: scale(.95); }
-@media (max-width: 640px) { .theme-toggle { bottom: 84px; } }

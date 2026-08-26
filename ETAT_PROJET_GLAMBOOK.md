@@ -60,7 +60,7 @@ git add -A; git commit -m "message"; git push
 - `api/` — fonctions serverless : `face-diagnostic.js` (OpenAI), `send-quote.js` (Resend), `sitemap.js`. Rate limiting via table `api_usage`.
 - `legal/` — `mentions-legales.html`, `cgu.html`, `cgv.html`, `confidentialite.html`.
 - `img/` — visuels (hero, portrait, bandeau-pro, cat-mariage, cat-soiree…). Filigranes des IA rognés au préalable.
-- `sw.js` — service worker (`CACHE_NAME` actuel **`glambook-v11`**, network-first pour `.js` et `.css`).
+- `sw.js` — service worker (`CACHE_NAME` actuel **`glambook-v12`**, network-first pour `.js` et `.css`).
 - `vercel.json` — routes + en-têtes de sécurité (CSP stricte, HSTS…).
 - `ui-kit-nextjs/` — kit UI Next.js « Sombre Luxe » (composants de référence, non utilisé par l'app vanilla).
 
@@ -71,6 +71,7 @@ git add -A; git commit -m "message"; git push
 Tokens CSS (dans `css/main.css`, `:root` = dark par défaut ; `html.theme-light` pour le clair) :
 
 - Fonds : `#0F0F11` (fond), `#18181B` (cartes), surfaces `#27272A`.
+- **Thème unique sombre** depuis le 26 août 2026 : la bascule clair/sombre a été retirée (bouton flottant, bloc `html.theme-light`, scripts d'init `gb-theme` dans les 19 pages). `js/theme.js` ne gère plus que les apparitions au scroll.
 - Bordures : `#27272A` / `#3F3F46`.
 - Accents : champagne `#E8D8CE`, or `#D4AF37` / `#E7C766`, rose `#E11D48` / `#E8547A`.
 - CTA gradient : `linear-gradient(100deg,#E8D8CE,#D4AF37 55%,#E11D48)`.
@@ -208,3 +209,22 @@ Audit du code réel confronté à la base de production. Ce qui a été trouvé 
 - **Redirection après inscription** : `auth/register.html` ignore `?redirect=`, la cliente perd la fiche artiste consultée.
 - **Stats dashboard** : « ce mois » compare le mois sans l'année.
 - **Nom « GlamBook »** : une plateforme homonyme (glambook.com, Glambook Ltd.) opère sur le même créneau en France depuis 2023 et a déposé la marque en classe 35 pour les places de marché de services de beauté. À arbitrer avant tout achat de domaine ou dépôt.
+
+---
+
+## 14. Charte graphique « Sombre Luxe » (26 août 2026)
+
+Étude complète publiée ici : https://claude.ai/code/artifact/9bbda50d-09a5-4532-bfb3-f81086a74e9b
+
+**Constat de l'audit** : 113 couleurs hexadécimales distinctes sur 22 fichiers, deux systèmes de jetons concurrents (`css/main.css` et un `:root` en dur dans `index.html`), texte blanc sur bouton rose à 3,51 de contraste (seuil WCAG : 4,5).
+
+**Principe** : l'or agit, le rose qualifie, le poudré habille. Une seule action dorée par écran ; le rose ne porte jamais de texte blanc en aplat (utiliser `#C43A60`, contraste 5,10).
+
+**Décidé et appliqué** : suppression du thème clair — la marque assume le sombre.
+
+**Reste à appliquer** (par ordre du plan de migration) :
+1. ~~Trancher la question du thème clair~~ ✅ fait
+2. Poser les jetons `--gb-*` en tête de `css/main.css`
+3. Libérer `index.html` de son `:root` local et fusionner ses 5 blocs `<style>`
+4. Hiérarchie des boutons à 4 niveaux + icônes SVG au trait (fin des emojis)
+5. Éliminer les couleurs en dur, en commençant par `dashboard/artist.html` (72 occurrences)
