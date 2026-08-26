@@ -60,7 +60,7 @@ git add -A; git commit -m "message"; git push
 - `api/` — fonctions serverless : `face-diagnostic.js` (OpenAI), `send-quote.js` (Resend), `sitemap.js`. Rate limiting via table `api_usage`.
 - `legal/` — `mentions-legales.html`, `cgu.html`, `cgv.html`, `confidentialite.html`.
 - `img/` — visuels (hero, portrait, bandeau-pro, cat-mariage, cat-soiree…). Filigranes des IA rognés au préalable.
-- `sw.js` — service worker (`CACHE_NAME` actuel **`glambook-v12`**, network-first pour `.js` et `.css`).
+- `sw.js` — service worker (`CACHE_NAME` actuel **`glambook-v13`**, network-first pour `.js` et `.css`).
 - `vercel.json` — routes + en-têtes de sécurité (CSP stricte, HSTS…).
 - `ui-kit-nextjs/` — kit UI Next.js « Sombre Luxe » (composants de référence, non utilisé par l'app vanilla).
 
@@ -222,9 +222,11 @@ Audit du code réel confronté à la base de production. Ce qui a été trouvé 
 
 **Décidé et appliqué** : suppression du thème clair — la marque assume le sombre.
 
-**Reste à appliquer** (par ordre du plan de migration) :
-1. ~~Trancher la question du thème clair~~ ✅ fait
-2. Poser les jetons `--gb-*` en tête de `css/main.css`
-3. Libérer `index.html` de son `:root` local et fusionner ses 5 blocs `<style>`
+**Plan de migration** :
+1. ~~Trancher la question du thème clair~~ ✅ thème unique sombre
+2. ~~Poser les jetons `--gb-*` en tête de `css/main.css`~~ ✅ faits, avec alias de compatibilité pour les anciens noms (`--rose`, `--or`, `--gris-cl`…) qui pointent désormais vers les jetons ; à retirer après l'étape 5
+3. ~~Libérer `index.html` de son `:root` local et fusionner ses blocs `<style>`~~ ✅ **zéro couleur en dur** dans l'accueil, un seul bloc `<style>` au lieu de 4, le second noir `#080408` a disparu
 4. Hiérarchie des boutons à 4 niveaux + icônes SVG au trait (fin des emojis)
-5. Éliminer les couleurs en dur, en commençant par `dashboard/artist.html` (72 occurrences)
+5. Éliminer les couleurs en dur des autres pages, en commençant par `dashboard/artist.html` (72 occurrences)
+
+**Vérification de l'étape 3** : rendu local des deux versions de l'accueil comparé pixel à pixel — hauteur identique (4272 px), différence sensible mesurée à 0,0 %. Tous les jetons résolvent (`--gris-cl` → `#0E0E10`, `--blanc` → `#17171A`, `--noir` → `#F4F2F5`), aucune `var()` non résolue dans le rendu.

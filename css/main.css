@@ -9,38 +9,89 @@
    La bascule clair/sombre a été retirée (charte « Sombre Luxe »).
    ══════════════════════════════════════ */
 :root {
-  /* Accents de marque */
-  --rose:    #E8547A;
-  --rose-f:  #C43A60;
-  --or:      #D4AF37;   /* doré champagne */
-  --champagne: #E7C766;
-  --poudre:  #E8D8CE;   /* rose poudré */
+  /* ══════════════════════════════════════════════════════════
+     CHARTE « SOMBRE LUXE » — source unique des couleurs.
+     Aucune couleur ne doit être écrite ailleurs que dans ce bloc.
+     Principe : l'or agit, le rose qualifie, le poudré habille.
+     ══════════════════════════════════════════════════════════ */
 
-  /* Fonds, surfaces et texte */
-  --rose-cl: #2A1A20;   /* tuile rose sombre */
-  --or-cl:   #2A2410;
-  --noir:    #F4F4F5;   /* = couleur de texte (blanc cassé) */
-  --gris:    #A1A1AA;   /* texte secondaire */
-  --gris-cl: #0F0F11;   /* = fond de page (noir satiné anthracite) */
-  --blanc:   #18181B;   /* = surfaces / cartes */
-  --surface-2: #27272A;
-  --bord:    #27272A;   /* bordure fine */
-  --bord-strong: #3F3F46;
-  --glass:   rgba(24,24,27,.55);  /* fond glassmorphism */
-  --nav-bg:  rgba(15,15,17,.72);
+  /* Fonds et structure */
+  --gb-ground:      #0E0E10;   /* fond de toutes les pages */
+  --gb-surface:     #17171A;   /* cartes, panneaux (opaque) */
+  --gb-surface-2:   #1F1F23;   /* surface élevée */
+  --gb-line:        #2A2A2F;   /* bordures et séparateurs */
+  --gb-line-strong: #3B3B42;
+
+  /* Signature — l'or agit */
+  --gb-gold:        #D4AF37;
+  --gb-champagne:   #E7C766;
+  --gb-powder:      #E8D8CE;
+
+  /* Accent — le rose qualifie */
+  --gb-rose:        #E8547A;
+  --gb-rose-deep:   #C43A60;   /* seul aplat rose autorisé sous du texte blanc */
+
+  /* Texte */
+  --gb-ink:         #F4F2F5;
+  --gb-ink-2:       #A8A2AC;
+  --gb-ink-3:       #75707A;
+
+  /* États — jamais utilisés comme couleurs de marque */
+  --gb-ok:          #7FB894;
+  --gb-warn:        #E0A458;
+  --gb-bad:         #D2685F;
+
+  /* Action principale */
+  --gb-cta:         linear-gradient(100deg, #E8D8CE, #D4AF37 62%, #E7C766);
+  --gb-cta-ink:     #17120A;
+
+  /* Teintes dérivées (fonds de pastilles, halos) */
+  --gb-rose-tint:   #241A1E;
+  --gb-gold-tint:   #241F12;
+
+  /* Rayons — trois valeurs */
+  --gb-r-sm:        6px;
+  --gb-r-md:        12px;
+  --gb-r-pill:      999px;
+
+  /* Relief : un halo doré, pas une ombre noire */
+  --gb-glow:        0 0 24px rgba(212,175,55,.14);
+  --gb-veil:        linear-gradient(to top, rgba(8,4,8,.88), transparent 60%);
+
+  /* ══════════════════════════════════════════════════════════
+     COMPATIBILITÉ — anciens noms, conservés le temps de la migration.
+     Ne plus les utiliser dans du code neuf ; ils seront retirés
+     une fois l'étape 5 du plan de migration terminée.
+     ══════════════════════════════════════════════════════════ */
+  --rose:        var(--gb-rose);
+  --rose-f:      var(--gb-rose-deep);
+  --or:          var(--gb-gold);
+  --champagne:   var(--gb-champagne);
+  --poudre:      var(--gb-powder);
+  --rose-cl:     var(--gb-rose-tint);
+  --or-cl:       var(--gb-gold-tint);
+  --noir:        var(--gb-ink);
+  --gris:        var(--gb-ink-2);
+  --gris-cl:     var(--gb-ground);
+  --blanc:       var(--gb-surface);
+  --surface-2:   var(--gb-surface-2);
+  --bord:        var(--gb-line);
+  --bord-strong: var(--gb-line-strong);
+  --glass:       rgba(23,23,26,.55);
+  --nav-bg:      rgba(14,14,16,.72);
   --scroll-thumb: rgba(255,255,255,.16);
 
-  --shadow:  0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
-  --shadow-md: 0 8px 30px rgba(0,0,0,.45);
-  --shadow-lg: 0 18px 50px rgba(0,0,0,.55);
-  --shadow-glow: 0 4px 24px rgba(232,84,122,.22);
+  --shadow:      0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md:   0 8px 30px rgba(0,0,0,.45);
+  --shadow-lg:   0 18px 50px rgba(0,0,0,.55);
+  --shadow-glow: var(--gb-glow);
 
-  --ink: #111111;      /* toujours foncé (toasts, badges sombres) */
-  --radius:  16px;
-  --radius-sm: 10px;
-  --radius-xs: 6px;
-  --transition: .2s cubic-bezier(.4,0,.2,1);
-  --nav-h: 64px;
+  --ink: #111111;      /* fond foncé des toasts et badges — sans rapport avec --gb-ink */
+  --radius:      16px;
+  --radius-sm:   var(--gb-r-md);
+  --radius-xs:   var(--gb-r-sm);
+  --transition:  .2s cubic-bezier(.4,0,.2,1);
+  --nav-h:       64px;
 }
 
 
