@@ -14,8 +14,8 @@
   <meta property="og:description" content="Trouvez et réservez une maquilleuse professionnelle près de chez vous. Portfolios, avis clients, réservation en ligne sécurisée."/>
   <meta property="og:url" content="https://glambook-pi.vercel.app/"/>
   <meta property="og:image" content="https://glambook-pi.vercel.app/img/hero.jpg"/>
-  <meta property="og:image:width" content="1200"/>
-  <meta property="og:image:height" content="618"/>
+  <meta property="og:image:width" content="1376"/>
+  <meta property="og:image:height" content="768"/>
   <meta property="og:image:alt" content="Maquilleuse professionnelle au travail"/>
   <meta property="og:locale" content="fr_FR"/>
   <!-- Twitter Card -->
@@ -76,7 +76,7 @@
 
     /* ── Hero : la photo plein cadre, le titre en capitales serrées ── */
     .hero { position: relative; min-height: 600px; display: flex; align-items: flex-end; overflow: hidden; }
-    .hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% center; }
+    .hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 35%; }
     .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14,14,16,.94) 0%, rgba(14,14,16,.62) 48%, rgba(14,14,16,.05) 100%); }
     .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--gb-ground) 0%, rgba(14,14,16,0) 32%); }
     .hero .wrap { position: relative; z-index: 1; width: 100%; padding-bottom: 64px; }
@@ -129,7 +129,7 @@
     .pro-text p { color: var(--gb-ink-2); margin: 0; max-width: 46ch; line-height: 1.6; }
     .pro-perks { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: .88rem; color: var(--gb-ink-2); }
     .pro-perks li::before { content: '— '; color: var(--gb-gold); }
-    .pro img { width: 100%; height: 100%; object-fit: cover; min-height: 320px; }
+    .pro img { width: 100%; height: 100%; object-fit: cover; object-position: 72% center; min-height: 320px; }
 
     /* ── Espace personnel (connectée) ── */
     .home-me { padding-top: 40px; }
@@ -173,7 +173,7 @@
     @media (max-width: 600px) {
       .wrap { padding: 0 16px; }
       .hero { min-height: 600px; }
-      .hero > img { object-position: 60% 15%; height: 72%; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+      .hero > img { object-position: 80% 20%; height: 72%; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
       .hero::before { background: linear-gradient(rgba(14,14,16,0) 20%, rgba(14,14,16,.85) 60%, var(--gb-ground) 72%); }
       .hero .eyebrow .far { display: none; }
       .rule-head .aside { display: none; }
