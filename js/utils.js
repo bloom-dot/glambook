@@ -93,3 +93,23 @@ export const ICON = {
   shield:   svg('<path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/>'),
   scan:     svg('<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="11" r="3"/><path d="M7.5 17a5 5 0 0 1 9 0"/>'),
 };
+
+// Mode de prise de rendez-vous de chaque maquilleuse, pour l'annoncer dès les cartes :
+//   'slots' → prestations tarifées ET créneaux libres à venir : réservation en ligne
+//   'quote' → tout le reste : la cliente décrit son besoin et reçoit un devis
+export async function bookingModes(supabase, artists) {
+  const modes = new Map((artists || []).map(a => [a.id, 'quote']));
+  const priced = (artists || []).filter(a => (parseInt(a.price_from) || 0) > 0).map(a => a.id);
+  if (!priced.length) return modes;
+  try {
+    const { data } = await supabase.from('availabilities').select('artist_id')
+      .in('artist_id', priced).gte('date', localISODate()).eq('is_available', true).eq('is_booked', false).limit(1000);
+    (data || []).forEach(r => modes.set(r.artist_id, 'slots'));
+  } catch (_) { /* sans réponse : on annonce « Sur devis », toujours vrai en dernier recours */ }
+  return modes;
+}
+export function modeTag(mode) {
+  return mode === 'slots'
+    ? '<span class="mode-tag is-slots">Réservation en ligne</span>'
+    : '<span class="mode-tag">Sur devis</span>';
+}

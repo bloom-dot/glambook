@@ -176,7 +176,25 @@
     .preview-btn { display:inline-block; padding:6px 14px; border-radius:8px; font-size:.72rem; font-weight:700; color:var(--gb-cta-ink); background:var(--gb-cta); margin-top:8px; }
 
     /* Upload photo */
+    /* Liste de démarrage */
+    .starter { border: 1px solid var(--gb-line-strong); border-radius: var(--radius); background: var(--gb-surface); padding: 24px 26px; margin-bottom: 32px; }
+    .starter h2 { font-size: 2.2rem; margin: 8px 0 6px; }
+    .starter h2 span { color: var(--gb-gold); }
+    .starter p { color: var(--gb-ink-2); font-size: .88rem; margin: 0; max-width: 60ch; }
+    .starter-bar { height: 4px; background: var(--gb-line); border-radius: 2px; margin: 18px 0 8px; overflow: hidden; }
+    .starter-bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gb-champagne), var(--gb-gold)); transition: width .5s; }
+    .starter-list { list-style: none; margin: 0; padding: 0; }
+    .starter-list li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gb-line); }
+    .starter-list li:last-child { border-bottom: none; }
+    .starter-list .ck { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--gb-line-strong); display: flex; align-items: center; justify-content: center; color: transparent; }
+    .starter-list li.done .ck { background: var(--gb-gold); border-color: var(--gb-gold); color: var(--gb-cta-ink); }
+    .starter-list .ck .gb-ico { width: 14px; height: 14px; }
+    .starter-list .t { font-weight: 600; font-size: .92rem; }
+    .starter-list li.done .t { color: var(--gb-ink-3); text-decoration: line-through; text-decoration-color: var(--gb-line-strong); }
+    .starter-list .d { font-size: .8rem; color: var(--gb-ink-3); }
+    .starter-list .opt { font-size: .64rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gb-ink-3); margin-left: 6px; }
     .upload-zone {
+      display: block;
       border: 2px dashed var(--bord); border-radius: var(--radius-sm);
       padding: 32px; text-align: center; cursor: pointer; transition: all .15s;
     }
@@ -238,8 +256,8 @@
 
     <!-- Stats -->
     <div class="stats-grid" id="stats-grid">
-      <div class="stat-card"><div class="num" id="stat-reservations">–</div><div class="lbl">Réservations ce mois</div></div>
-      <div class="stat-card"><div class="num" id="stat-revenue">–</div><div class="lbl">Revenus ce mois</div></div>
+      <div class="stat-card"><div class="num" id="stat-reservations">–</div><div class="lbl">Prestations ce mois</div></div>
+      <div class="stat-card"><div class="num" id="stat-revenue">–</div><div class="lbl">Chiffre du mois</div></div>
       <div class="stat-card"><div class="num" id="stat-rating">–</div><div class="lbl">Note moyenne</div></div>
       <div class="stat-card"><div class="num" id="stat-requests">–</div><div class="lbl">Demandes en attente</div></div>
     </div>
@@ -319,6 +337,14 @@
 
     <!-- ═══ ONGLET DEMANDES ═══ -->
     <div id="tab-demandes" style="display:none;">
+      <section class="starter" id="starter" hidden aria-labelledby="starter-t">
+        <div class="starter-head">
+          <div><span class="eyebrow">Pour démarrer</span><h2 id="starter-t">Votre profil est prêt à <span id="starter-pct">0</span> %</h2>
+            <p>Les clientes choisissent sur photos : un profil complet apparaît mieux dans la recherche et reçoit plus de demandes.</p></div>
+        </div>
+        <div class="starter-bar" aria-hidden="true"><span id="starter-fill"></span></div>
+        <ol class="starter-list" id="starter-list"></ol>
+      </section>
       <div style="margin-bottom:16px;">
         <h2 style="font-size:1.1rem;font-weight:800;">Demandes reçues</h2>
         <p style="font-size:.82rem;color:var(--gris);">Lisez le besoin de la cliente, puis répondez-lui par un devis.</p>
@@ -608,14 +634,56 @@ async function init() {
   loadReviews();
   loadPhotos();
   loadServices();
-  // Premier écran : les demandes — c'est là que le travail arrive
-  showTab('demandes');
+  // Premier écran : les demandes — c'est là que le travail arrive (ou l'onglet demandé dans l'adresse)
+  const wanted = location.hash.slice(1);
+  showTab(TABS.includes(wanted) ? wanted : 'demandes');
   updateNavBadges();
   // Le diagnostic visage n'apparaît dans le menu que s'il est réellement branché côté serveur
   fetch('/api/config').then(r => r.json()).then(c => { if (c.diagnosticEnabled) document.getElementById('nav-diag').hidden = false; }).catch(() => {});
 }
 
+// ── Liste de démarrage : ce qu'il manque pour que le profil donne envie (disparaît une fois complète) ──
+let starterT;
+function refreshStarter() { clearTimeout(starterT); starterT = setTimeout(renderStarter, 300); }
+async function renderStarter() {
+  if (!artistData?.id) return;
+  try {
+    const [ph, sv, ar, pr] = await Promise.all([
+      supabase.from('artist_photos').select('id', { count: 'exact', head: true }).eq('artist_id', artistData.id),
+      supabase.from('services').select('id', { count: 'exact', head: true }).eq('artist_id', artistData.id),
+      supabase.from('artists').select('bio, specialties, is_active').eq('id', artistData.id).maybeSingle(),
+      supabase.from('profiles').select('city').eq('user_id', user.id).maybeSingle(),
+    ]);
+    const nPh = ph.count || 0, nSv = sv.count || 0, a = ar.data || {}, city = (pr.data?.city || '').trim();
+    const items = [
+      { ok: nPh >= 3, t: 'Ajouter au moins 3 photos', d: nPh ? `${nPh} photo${nPh > 1 ? 's' : ''} pour l’instant · la première sert de couverture` : 'Vos réalisations, c’est ce que les clientes regardent en premier', tab: 'photos', go: 'Ajouter' },
+      { ok: (a.bio || '').trim().length >= 60, t: 'Écrire votre présentation', d: 'Quelques lignes sur votre parcours et votre style', tab: 'profil', go: 'Écrire' },
+      { ok: !!city, t: 'Indiquer votre ville', d: 'Indispensable pour apparaître dans la recherche par ville et par distance', tab: 'profil', go: 'Indiquer' },
+      { ok: (a.specialties || []).length > 0, t: 'Choisir vos spécialités', d: 'Mariage, soirée, shooting… pour les filtres de recherche', tab: 'profil', go: 'Choisir' },
+      { ok: !!a.is_active, t: 'Mettre votre profil en ligne', d: 'Tant qu’il est hors ligne, personne ne le voit', act: 'online', go: 'Mettre en ligne' },
+      { ok: nSv > 0, opt: true, t: 'Afficher vos tarifs', d: 'Sinon votre profil indique « Sur devis », ce qui convient aussi', tab: 'services', go: 'Ajouter' },
+    ];
+    const req = items.filter(i => !i.opt), done = req.filter(i => i.ok).length;
+    const box = document.getElementById('starter');
+    if (done === req.length) { box.hidden = true; return; }
+    const pct = Math.round(done / req.length * 100);
+    document.getElementById('starter-pct').textContent = pct;
+    document.getElementById('starter-fill').style.width = pct + '%';
+    document.getElementById('starter-list').innerHTML = items.map(i => `<li class="${i.ok ? 'done' : ''}">
+      <span class="ck">${ICON.check}</span>
+      <div><div class="t">${i.t}${i.opt ? '<span class="opt">Facultatif</span>' : ''}</div><div class="d">${i.d}</div></div>
+      ${i.ok ? '' : i.act ? `<button type="button" class="btn btn-primary btn-sm" data-starter-act="${i.act}">${i.go}</button>` : `<button type="button" class="btn btn-ghost btn-sm" data-starter-tab="${i.tab}">${i.go}</button>`}
+    </li>`).join('');
+    box.hidden = false;
+  } catch (e) { console.warn('starter', e); }
+}
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-starter-tab]'); if (t) showTab(t.dataset.starterTab);
+  const a = e.target.closest('[data-starter-act="online"]'); if (a) document.getElementById('btn-toggle-active').click();
+});
+
 function renderActive(on) {
+  refreshStarter();
   const badge = document.getElementById('active-badge');
   badge.textContent = on ? 'Profil en ligne' : 'Profil hors ligne';
   badge.className = 'badge ' + (on ? 'is-ok' : 'is-info');
@@ -624,17 +692,24 @@ function renderActive(on) {
   btn.className = 'btn btn-sm ' + (on ? 'btn-ghost' : 'btn-primary');
 }
 
-// Chiffres du mois : calculés à part, pour ne pas dépendre du filtre affiché dans la liste
+// Chiffres du mois : réservations de créneaux ET devis signés (la plupart des prestations passent par un devis)
 async function loadStats() {
   const now = new Date();
   const first = localISODate(new Date(now.getFullYear(), now.getMonth(), 1));
   const next  = localISODate(new Date(now.getFullYear(), now.getMonth() + 1, 1));
-  const { data } = await supabase.from('bookings').select('status, services(price_cents)')
-    .eq('artist_id', artistData.id).gte('date', first).lt('date', next).in('status', ['pending', 'confirmed', 'done']);
-  const rows = data || [];
+  const [bk, qt] = await Promise.all([
+    supabase.from('bookings').select('status, services(price_cents)')
+      .eq('artist_id', artistData.id).gte('date', first).lt('date', next).in('status', ['pending', 'confirmed', 'done']),
+    supabase.from('quotes').select('total_cents, event_date, signed_at')
+      .eq('artist_id', artistData.id).eq('status', 'signed'),
+  ]);
+  const rows = bk.data || [];
   const paid = rows.filter(b => b.status !== 'pending');
-  document.getElementById('stat-reservations').textContent = rows.length;
-  document.getElementById('stat-revenue').textContent = Math.round(paid.reduce((s, b) => s + (b.services?.price_cents || 0), 0) / 100).toLocaleString('fr-FR') + ' €';
+  // Un devis compte pour le mois de l'événement (à défaut, celui de la signature)
+  const inMonth = (qt.data || []).filter(q => { const d = q.event_date || q.signed_at; if (!d) return false; const k = localISODate(new Date(d)); return k >= first && k < next; });
+  const cents = paid.reduce((s, b) => s + (b.services?.price_cents || 0), 0) + inMonth.reduce((s, q) => s + (q.total_cents || 0), 0);
+  document.getElementById('stat-reservations').textContent = rows.length + inMonth.length;
+  document.getElementById('stat-revenue').textContent = Math.round(cents / 100).toLocaleString('fr-FR') + ' €';
 }
 
 // Badges de non-lus dans la navigation
@@ -874,6 +949,7 @@ async function loadReviews() {
 async function loadPhotos() {
   const { data } = await supabase.from('artist_photos').select('*').eq('artist_id',artistData?.id).order('created_at',{ascending:true});
   const prev = document.getElementById('photos-preview');
+  refreshStarter();
   prev.innerHTML = (data||[]).filter(ph => safeUrl(ph.url)).map(ph=>`<div class="ph"><img src="${esc(ph.url)}" alt="" loading="lazy"><button type="button" class="ph-del" data-pid="${esc(ph.id)}" data-url="${esc(ph.url)}" aria-label="Retirer cette photo">${ICON.trash}</button></div>`).join('');
   prev.querySelectorAll('.ph-del').forEach(btn => btn.addEventListener('click', async () => {
     if (!confirm('Retirer cette photo de votre portfolio ?')) return;
@@ -917,6 +993,7 @@ document.getElementById('photo-input').addEventListener('change', async (e) => {
 async function loadServices() {
   const { data } = await supabase.from('services').select('*').eq('artist_id',artistData?.id).order('price_cents');
   const el = document.getElementById('services-list-dash');
+  refreshStarter();
   el.innerHTML = (data||[]).map(s=>`
     <div style="background:var(--blanc);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--gb-line);">
       <div>
@@ -1005,6 +1082,7 @@ document.getElementById('btn-save-profile').addEventListener('click', async () =
   btn.disabled = false;
   if (r1.error || r2.error) { console.error(r1.error || r2.error); showToast('Le profil n’a pas pu être enregistré.', 'error'); return; }
   if (profileData) { profileData.full_name = fullName; profileData.city = city; }
+  refreshStarter();
   showToast(city && !coords ? 'Profil enregistré. Ville non reconnue : vous n’apparaîtrez pas dans la recherche par distance.' : 'Profil enregistré');
 });
 
@@ -1166,6 +1244,9 @@ const TABS = ['reservations','disponibilites','avis','demandes','devis','profil'
 function showTab(name) {
   if (!TABS.includes(name)) return;
   TABS.forEach(t => { document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none'; });
+  // Les chiffres du mois n'ont leur place que sur l'accueil (Demandes) : ailleurs ils repoussaient le contenu
+  document.getElementById('stats-grid').hidden = name !== 'demandes';
+  history.replaceState(null, '', name === 'demandes' ? location.pathname : '#' + name);
   // Même état actif dans la barre latérale, la barre du bas et la feuille « Plus »
   document.querySelectorAll('[data-tab]').forEach(el => el.classList.toggle('active', el.dataset.tab === name));
   const inBar = !!document.querySelector(`.mobile-nav-inner [data-tab="${name}"]`);

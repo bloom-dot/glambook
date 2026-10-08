@@ -77,16 +77,7 @@
     .slot-btn.taken { opacity: .4; pointer-events: none; text-decoration: line-through; }
     .card-note { font-size: .75rem; color: var(--gb-ink-3); text-align: center; margin-top: 12px; }
 
-    /* Invitée : bandeau discret en bas (ordinateur) */
-    .unlock-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: var(--gb-surface); border-top: 1px solid var(--gb-line-strong); color: var(--gb-ink); padding: 14px 28px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-    .unlock-banner .unlock-text { flex: 1; min-width: 200px; }
-    .unlock-banner strong { display: block; font-size: 1.2rem; font-weight: 800; font-stretch: 75%; text-transform: uppercase; }
-    .unlock-banner span { font-size: .8rem; color: var(--gb-ink-2); }
-    .unlock-banner .unlock-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
-    .photo-blur-overlay { position: relative; border-radius: var(--gb-r-sm); overflow: hidden; }
-    .photo-blur-overlay img { filter: blur(8px); transform: scale(1.06); pointer-events: none; cursor: default; }
-    .photo-blur-overlay::after { content: ''; position: absolute; inset: 0; background: rgba(14,14,16,.35) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23E7C766" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>') center / 26px 26px no-repeat; }
 
     /* Mobile : barre d'action fixe « Écrire | Demander un devis » */
     .m-cta { display: none; }
@@ -94,7 +85,6 @@
       .profile-body { grid-template-columns: 1fr; gap: 0; padding: 16px 16px 24px; }
       .wrap { padding: 0 16px; }
       .p-bio { font-size: 1.3rem; }
-      .unlock-banner { display: none; }
       .m-cta { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 210; padding: 12px 16px calc(14px + env(safe-area-inset-bottom)); background: var(--gb-surface); border-top: 1px solid var(--gb-line); }
       .m-cta a { height: 52px; display: flex; align-items: center; justify-content: center; border-radius: var(--gb-r-md); text-decoration: none; }
       .m-cta .w { border: 1px solid var(--gb-line-strong); color: var(--gb-ink); font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
@@ -375,8 +365,8 @@ async function load() {
   document.getElementById('specialties-tags').innerHTML = (a.specialties || [])
     .map(s => `<span class="tag">${esc(specialtyLabel(s))}</span>`).join('');
 
-  // Réseaux sociaux — masqués pour les guests
-  if (!isGuest) {
+  // Réseaux sociaux — publics : ce sont des liens que la maquilleuse publie elle-même
+  {
     const socials = [];
     const igUrl = safeUrl(a.instagram), ttUrl = safeUrl(a.tiktok), ytUrl = safeUrl(a.youtube), wsUrl = safeUrl(a.website);
     if (igUrl) socials.push(`<a class="social-link" href="${esc(igUrl)}" target="_blank" rel="noopener noreferrer"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="14" rx="3"/><circle cx="12" cy="14" r="3.4"/><path d="M9 7l1.4-2.4h3.2L15 7"/></svg> Instagram</a>`);
@@ -384,9 +374,6 @@ async function load() {
     if (ytUrl) socials.push(`<a class="social-link" href="${esc(ytUrl)}" target="_blank" rel="noopener noreferrer">${ICON.play} YouTube</a>`);
     if (wsUrl) socials.push(`<a class="social-link" href="${esc(wsUrl)}" target="_blank" rel="noopener noreferrer"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z"/></svg> Site web</a>`);
     document.getElementById('social-links').innerHTML = socials.join('');
-  } else {
-    document.getElementById('social-links').innerHTML =
-      `<span class="guest-hint"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Réseaux sociaux — <a href="/auth/register.html?redirect=${backHere}">Créez un compte</a> pour voir ses réseaux</span>`;
   }
 
 
@@ -456,17 +443,7 @@ function addQuoteLink() {
   const photos = (a.photos || []).map(ph => ({ ...ph, url: safeUrl(ph.url) })).filter(ph => ph.url).slice(0, 12);
   const pg = document.getElementById('photo-grid');
   if (photos.length > 0) {
-    if (isGuest) {
-      const visible = photos.slice(0, 2);
-      const locked  = photos.slice(2);
-      pg.innerHTML =
-        visible.map(ph => `<img src="${esc(ph.url)}" alt="" loading="lazy">`).join('') +
-        locked.map(ph  => `<div class="photo-blur-overlay"><img src="${esc(ph.url)}" alt="" loading="lazy"/></div>`).join('') +
-        (locked.length > 0 ? `<div style="grid-column:1/-1;text-align:center;padding:14px 0;">
-          <a href="/auth/register.html?redirect=${backHere}" class="btn btn-ghost btn-sm">
-            Voir ${locked.length > 1 ? 'les ' + locked.length + ' autres photos' : 'la dernière photo'} →
-          </a></div>` : '');
-    } else {
+    {
       pg.innerHTML = photos.map(ph => `<img src="${esc(ph.url)}" alt="${esc(ph.caption||'')}" loading="lazy" data-zoom>`).join('');
       pg.querySelectorAll('img[data-zoom]').forEach(img => img.addEventListener('click', () => openLightbox(img.src)));
     }
@@ -478,7 +455,7 @@ function addQuoteLink() {
   const { data: reviews } = await supabase
     .from('reviews_public').select('*')
     .eq('artist_id', artistId).order('created_at', { ascending: false })
-    .limit(isGuest ? 1 : 10);
+    .limit(10);
 
   const rl = document.getElementById('reviews-list');
   if (reviews && reviews.length > 0) {
@@ -493,12 +470,6 @@ function addQuoteLink() {
         <div style="margin-bottom:6px;" class="stars">${stars(r.rating)}</div>
         <p class="review-text">${esc(r.comment || '')}</p>
       </div>`).join('');
-    if (isGuest && a.review_count > 1) {
-      rl.innerHTML += `<div class="more-reviews">
-        <span>+ ${a.review_count - 1} autre${a.review_count > 2 ? 's' : ''} avis</span>
-        <a href="/auth/register.html?redirect=${backHere}" class="btn btn-ghost btn-sm">Voir tous les avis</a>
-      </div>`;
-    }
   } else {
     rl.innerHTML = '<p style="color:var(--gb-ink-3);padding:12px 0;">Pas encore d’avis sur ce profil.</p>';
   }
@@ -523,24 +494,6 @@ function addQuoteLink() {
         </a>
         <p class="card-note">Compte gratuit · aucune carte bancaire demandée</p>
       </div>`;
-  }
-
-  // Bannière unlock pour les guests
-  if (isGuest) {
-    const banner = document.createElement('div');
-    banner.className = 'unlock-banner';
-    banner.innerHTML = `
-      <div class="unlock-text">
-        <strong>Débloquez le profil complet</strong>
-        <span>Portfolio entier, tous les avis et réseaux sociaux</span>
-      </div>
-      <div class="unlock-actions">
-        <a href="/auth/login.html?redirect=${backHere}" class="btn btn-ghost btn-sm">Connexion</a>
-        <a href="/auth/register.html?redirect=${backHere}" class="btn btn-primary btn-sm">Créer un compte</a>
-      </div>`;
-    document.body.appendChild(banner);
-    // Ajouter padding bas pour que le contenu ne soit pas caché sous la bannière
-    document.body.style.paddingBottom = '80px';
   }
 
   // Mobile : barre d'action fixe (Écrire | action principale)

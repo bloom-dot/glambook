@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glambook-v20';
+const CACHE_NAME = 'glambook-v23';
 const ASSETS = [
   '/',
   '/index.html',
@@ -8,6 +8,7 @@ const ASSETS = [
   '/js/utils.js',
   '/js/nav.js',
   '/js/select.js',
+  '/js/shell.js',
   '/manifest.json'
 ];
 

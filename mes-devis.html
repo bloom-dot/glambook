@@ -9,52 +9,165 @@
   <meta name="theme-color" content="#0E0E10"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <style>
-    .wrap { max-width: 760px; margin: 0 auto; padding: 28px 16px 90px; }
-    .hello { font-size: 1.9rem; margin-bottom: 2px; }
-    .hello-sub { color: var(--gb-ink-2); font-size: .9rem; margin-bottom: 8px; }
-    h2 { font-size: 1.25rem; margin: 30px 0 12px; }
-    .row { background: var(--gb-surface); border: 1px solid var(--gb-line); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-    .row .nm { font-weight: 700; font-size: .92rem; }
-    .row .meta { font-size: .8rem; color: var(--gb-ink-2); margin-top: 3px; display: flex; gap: 4px 14px; flex-wrap: wrap; }
-    .row .need { font-size: .82rem; color: var(--gb-ink-2); margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .row .right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .pill { font-size: .7rem; font-weight: 700; padding: 4px 11px; border-radius: 20px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
-    .empty { color: var(--gb-ink-2); text-align: center; padding: 26px; font-size: .86rem; border: 1px dashed var(--gb-line-strong); border-radius: var(--radius); }
-    .empty .btn { margin-top: 12px; }
+    /* Espace cliente « Noir éditorial » */
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 28px 96px; }
+    .me-head { padding: 56px 0 30px; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+    .me-head h1 { font-size: clamp(3.2rem, 8vw, 5.6rem); line-height: .88; margin: 12px 0 10px; }
+    .me-head p { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.3rem; color: var(--gb-ink-2); margin: 0; }
+
+    /* Trois compteurs qui renvoient aux sections */
+    .tally { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--gb-line); border-bottom: 1px solid var(--gb-line); margin-bottom: 56px; }
+    .tally a { padding: 20px 22px; text-decoration: none; color: var(--gb-ink); border-right: 1px solid var(--gb-line); display: flex; flex-direction: column; gap: 6px; transition: background .2s; }
+    .tally a:last-child { border-right: none; }
+    .tally a:hover { background: var(--gb-surface); }
+    .tally .n { font-size: 3.4rem; font-weight: 800; font-stretch: var(--gb-condensed); line-height: .9; }
+    .tally .n.hot { color: var(--gb-gold); }
+    .tally .l { font-size: .7rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gb-ink-2); }
+
+    .sec { margin-bottom: 56px; scroll-margin-top: calc(var(--nav-h) + 16px); }
+    .sec .rule-head { margin-bottom: 4px; }
+
+    /* Lignes sans cadre, séparées par un filet */
+    .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 24px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--gb-line); }
+    .row .nm { font-size: 1.7rem; font-weight: 800; font-stretch: var(--gb-condensed); text-transform: uppercase; line-height: 1; }
+    .row .nm a { color: inherit; text-decoration: none; }
+    .row .nm a:hover { color: var(--gb-champagne); }
+    .row .svc { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.15rem; color: var(--gb-ink-2); margin-top: 4px; }
+    .row .meta { font-size: .8rem; color: var(--gb-ink-2); margin-top: 8px; display: flex; gap: 4px 16px; flex-wrap: wrap; }
+    .row .meta span { display: inline-flex; align-items: center; gap: 6px; }
+    .row .meta .gb-ico { color: var(--gb-champagne); }
+    .row .need { font-size: .86rem; color: var(--gb-ink-2); margin-top: 8px; max-width: 60ch; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .row .right { display: flex; align-items: center; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+    .row .amt { font-size: 1.05rem; font-weight: 600; color: var(--gb-champagne); white-space: nowrap; }
+    .pill { font-size: .66rem; font-weight: 700; padding: 5px 10px; border-radius: var(--gb-r-sm); text-transform: uppercase; letter-spacing: .1em; white-space: nowrap; }
+    .row .full { grid-column: 1 / -1; }
+    .row .nm a { color: inherit; text-decoration: none; }
+    .rv { margin-top: 8px; padding: 18px; background: var(--gb-surface); border: 1px solid var(--gb-line); border-radius: var(--gb-r-md); display: grid; gap: 12px; max-width: 560px; }
+    .rv fieldset { border: none; margin: 0; padding: 0; display: flex; gap: 2px; align-items: center; flex-wrap: wrap; }
+    .rv legend { width: 100%; font-size: .7rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--gb-ink-2); margin-bottom: 8px; padding: 0; }
+    .rv input[type=radio] { position: absolute; opacity: 0; pointer-events: none; }
+    .rv fieldset label { cursor: pointer; color: var(--gb-line-strong); padding: 4px; border-radius: 4px; }
+    .rv fieldset label .gb-ico { width: 30px; height: 30px; fill: currentColor; }
+    /* étoiles remplies jusqu'à la note choisie ou survolée */
+    .rv fieldset:has(input:nth-of-type(1):checked) label:nth-of-type(-n+1),
+    .rv fieldset:has(input:nth-of-type(2):checked) label:nth-of-type(-n+2),
+    .rv fieldset:has(input:nth-of-type(3):checked) label:nth-of-type(-n+3),
+    .rv fieldset:has(input:nth-of-type(4):checked) label:nth-of-type(-n+4),
+    .rv fieldset:has(input:nth-of-type(5):checked) label:nth-of-type(-n+5) { color: var(--gb-gold); }
+    .rv fieldset label:has(~ label:hover), .rv fieldset label:hover { color: var(--gb-champagne) !important; }
+    .rv fieldset input:focus-visible + label { outline: 2px solid var(--gb-champagne); }
+    .rv textarea { width: 100%; background: var(--gb-ground); color: var(--gb-ink); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-sm); padding: 10px 12px; font: inherit; resize: vertical; }
+    .rv textarea:focus { outline: none; border-color: var(--gb-champagne); }
+    .rv-actions { display: flex; gap: 10px; align-items: center; }
+    .rv-note { font-size: .76rem; color: var(--gb-ink-3); margin: 0; }
+    .rv-done { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.15rem; color: var(--gb-champagne); margin: 6px 0 0; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    details.hist { margin-top: 4px; }
+    details.hist summary { cursor: pointer; list-style: none; padding: 16px 0; border-bottom: 1px solid var(--gb-line); font-size: .74rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--gb-ink-2); }
+    details.hist summary::-webkit-details-marker { display: none; }
+    details.hist summary::after { content: ' +'; color: var(--gb-champagne); }
+    details.hist[open] summary::after { content: ' −'; }
+    .none { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.2rem; color: var(--gb-ink-3); padding: 20px 0; border-bottom: 1px solid var(--gb-line); }
+
+    /* Premier passage : rien encore → par où commencer */
+    .start { margin-bottom: 56px; }
+    .start p { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.35rem; color: var(--gb-ink-2); margin: 18px 0 8px; max-width: 46ch; }
+    .start .index a { display: grid; grid-template-columns: 48px minmax(0, 1fr) 180px; align-items: center; gap: 20px; padding: 6px 0; border-bottom: 1px solid var(--gb-line); text-decoration: none; color: var(--gb-ink); }
+    .start .index .n { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.25rem; color: var(--gb-gold); }
+    .start .index .w { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; font-stretch: var(--gb-condensed); text-transform: uppercase; line-height: 1.05; transition: color .2s, padding-left .2s; }
+    .start .index img { width: 180px; height: 52px; object-fit: cover; border-radius: 4px; opacity: .85; }
+    .start .index a:hover .w { color: var(--gb-champagne); padding-left: 8px; }
+
+    /* Compte */
+    .account { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 0; border-bottom: 1px solid var(--gb-line); color: var(--gb-ink-2); font-size: .9rem; }
+    .account .btn { margin: 0; }
+    details.del { margin-top: 18px; }
+    details.del summary { cursor: pointer; color: var(--gb-ink-3); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; list-style: none; }
+    details.del summary::-webkit-details-marker { display: none; }
+    details.del summary:hover { color: var(--gb-bad); }
+    details.del .danger-zone { margin-top: 14px; }
+
+    @media (max-width: 640px) {
+      .wrap { padding: 0 16px 80px; }
+      .me-head { padding-top: 36px; }
+      .tally a { padding: 14px 12px; }
+      .tally .n { font-size: 2.6rem; }
+      .tally .l { font-size: .6rem; letter-spacing: .12em; }
+      .row { grid-template-columns: 1fr; }
+      .row .right { justify-content: flex-start; }
+      .start .index a { grid-template-columns: 32px minmax(0, 1fr) 76px; gap: 12px; }
+      .start .index img { width: 76px; height: 44px; }
+    }
   </style>
 </head>
 <body>
+<a href="#main" class="skip-link">Aller au contenu</a>
 <nav class="nav">
-  <div class="nav-inner">
+  <div class="nav-inner" style="max-width:1200px;">
     <a href="/" class="nav-logo">Glam<span>Book</span></a>
     <div class="nav-links">
       <a href="/artists.html" class="hide-mobile">Maquilleuses</a>
       <a href="/messages.html">Messages</a>
-      <a href="#" id="btn-logout" class="nav-quiet">Déconnexion</a>
+      <a href="#" id="btn-logout" class="nav-quiet hide-mobile">Déconnexion</a>
     </div>
   </div>
 </nav>
 
-<main class="wrap">
-  <h1 class="hello" id="hello">Mon espace</h1>
-  <p class="hello-sub">Vos devis, vos demandes et vos rendez-vous au même endroit.</p>
+<main class="wrap" id="main">
+  <header class="me-head">
+    <div>
+      <span class="eyebrow">Mon espace</span>
+      <h1 id="hello">Bonjour</h1>
+      <p>Vos devis, vos demandes et vos rendez-vous au même endroit.</p>
+    </div>
+    <a href="/artists.html" class="btn btn-ghost btn-sm">Trouver une maquilleuse</a>
+  </header>
 
-  <h2>Devis à signer et devis signés</h2>
-  <div id="quotes"><div class="empty">Chargement…</div></div>
+  <nav class="tally" aria-label="Résumé">
+    <a href="#sec-quotes"><span class="n" id="t-quotes">–</span><span class="l" id="t-quotes-l">Devis à signer</span></a>
+    <a href="#sec-requests"><span class="n" id="t-requests">–</span><span class="l">Demandes en cours</span></a>
+    <a href="#sec-bookings"><span class="n" id="t-bookings">–</span><span class="l">Rendez-vous à venir</span></a>
+  </nav>
 
-  <h2>Demandes envoyées</h2>
-  <div id="requests"><div class="empty">Chargement…</div></div>
+  <section class="start" id="start" hidden>
+    <div class="rule-head"><span class="lbl">Par où commencer</span><span class="aside">choisissez une occasion</span></div>
+    <p>Votre espace est encore vide. Choisissez une maquilleuse, décrivez votre événement : son devis arrivera ici.</p>
+    <nav class="index" aria-label="Occasions">
+      <a href="/artists.html?service=mariage"><span class="n">01</span><span class="w">Mariage</span><img src="/img/cat-mariage.jpg" alt="" loading="lazy"/></a>
+      <a href="/artists.html?service=soiree"><span class="n">02</span><span class="w">Soirée</span><img src="/img/cat-soiree.jpg" alt="" loading="lazy"/></a>
+      <a href="/artists.html?service=editorial"><span class="n">03</span><span class="w">Shooting</span><img src="/img/cat-shooting.jpg" alt="" loading="lazy"/></a>
+      <a href="/artists.html?service=quotidien"><span class="n">04</span><span class="w">Quotidien</span><img src="/img/cat-quotidien.jpg" alt="" loading="lazy"/></a>
+      <a href="/artists.html?service=scene"><span class="n">05</span><span class="w">Scène</span><img src="/img/cat-scene.jpg" alt="" loading="lazy"/></a>
+    </nav>
+  </section>
 
-  <div id="bookings-wrap" hidden>
-    <h2>Rendez-vous réservés</h2>
+  <section class="sec" id="sec-quotes">
+    <div class="rule-head"><span class="lbl">Devis</span><span class="aside">à lire et signer en ligne</span></div>
+    <div id="quotes"><div class="none">Chargement…</div></div>
+  </section>
+
+  <section class="sec" id="sec-requests">
+    <div class="rule-head"><span class="lbl">Demandes envoyées</span><span class="aside">en attente de devis</span></div>
+    <div id="requests"><div class="none">Chargement…</div></div>
+  </section>
+
+  <section class="sec" id="sec-bookings" hidden>
+    <div class="rule-head"><span class="lbl">Rendez-vous</span><span class="aside">réservés sur un créneau</span></div>
     <div id="bookings"></div>
-  </div>
+  </section>
 
-  <div class="danger-zone">
-    <h3>Supprimer mon compte</h3>
-    <p>Cette action est définitive : vos données personnelles, demandes et messages seront supprimés (droit à l'effacement — RGPD).</p>
-    <button class="btn btn-danger btn-sm" id="btnDelete">Supprimer définitivement mon compte</button>
-  </div>
+  <section class="sec">
+    <div class="rule-head"><span class="lbl">Mon compte</span></div>
+    <div class="account"><span id="acc-email"></span><a href="#" class="btn btn-ghost btn-sm" id="btn-logout-2">Se déconnecter</a></div>
+    <details class="del">
+      <summary>Supprimer mon compte</summary>
+      <div class="danger-zone">
+        <h3>Supprimer mon compte</h3>
+        <p>Cette action est définitive : vos données personnelles, demandes et messages seront supprimés (droit à l'effacement — RGPD).</p>
+        <button class="btn btn-danger btn-sm" id="btnDelete">Supprimer définitivement mon compte</button>
+      </div>
+    </details>
+  </section>
 </main>
 
 <div class="toast" id="toast" role="status"></div>
@@ -79,10 +192,75 @@
     // Une maquilleuse a son propre tableau de bord
     if (p?.role === 'artist') { const a = document.createElement('a'); a.href = '/dashboard/artist.html'; a.textContent = 'Tableau de bord'; a.className = 'hide-mobile'; document.querySelector('.nav-links').prepend(a); }
     const first = (p?.full_name || '').trim().split(' ')[0];
-    if (first) $('hello').textContent = 'Bonjour ' + first;
+    if (first) $('hello').innerHTML = 'Bonjour <em>' + esc(first) + '</em>';
+    else $('hello').textContent = 'Bonjour.';
   }).catch(() => {});
 
-  $('btn-logout').addEventListener('click', async (e) => { e.preventDefault(); try { await supabase.auth.signOut(); } catch (_) {} location.href = '/'; });
+  const logout = async (e) => { e.preventDefault(); try { await supabase.auth.signOut(); } catch (_) {} location.href = '/'; };
+  $('btn-logout').addEventListener('click', logout);
+  $('btn-logout-2').addEventListener('click', logout);
+  $('acc-email').textContent = user.email || '';
+
+  // Compteurs + écran « par où commencer » quand tout est vide
+  const counts = {};
+  function tally(key, n, hot) {
+    counts[key] = n;
+    const el = $('t-' + key); el.textContent = n; el.classList.toggle('hot', !!hot && n > 0);
+    if ('quotes' in counts && 'requests' in counts && 'bookings' in counts) {
+      const empty = counts.quotesAll === 0 && counts.requestsAll === 0 && counts.bookings === 0;
+      $('start').hidden = !empty;
+      $('sec-quotes').hidden = empty; $('sec-requests').hidden = empty;
+      document.querySelector('.tally').hidden = empty;
+    }
+  }
+
+  // Formulaire d'avis (le même pour un devis signé et pour un rendez-vous passé)
+  const STAR = '<svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.2 1.1 6.1L12 16.8 6.7 19.7l1.1-6.1L3.4 9.4l6-.8Z"/></svg>';
+  function reviewForm(kind, id, who) {
+    const k = kind + '-' + id;
+    return `<form class="rv" data-kind="${kind}" data-id="${esc(id)}" hidden>
+      <fieldset class="stars-in"><legend>Votre note pour ${esc(who)}</legend>
+        ${[1,2,3,4,5].map(n => `<input type="radio" name="r-${esc(k)}" id="r-${esc(k)}-${n}" value="${n}"/><label for="r-${esc(k)}-${n}" title="${n} sur 5">${STAR}<span class="sr">${n} sur 5</span></label>`).join('')}
+      </fieldset>
+      <label class="sr" for="c-${esc(k)}">Votre commentaire</label>
+      <textarea id="c-${esc(k)}" maxlength="1000" rows="3" placeholder="Comment s’est passée la prestation ? Tenue, ponctualité, écoute…"></textarea>
+      <div class="rv-actions"><button type="submit" class="btn btn-primary btn-sm">Publier mon avis</button><button type="button" class="btn btn-quiet btn-sm" data-close>Plus tard</button></div>
+      <p class="rv-note">Votre avis apparaît sur sa fiche avec votre prénom et l’initiale de votre nom.</p>
+    </form>`;
+  }
+  document.addEventListener('click', (e) => {
+    const open = e.target.closest('[data-review]');
+    if (open) { const f = document.querySelector(`form.rv[data-kind="${open.dataset.review}"][data-id="${CSS.escape(open.dataset.id)}"]`); if (f) { f.hidden = false; open.hidden = true; f.querySelector('input')?.focus(); } }
+    const close = e.target.closest('form.rv [data-close]');
+    if (close) { const f = close.closest('form'); f.hidden = true; const b = document.querySelector(`[data-review="${f.dataset.kind}"][data-id="${CSS.escape(f.dataset.id)}"]`); if (b) b.hidden = false; }
+  });
+  document.addEventListener('submit', async (e) => {
+    const f = e.target.closest('form.rv'); if (!f) return;
+    e.preventDefault();
+    const rating = parseInt(f.querySelector('input:checked')?.value || '0', 10);
+    if (!rating) { showToast('Choisissez une note de 1 à 5.'); return; }
+    const comment = f.querySelector('textarea').value.trim();
+    const btn = f.querySelector('[type=submit]'); btn.disabled = true;
+    try {
+      if (f.dataset.kind === 'quote') {
+        const { data, error } = await supabase.rpc('review_quote', { p_quote_id: f.dataset.id, p_rating: rating, p_comment: comment });
+        if (error) throw error;
+        if (!data?.ok) {
+          const why = { already_reviewed: 'Vous avez déjà noté cette prestation.', too_early: 'Vous pourrez la noter après la date de l’événement.' }[data?.error];
+          throw new Error(why || 'refus');
+        }
+      } else {
+        const { error } = await supabase.from('reviews').insert({ booking_id: f.dataset.id, artist_id: f.dataset.artist, client_id: user.id, rating, comment });
+        if (error) throw error;
+      }
+      f.outerHTML = '<p class="rv-done">Merci : votre avis est publié sur sa fiche.</p>';
+      document.querySelectorAll(`[data-review="${f.dataset.kind}"][data-id="${CSS.escape(f.dataset.id)}"]`).forEach(b => b.remove());
+      showToast('Merci pour votre avis !');
+    } catch (err) {
+      console.error(err); btn.disabled = false;
+      showToast(err.message && err.message !== 'refus' && !err.code ? err.message : 'L’avis n’a pas pu être publié. Réessayez dans un instant.', 'error');
+    }
+  });
 
   // Devis reçus (RPC sécurisé par email)
   (async () => {
@@ -90,18 +268,28 @@
       const { data, error } = await supabase.rpc('my_quotes');
       if (error) throw error;
       const rows = data || [];
+      counts.quotesAll = rows.length;
+      const toReview = rows.filter(q => q.can_review);
       $('quotes').innerHTML = rows.length ? rows.map(q => {
         const [lbl, cls] = STATUS[q.status] || ['—', 'is-info'];
         const signed = q.status === 'signed';
+        const who = q.mua_name || 'Maquilleuse';
+        const nm = q.artist_slug ? `<a href="/artiste/${encodeURIComponent(q.artist_slug)}">${esc(who)}</a>` : esc(who);
+        const when = q.event_date ? new Date(q.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
         return `<div class="row">
-          <div><div class="nm">${esc(q.mua_name || 'Maquilleuse')} · ${esc(euros(q.total_cents))}</div>
-            <div class="meta"><span>${esc(q.quote_number || 'Devis')}</span><span>reçu le ${esc(fmt(q.created_at))}</span></div></div>
+          <div><div class="nm">${nm}</div>
+            <div class="meta"><span>${ICON.doc} ${esc(q.quote_number || 'Devis')}</span>${when ? `<span>${ICON.calendar} ${esc(when)}</span>` : `<span>reçu le ${esc(fmt(q.created_at))}</span>`}</div></div>
           <div class="right">
-            <span class="pill ${cls}">${lbl}</span>
+            <span class="amt">${esc(euros(q.total_cents))}</span>
+            ${q.reviewed ? '<span class="pill is-ok">Avis publié</span>' : `<span class="pill ${cls}">${lbl}</span>`}
+            ${q.can_review ? `<button type="button" class="btn btn-primary btn-sm" data-review="quote" data-id="${esc(q.id)}">Laisser un avis</button>` : ''}
             <a class="btn ${signed ? 'btn-ghost' : 'btn-primary'} btn-sm" href="/signature.html?t=${encodeURIComponent(q.share_token)}">${signed ? 'Voir' : 'Lire et signer'}</a>
-          </div></div>`;
-      }).join('') : '<div class="empty">Aucun devis pour le moment. Ils apparaissent ici dès qu’une maquilleuse répond à votre demande.</div>';
-    } catch (e) { console.error(e); $('quotes').innerHTML = '<div class="empty">Vos devis ne peuvent pas être affichés pour le moment.</div>'; }
+          </div>
+          ${q.can_review ? `<div class="full">${reviewForm('quote', q.id, who)}</div>` : ''}</div>`;
+      }).join('') : '<div class="none">Aucun devis pour le moment : ils arrivent ici dès qu’une maquilleuse répond.</div>';
+      tally('quotes', rows.filter(q => q.status === 'sent').length + toReview.length, true);
+      $('t-quotes-l').textContent = toReview.length && !rows.some(q => q.status === 'sent') ? 'Avis à laisser' : (toReview.length ? 'Devis à signer ou noter' : 'Devis à signer');
+    } catch (e) { console.error(e); counts.quotesAll = -1; $('quotes').innerHTML = '<div class="none">Vos devis ne peuvent pas être affichés pour le moment.</div>'; tally('quotes', 0); }
   })();
 
   // Demandes de devis (RLS : les siennes)
@@ -120,6 +308,7 @@
         const { data: arts } = await supabase.from('artists_public').select('id,slug,display_name').in('id', ids);
         (arts || []).forEach(a => artists.set(a.id, a));
       }
+      counts.requestsAll = rows.length;
       $('requests').innerHTML = rows.length ? rows.map(r => {
         const [lbl, cls] = STATUS[r.status] || ['—', 'is-info'];
         const svc = (r.services_snapshot || []).map(s => s.name).join(', ');
@@ -127,35 +316,61 @@
         const who = a ? `<a href="${a.slug ? '/artiste/' + encodeURIComponent(a.slug) : '/artist.html?id=' + encodeURIComponent(a.id)}" style="color:inherit;">${esc(a.display_name || 'Maquilleuse')}</a>` : 'Maquilleuse';
         const when = r.event_date ? new Date(r.event_date).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' }) : '';
         return `<div class="row">
-          <div style="min-width:0;flex:1 1 260px;"><div class="nm">${who}${svc ? ' · ' + esc(svc) : ''}</div>
+          <div style="min-width:0;"><div class="nm">${who}</div>${svc ? `<div class="svc">${esc(svc)}</div>` : ''}
             <div class="meta">${when ? `<span>${ICON.calendar} ${esc(when)}</span>` : ''}${r.event_address ? `<span>${ICON.pin} ${esc(r.event_address)}</span>` : ''}</div>
             ${r.note ? `<div class="need">${esc(r.note)}</div>` : ''}</div>
           <div class="right">
             <span class="pill ${cls}">${lbl}</span>
             ${r.status === 'pending' ? `<a class="btn btn-ghost btn-sm" href="/messages.html?artist=${encodeURIComponent(r.artist_id)}">Lui écrire</a>` : ''}
           </div></div>`;
-      }).join('') : '<div class="empty">Vous n’avez pas encore envoyé de demande.<br/><a href="/artists.html" class="btn btn-primary btn-sm">Trouver une maquilleuse</a></div>';
-    } catch (e) { console.error(e); $('requests').innerHTML = '<div class="empty">Vos demandes ne peuvent pas être affichées pour le moment.</div>'; }
+      }).join('') : '<div class="none">Aucune demande envoyée pour l’instant.</div>';
+      tally('requests', rows.filter(r => r.status === 'pending').length);
+    } catch (e) { console.error(e); counts.requestsAll = -1; $('requests').innerHTML = '<div class="none">Vos demandes ne peuvent pas être affichées pour le moment.</div>'; tally('requests', 0); }
   })();
 
-  // Rendez-vous réservés directement sur un créneau (affichés seulement s'il y en a)
-  (async () => {
+  // Rendez-vous réservés sur un créneau : à venir, puis historique (annulation et avis ici, plus de page à part)
+  window.cancelBooking = async (id) => {
+    if (!confirm('Annuler ce rendez-vous ? Le créneau sera libéré.')) return;
+    const { error } = await supabase.rpc('cancel_booking', { p_booking_id: id });
+    if (error) { showToast('Ce rendez-vous n’a pas pu être annulé.', 'error'); return; }
+    showToast('Rendez-vous annulé'); loadBookings();
+  };
+  async function loadBookings() {
     try {
       const { data, error } = await supabase.from('bookings')
-        .select('id,date,time_slot,status, artists(display_name), services(name)')
-        .eq('client_id', user.id).gte('date', localISODate()).in('status', ['pending', 'confirmed'])
-        .order('date', { ascending: true });
-      if (error || !data || !data.length) return;
-      $('bookings').innerHTML = data.map(b => {
-        const [lbl, cls] = STATUS[b.status] || ['—', 'is-info'];
+        .select('id,date,time_slot,status,reviewed,artist_id, artists(display_name,slug), services(name,price_cents)')
+        .eq('client_id', user.id).order('date', { ascending: true });
+      if (error || !data || !data.length) { tally('bookings', 0); return; }
+      const today = localISODate();
+      const up = data.filter(b => b.date >= today && ['pending', 'confirmed'].includes(b.status));
+      const past = data.filter(b => !up.includes(b)).reverse();
+      const row = (b) => {
+        const isPast = b.date < today;
+        const key = b.status === 'confirmed' && isPast ? 'done' : b.status;
+        const [lbl, cls] = STATUS[key] || ['—', 'is-info'];
+        const who = b.artists?.display_name || 'Maquilleuse';
+        const nm = b.artists?.slug ? `<a href="/artiste/${encodeURIComponent(b.artists.slug)}">${esc(who)}</a>` : esc(who);
         const d = new Date(b.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-        return `<div class="row"><div><div class="nm">${esc(b.artists?.display_name || 'Maquilleuse')}${b.services?.name ? ' · ' + esc(b.services.name) : ''}</div>
+        const canReview = isPast && ['confirmed', 'done'].includes(b.status) && !b.reviewed;
+        const price = b.services?.price_cents ? euros(b.services.price_cents) : '';
+        return `<div class="row"><div><div class="nm">${nm}</div>${b.services?.name ? `<div class="svc">${esc(b.services.name)}</div>` : ''}
           <div class="meta"><span>${ICON.calendar} ${esc(d)} à ${esc(b.time_slot)}</span></div></div>
-          <div class="right"><span class="pill ${cls}">${lbl}</span><a class="btn btn-ghost btn-sm" href="/dashboard/client.html">Gérer</a></div></div>`;
-      }).join('') + '<p style="font-size:.8rem;margin-top:8px;"><a href="/dashboard/client.html" style="color:var(--gb-champagne);">Historique, annulation et avis →</a></p>';
-      $('bookings-wrap').hidden = false;
-    } catch (e) { console.warn(e); }
-  })();
+          <div class="right">${price ? `<span class="amt">${esc(price)}</span>` : ''}
+            ${b.reviewed ? '<span class="pill is-ok">Avis publié</span>' : `<span class="pill ${cls}">${lbl}</span>`}
+            ${canReview ? `<button type="button" class="btn btn-primary btn-sm" data-review="booking" data-id="${esc(b.id)}">Laisser un avis</button>` : ''}
+            ${!isPast && ['pending', 'confirmed'].includes(b.status) ? `<button type="button" class="btn btn-quiet btn-sm" onclick="cancelBooking('${esc(b.id)}')">Annuler</button>` : ''}
+          </div>
+          ${canReview ? `<div class="full">${reviewForm('booking', b.id, who).replace('<form class="rv"', `<form class="rv" data-artist="${esc(b.artist_id)}"`)}</div>` : ''}</div>`;
+      };
+      $('bookings').innerHTML = (up.length ? up.map(row).join('') : '<div class="none">Aucun rendez-vous à venir.</div>')
+        + (past.length ? `<details class="hist"><summary>Historique · ${past.length} rendez-vous</summary>${past.map(row).join('')}</details>` : '');
+      // Un avis en attente ouvre l'historique d'office
+      if (past.some(b => b.date < today && ['confirmed', 'done'].includes(b.status) && !b.reviewed)) $('bookings').querySelector('details')?.setAttribute('open', '');
+      $('sec-bookings').hidden = false;
+      tally('bookings', up.length);
+    } catch (e) { console.warn(e); tally('bookings', 0); }
+  }
+  loadBookings();
 
   // Suppression de compte
   $('btnDelete').onclick = async () => {

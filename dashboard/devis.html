@@ -68,6 +68,7 @@
 
     .back-link { font-size:.85rem; color:var(--gris); text-decoration:none; }
     .back-link:hover { color:var(--gb-ink); }
+    body.has-pshell .back-link { display: none; }
     .req-note { border:1px solid var(--gb-line-strong); background:var(--gb-gold-tint); border-radius:var(--radius); padding:16px 18px; margin-bottom:18px; }
     .req-note .lbl { font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--gb-champagne); margin-bottom:6px; }
     .req-note .txt { font-size:.9rem; white-space:pre-wrap; }
@@ -189,6 +190,8 @@
     // Devis préparé en réponse à une demande : /dashboard/devis.html?request=<id>
     const requestId = new URLSearchParams(location.search).get('request');
     import { showToast, esc } from '/js/utils.js';
+    import { mountShell } from '/js/shell.js';
+    mountShell('devis');
 
     let quote = emptyQuote();
     quote.quoteNumber = generateQuoteNumber();

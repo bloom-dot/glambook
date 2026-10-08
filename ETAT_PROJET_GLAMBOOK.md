@@ -305,8 +305,22 @@ Direction E choisie par Fernand (mélange de A « Sombre Luxe » et C « Éditor
 - **Recherche** : grand titre, occasions en onglets, filtres en ligne, même carte que l'accueil.
 - **Fiche maquilleuse** : la couverture (ou, à défaut, la première photo du portfolio) en plein cadre avec le nom en capitales ; présentation en italique ; portfolio en mosaïque ; avis en citations. Sur mobile, barre fixe « Écrire | Demander un devis / Réserver ». La couleur choisie par la maquilleuse ne teinte plus que le surtitre et la sélection (`--artist-accent`).
 - Tableau de bord, messages, inscription, signature : rose remplacé par l'or / le champagne, logos alignés.
-- Cache du service worker : `glambook-v21`.
+- Cache du service worker : `glambook-v22`.
+- Corrigé (revue des parcours) : zone « Ajouter des photos » du portfolio superposée au titre (label en ligne → bloc) ; menu du haut qui débordait sur téléphone une fois connectée (« Déconnexion » masqué sur mobile, accessible depuis Mon espace).
 - Mon espace (`mes-devis.html`) refait : grand « Bonjour *Prénom* », trois compteurs (devis à signer, demandes en cours, rendez-vous) qui mènent aux sections, lignes sans cadre séparées par des filets, montant en champagne. Compte vide : index des occasions « Par où commencer ». Section « Mon compte » avec déconnexion ; la suppression du compte est repliée derrière un lien discret.
 - Menus déroulants : `js/select.js` remplace l'apparence du menu natif (illisible sous Windows) pour tout `<select class="gb-select">` ; le select d'origine reste caché et garde la valeur. Utilisé sur l'accueil (occasion) et la recherche (rayon, tri).
 - Photos (8 octobre) : cadre gris retiré de `cat-mariage.jpg` et `cat-soiree.jpg` (restes du découpage d'une planche) ; l'accueil se partage avec `hero.jpg` en grand format. `portrait.jpg` et `cat-toutes.jpg` ne sont plus utilisées.
 - Nouvelles photos générées par Fernand (8 octobre, soir) : `hero.jpg` (maquilleuse de face, cliente de profil, moitié gauche noire pour le titre, 1376 × 768), `bandeau-pro.jpg` (maquilleuse qui prépare son matériel), `cat-shooting.jpg` (eye-liner graphique sans paillettes, recadrée sur les yeux). Les anciennes sont gardées hors du site. À terme : une photo d'accueil d'au moins 2 400 px de large pour les grands écrans.
+
+## 18. Chantiers d'ergonomie (8 octobre 2026, soir)
+
+Lancés par Fernand après la revue des parcours (page « Parcours GlamBook »). L'acompte en ligne est volontairement mis de côté.
+
+1. **Portfolio, avis et réseaux visibles sans compte** (`artist.html`) : plus de floutage ni de bandeau « Débloquez le profil ». Le compte n'est demandé qu'au moment d'écrire ou de demander un devis.
+2. **Liste de démarrage pro** (`dashboard/artist.html`, onglet Demandes) : 3 photos, présentation (60 caractères), ville, spécialités, profil en ligne ; tarifs en facultatif. Pourcentage + barre ; disparaît quand tout est fait. Se met à jour après chaque enregistrement.
+3. **Avis après un devis signé** — migration `supabase-avis-devis-2026-10.sql` **appliquée le 8 octobre** : colonne `reviews.quote_id` (unique), fonction `review_quote()` (cliente dont l'e-mail est sur un devis signé, date de l'événement passée — ou 1 jour après signature sans date), `my_quotes()` renvoie `can_review`, `reviewed`, `artist_slug`. Les insertions directes restent limitées aux réservations. Testé en local : 16/16. Formulaire d'avis (étoiles + commentaire) dans Mon espace.
+4. **Compteurs pro** : « Prestations ce mois » et « Chiffre du mois » comptent aussi les devis signés (au mois de l'événement). Les compteurs ne s'affichent plus que sur l'onglet Demandes. Le tableau de bord ouvre l'onglet indiqué dans l'adresse (`/dashboard/artist.html#devis`).
+5. **Mode sur les cartes** (`bookingModes()` / `modeTag()` dans `js/utils.js`) : « Réservation en ligne » si tarifs ET créneaux libres à venir, sinon « Sur devis ». Accueil et recherche.
+6. **Un seul espace cliente** : Mon espace reprend les rendez-vous (à venir + historique repliable), l'annulation et les avis. `dashboard/client.html` redirige vers `/mes-devis.html#sec-bookings` (l'ancienne page est conservée hors du site).
+7. **Cadre commun** (`js/shell.js`) : Messages et l'éditeur de devis gardent la barre latérale du tableau de bord pour une maquilleuse (barre du bas sur mobile) ; la barre du site pour une cliente.
+- Cache : `glambook-v23`.

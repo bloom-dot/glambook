@@ -137,7 +137,7 @@
 
 <script type="module">
 import { supabase, esc, safeUrl, specialtyLabel } from '/js/supabase.js';
-import { showToast, localISODate, ICON } from '/js/utils.js';
+import { showToast, localISODate, ICON, bookingModes, modeTag } from '/js/utils.js';
 import { initNav } from '/js/nav.js';
 import { enhanceSelects } from '/js/select.js';
 initNav();
@@ -308,6 +308,7 @@ async function loadArtists(reset) {
     data = [...data].sort((x, y) => rank(x) - rank(y));
   }
 
+  const modes = await bookingModes(supabase, data);
   const grid = document.getElementById('artists-grid');
   if (reset) grid.innerHTML = '';
 
@@ -338,9 +339,9 @@ async function loadArtists(reset) {
     const reviews = parseInt(a.review_count) || 0;
     const price   = parseInt(a.price_from) || 0;
     // Pas d'etoiles tant qu'aucune cliente n'a note : cinq etoiles sur zero avis sonne faux
-    const noteHtml = reviews
-      ? `<div class="card-note"><span class="st">★</span> ${String(Number(a.rating_avg || 5).toFixed(1)).replace('.', ',')} · ${reviews} avis</div>`
-      : `<div style="margin-top:8px;"><span class="new-badge">Nouvelle sur GlamBook</span></div>`;
+    const noteHtml = `<div class="card-tags">${modeTag(modes.get(a.id))}${reviews
+      ? `<span class="card-note" style="margin:0;"><span class="st">★</span> ${String(Number(a.rating_avg || 5).toFixed(1)).replace('.', ',')} · ${reviews} avis</span>`
+      : `<span class="new-badge">Nouvelle sur GlamBook</span>`}</div>`;
     const priceHtml = price ? `dès ${price} €` : 'Sur devis';
     const el  = document.createElement('a');
     el.href   = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : `/artist.html?id=${encodeURIComponent(a.id)}`;

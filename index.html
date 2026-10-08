@@ -333,7 +333,7 @@
 <!-- ═══ SUPABASE DATA ═══ -->
 <script type="module">
 import { supabase, esc, safeUrl, getProfile, specialtyLabel } from '/js/supabase.js';
-import { ICON, localISODate } from '/js/utils.js';
+import { ICON, localISODate, bookingModes, modeTag } from '/js/utils.js';
 import { enhanceSelects } from '/js/select.js';
 enhanceSelects();
 
@@ -450,6 +450,7 @@ async function loadFeatured() {
     return;
   }
   const PH = `<div class="artist-card-cover cover-ph" role="img" aria-label="Pas encore de photo">${ICON.image}</div>`;
+  const modes = await bookingModes(supabase, artists.slice(0, 3));
   grid.innerHTML = artists.slice(0, 3).map(a => {
     const name = esc(a.display_name||'Maquilleuse');
     const coverUrl = safeUrl((a.photos||[])[0]?.url)||'';
@@ -463,7 +464,7 @@ async function loadFeatured() {
           <span class="artist-name">${name}</span><span class="artist-price">${price ? 'dès ' + price + ' €' : 'Sur devis'}</span>
         </div>
         <div class="artist-city">${esc(a.city || 'France')}${specs ? ' — ' + specs : ''}</div>
-        ${(parseInt(a.review_count) || 0) ? '' : '<div style="margin-top:8px;"><span class="new-badge">Nouvelle sur GlamBook</span></div>'}
+        <div class="card-tags">${modeTag(modes.get(a.id))}${(parseInt(a.review_count) || 0) ? '' : '<span class="new-badge">Nouvelle sur GlamBook</span>'}</div>
       </div></a>`;
   }).join('');
 

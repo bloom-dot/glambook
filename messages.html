@@ -13,6 +13,10 @@
     body { background: var(--gris-cl); }
     .chat { max-width: 1000px; margin: 0 auto; height: 100dvh; display: grid; grid-template-columns: 320px 1fr; }
     @media(max-width:760px){ .chat { grid-template-columns: 1fr; } }
+    /* Dans le cadre du site (cliente) ou du tableau de bord (maquilleuse) */
+    body.has-topnav .chat { height: calc(100dvh - var(--nav-h)); }
+    body.has-pshell .chat { max-width: 1100px; border-left: 1px solid var(--gb-line); border-right: 1px solid var(--gb-line); }
+    @media (max-width: 900px) { body.has-pshell .chat { height: calc(100dvh - 64px); border: none; } }
 
     .col { display: flex; flex-direction: column; min-height: 0; background: var(--blanc); border-right: 1px solid var(--bord); }
     .col-head { padding: 16px 18px; border-bottom: 1px solid var(--bord); display:flex; align-items:center; justify-content:space-between; gap:10px; }
@@ -70,7 +74,7 @@
   <div class="col" id="listCol">
     <div class="col-head">
       <span class="ttl">Messages</span>
-      <span><a href="/mes-devis.html" id="spaceLink" style="margin-right:12px;">Mon espace</a><a href="/" id="homeLink">Accueil</a></span>
+      <span class="aside" style="font-family:var(--gb-font-serif);font-style:italic;color:var(--gb-ink-3);font-size:1.05rem;">vos échanges</span>
     </div>
     <div class="secure-note"><span data-ico="lock"></span> Vos coordonnées ne sont pas communiquées à l'autre personne.</div>
     <div class="conv-list" id="convList">
@@ -106,6 +110,7 @@
   import { startConversation, myConversations, getMessages, sendMessage, markRead, subscribeMessages,
            reportConversation, blockConversation, unblockConversation, looksLikeContactInfo } from '/js/chat/store.js';
   import { showToast, esc, ICON } from '/js/utils.js';
+  import { mountShell } from '/js/shell.js';
 
   document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ICON[el.dataset.ico] || ''; });
 
@@ -128,7 +133,7 @@
   me = await getCurrentUser();
   if (!me) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`; await new Promise(() => {}); }
   // « Mon espace » mène au tableau de bord pour une maquilleuse, aux devis pour une cliente
-  getProfile(me.id).then(p => { if (p?.role === 'artist') document.getElementById('spaceLink').href = '/dashboard/artist.html'; }).catch(() => {});
+  mountShell('messages');
 
   async function loadConversations() {
     try { convs = await myConversations(); }

@@ -556,3 +556,37 @@ body.auth .nav { background: transparent; border: none; position: absolute; widt
 .gbs-box .gbs-btn:focus-visible { outline-offset: 2px; }
 .gbs-box .gbs-list { left: 0; min-width: 100%; top: calc(100% + 6px); }
 .gbs-box.up .gbs-list { bottom: calc(100% + 6px); }
+
+/* Mode de prise de rendez-vous, sur les cartes */
+.mode-tag { display: inline-flex; align-items: center; gap: 6px; font-size: .64rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-ink-2); }
+.mode-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gb-ink-3); }
+.mode-tag.is-slots { color: var(--gb-champagne); }
+.mode-tag.is-slots::before { background: var(--gb-gold); }
+.card-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 10px; }
+
+/* ══════════════════════════════════════
+   CADRE PRO (js/shell.js) : Messages et éditeur de devis gardent la barre du tableau de bord
+   ══════════════════════════════════════ */
+.pshell { position: fixed; top: 0; left: 0; bottom: 0; width: 232px; z-index: 90; background: var(--gb-ground); border-right: 1px solid var(--gb-line); padding: 22px 0; overflow-y: auto; display: flex; flex-direction: column; }
+.pshell-logo { display: block; padding: 0 22px 20px; border-bottom: 1px solid var(--gb-line); font-size: 1.7rem; font-weight: 800; font-stretch: var(--gb-condensed); text-transform: uppercase; letter-spacing: .03em; color: var(--gb-ink); text-decoration: none; }
+.pshell-logo span { color: var(--gb-gold); }
+.pshell-user { padding: 14px 22px; border-bottom: 1px solid var(--gb-line); }
+.pshell-user .n { font-weight: 700; font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pshell-user .s { font-size: .72rem; color: var(--gb-ink-3); }
+.pshell-sec { font-size: .64rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gb-ink-3); padding: 18px 22px 6px; }
+.pshell-item { display: flex; align-items: center; gap: 12px; padding: 10px 22px; font-size: .85rem; font-weight: 600; color: var(--gb-ink-2); text-decoration: none; border-left: 3px solid transparent; }
+.pshell-item .gb-ico { width: 18px; height: 18px; }
+.pshell-item:hover { background: var(--gb-surface-2); color: var(--gb-ink); }
+.pshell-item.active { background: var(--gb-gold-tint); color: var(--gb-champagne); border-left-color: var(--gb-gold); }
+.pshell-out { margin-top: auto; }
+.pshell-mob { display: none; }
+body.has-pshell { padding-left: 232px; }
+@media (max-width: 900px) {
+  .pshell { display: none; }
+  body.has-pshell { padding-left: 0; padding-bottom: 64px; }
+  .pshell-mob { display: flex; justify-content: space-around; position: fixed; left: 0; right: 0; bottom: 0; z-index: 100; background: var(--nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--gb-line); padding: 6px 0 env(safe-area-inset-bottom, 4px); }
+  .pshell-mob a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 8px; min-width: 56px; font-size: .64rem; font-weight: 600; color: var(--gb-ink-2); text-decoration: none; }
+  .pshell-mob a .gb-ico { width: 22px; height: 22px; }
+  .pshell-mob a.active { color: var(--gb-champagne); }
+}
+.artist-card-cover.cover-ph { display: flex; }
