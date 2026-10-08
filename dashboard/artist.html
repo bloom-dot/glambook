@@ -208,6 +208,117 @@
     .photos-preview .ph-del:hover { color: var(--gb-bad); }
     @media (max-width: 520px) { .photos-preview { grid-template-columns: repeat(3,1fr); } .palette-grid { grid-template-columns: repeat(2,1fr); } }
     .panel-d { background: var(--blanc); border: 1px solid var(--gb-line); border-radius: var(--radius); padding: 22px; }
+    /* ══════ Espace pro « Noir éditorial » : clair à lire, rapide à utiliser ══════ */
+    body { background: var(--gb-ground); }
+    .dash-layout { grid-template-columns: 240px minmax(0, 1fr); }
+    .sidebar { background: var(--gb-ground); padding: 22px 0 14px; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 0 22px 18px; margin-bottom: 0; }
+    .sidebar-user { padding: 14px 22px; margin-bottom: 6px; }
+    .nav-item { padding: 10px 22px; border-radius: 0; }
+    .nav-section { padding: 20px 22px 6px; letter-spacing: .14em; }
+    .sb-foot { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--gb-line); }
+    @media (max-width: 768px) { .dash-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+    .dash-main { padding: 40px 48px 64px; max-width: 1040px; }
+    @media (max-width: 768px) { .dash-main { padding: 24px 16px 96px; } }
+
+    /* En-tête de page */
+    .dh { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; padding-bottom: 24px; margin-bottom: 32px; border-bottom: 1px solid var(--gb-line); }
+    .dh h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); line-height: .9; margin: 10px 0 10px; }
+    .dh p { margin: 0; font-family: var(--gb-font-serif); font-style: italic; font-size: 1.2rem; color: var(--gb-ink-2); max-width: 52ch; }
+    .dh-status { display: flex; align-items: center; gap: 10px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 8px; font-size: .7rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-ink-2); }
+    .status-pill::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--gb-ink-3); }
+    .status-pill.on { color: var(--gb-ok); }
+    .status-pill.on::before { background: var(--gb-ok); box-shadow: 0 0 0 4px rgba(127,200,160,.15); }
+    @media (max-width: 768px) { .dh { padding-bottom: 18px; margin-bottom: 24px; } .dh p { font-size: 1.05rem; } }
+
+    /* Blocs de l'accueil */
+    .blk { margin-bottom: 44px; }
+    .blk .rule-head { margin-bottom: 4px; }
+    .quiet { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.15rem; color: var(--gb-ink-3); padding: 16px 0; margin: 0; }
+    .todo, .nx { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--gb-line); }
+    .todo .n { font-size: 2.6rem; font-weight: 800; font-stretch: var(--gb-condensed); line-height: .9; color: var(--gb-ink-2); }
+    .todo.hot .n { color: var(--gb-gold); }
+    .todo .tx, .nx .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .todo .tx b, .nx .tx b { font-weight: 600; font-size: .98rem; }
+    .todo .tx span, .nx .tx span { font-size: .82rem; color: var(--gb-ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nx .dt { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+    .nx .dt .d { font-size: 2rem; font-weight: 800; font-stretch: var(--gb-condensed); }
+    .nx .dt .m { font-size: .66rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-champagne); margin-top: 3px; }
+    .nx .rt { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .nx .tg { font-size: .64rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gb-ink-3); }
+    .nx .amt { color: var(--gb-champagne); font-weight: 600; }
+
+    /* Chiffres du mois : une rangée, sans cartes */
+    .tally { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--gb-line); margin: 0; gap: 0; }
+    .tally .stat-card { background: none; border: none; border-right: 1px solid var(--gb-line); border-radius: 0; padding: 18px 20px 18px 0; }
+    .tally .stat-card + .stat-card { padding-left: 20px; }
+    .tally .stat-card:last-child { border-right: none; }
+    .tally .num { font-size: 2.6rem; font-weight: 800; font-stretch: var(--gb-condensed); line-height: .9; letter-spacing: 0; }
+    .tally .lbl { font-size: .66rem; letter-spacing: .14em; margin-top: 8px; color: var(--gb-ink-2); }
+    @media (max-width: 640px) { .tally { grid-template-columns: 1fr 1fr; } .tally .stat-card:nth-child(2) { border-right: none; } .tally .stat-card:nth-child(3) { padding-left: 0; } .tally .stat-card:nth-child(-n+2) { border-bottom: 1px solid var(--gb-line); } }
+
+    /* Liste de démarrage dans le ton éditorial */
+    .starter { background: var(--gb-surface); border-color: var(--gb-line); padding: 26px 28px; margin-bottom: 44px; }
+    .starter h2 { font-size: 2.4rem; }
+    .starter-list li { padding: 13px 0; }
+
+    /* Agenda : bascule Rendez-vous / Disponibilités */
+    .seg { display: inline-flex; border: 1px solid var(--gb-line-strong); border-radius: 999px; padding: 4px; margin-bottom: 24px; gap: 2px; }
+    .seg button { border: none; background: none; color: var(--gb-ink-2); font: 700 .72rem var(--gb-font-body); letter-spacing: .12em; text-transform: uppercase; padding: 9px 16px; border-radius: 999px; cursor: pointer; }
+    .seg button:hover { color: var(--gb-ink); }
+    .seg button.active { background: var(--gb-gold-tint); color: var(--gb-champagne); }
+    .tab-note { font-size: .88rem; color: var(--gb-ink-2); margin: 0 0 18px; max-width: 70ch; }
+    .tab-actions { display: flex; justify-content: flex-end; margin: -12px 0 12px; }
+
+    /* Listes : lignes séparées par un filet plutôt que des cartes empilées */
+    .booking-row { background: none; border: none; border-bottom: 1px solid var(--gb-line); border-radius: 0; padding: 18px 0; margin: 0; }
+    .booking-row .client-name { font-size: 1.05rem; }
+    #demandes-list .booking-row { background: var(--gb-surface); border: 1px solid var(--gb-line); border-radius: var(--radius); padding: 22px 24px !important; margin-bottom: 14px; }
+    .booking-date { background: var(--gb-gold-tint); color: var(--gb-champagne); }
+    .booking-status { font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; border-radius: var(--gb-r-sm); }
+    .tabs { background: none; border-bottom: 1px solid var(--gb-line); border-radius: 0; padding: 0; gap: 18px; }
+    .tabs .tab { padding: 10px 0; border-radius: 0; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; border-bottom: 2px solid transparent; }
+    .tabs .tab.active { background: none; box-shadow: none; color: var(--gb-ink); border-bottom-color: var(--gb-gold); }
+    .panel-d, .profile-form { background: var(--gb-surface); border-color: var(--gb-line); }
+    .cal-day.today { border-color: var(--gb-champagne); color: var(--gb-champagne); background: var(--gb-gold-tint); }
+    .cal-day:hover:not(.past) { border-color: var(--gb-champagne); background: var(--gb-gold-tint); }
+    .wk-chip:hover, .upload-zone:hover { border-color: var(--gb-champagne); background: var(--gb-gold-tint); }
+    input:checked + .slider { background: var(--gb-gold); }
+    details.del { margin-top: 28px; }
+    details.del summary { cursor: pointer; list-style: none; color: var(--gb-ink-3); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+    details.del summary::-webkit-details-marker { display: none; }
+    details.del summary:hover { color: var(--gb-bad); }
+    @media (max-width: 640px) { .todo, .nx { grid-template-columns: 48px minmax(0, 1fr); } .todo .btn, .nx .rt { grid-column: 2; justify-self: start; align-items: flex-start; } }
+
+    .qrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 16px; align-items: center; }
+    .q-name { font-size: 1.5rem; font-weight: 800; font-stretch: var(--gb-condensed); text-transform: uppercase; line-height: 1; }
+    .q-amt { color: var(--gb-champagne); font-weight: 600; white-space: nowrap; }
+    .q-act { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    @media (max-width: 768px) { .qrow { grid-template-columns: minmax(0, 1fr) auto; } .q-act { grid-column: 1 / -1; justify-content: flex-start; } }
+    /* Présentation : sections titrées à gauche, champs à droite */
+    .pf-sec { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 28px; padding: 26px 0; border-bottom: 1px solid var(--gb-line); }
+    .pf-sec:first-child { padding-top: 0; }
+    .pf-h h3 { font-size: 1.5rem; font-stretch: var(--gb-condensed); text-transform: uppercase; margin: 0 0 6px; }
+    .pf-h p { margin: 0; font-size: .84rem; color: var(--gb-ink-3); }
+    .pf .field small { display: block; font-size: .74rem; color: var(--gb-ink-3); margin-top: 6px; }
+    .spec-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .spec-pill { cursor: pointer; }
+    .spec-pill input { position: absolute; opacity: 0; pointer-events: none; }
+    .spec-pill span { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border: 1px solid var(--gb-line-strong); border-radius: 999px; font-size: .82rem; font-weight: 600; color: var(--gb-ink-2); transition: all .15s; }
+    .spec-pill span::before { content: '+'; color: var(--gb-ink-3); }
+    .spec-pill:hover span { border-color: var(--gb-champagne); color: var(--gb-ink); }
+    .spec-pill input:checked + span { background: var(--gb-gold-tint); border-color: var(--gb-gold); color: var(--gb-champagne); }
+    .spec-pill input:checked + span::before { content: '✓'; color: var(--gb-gold); }
+    .spec-pill input:focus-visible + span { outline: 2px solid var(--gb-champagne); outline-offset: 2px; }
+    .pf-save { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 0; background: linear-gradient(to top, var(--gb-ground) 70%, rgba(14,14,16,0)); font-size: .82rem; color: var(--gb-ink-3); }
+    @media (max-width: 768px) {
+      .pf-sec { grid-template-columns: 1fr; gap: 14px; }
+      .pf-save { bottom: 64px; }
+      .pf-save span { display: none; }
+      .pf-save .btn { width: 100%; }
+    }
+
     .dash-main select, .dash-main input[type=text]#cta-text { background: var(--gb-surface); color: var(--gb-ink); border: 1.5px solid var(--bord); border-radius: 8px; font-family: inherit; }
   </style>
 </head>
@@ -221,49 +332,77 @@
       <div class="name" id="sb-name">Chargement...</div>
       <div class="sub">Maquilleuse</div>
     </div>
-    <div class="nav-section">Activité</div>
+    <a class="nav-item" data-tab="accueil"><span data-ico="home"></span> Accueil</a>
+    <div class="nav-section">Mon activité</div>
     <a class="nav-item" id="nav-dem" data-tab="demandes"><span data-ico="inbox"></span> Demandes</a>
     <a class="nav-item" data-tab="devis"><span data-ico="doc"></span> Devis</a>
     <a class="nav-item" id="nav-msg" href="/messages.html"><span data-ico="chat"></span> Messages</a>
-    <a class="nav-item" data-tab="reservations"><span data-ico="check"></span> Réservations</a>
-    <a class="nav-item" data-tab="disponibilites"><span data-ico="calendar"></span> Disponibilités</a>
-    <a class="nav-item" data-tab="avis"><span data-ico="star"></span> Avis clientes</a>
+    <a class="nav-item" data-tab="reservations" data-group="agenda"><span data-ico="calendar"></span> Agenda</a>
+    <a class="nav-item" data-tab="avis"><span data-ico="star"></span> Avis</a>
     <a class="nav-item" id="nav-diag" href="/dashboard/diagnostic.html" hidden><span data-ico="scan"></span> Diagnostic visage</a>
-    <div class="nav-section">Profil public</div>
-    <a class="nav-item" data-tab="profil"><span data-ico="user"></span> Mon profil</a>
-    <a class="nav-item" data-tab="photos"><span data-ico="image"></span> Portfolio</a>
-    <a class="nav-item" data-tab="services"><span data-ico="tag"></span> Prestations &amp; tarifs</a>
+    <div class="nav-section">Ma vitrine</div>
+    <a class="nav-item" data-tab="profil"><span data-ico="user"></span> Présentation</a>
+    <a class="nav-item" data-tab="photos"><span data-ico="image"></span> Photos</a>
+    <a class="nav-item" data-tab="services"><span data-ico="tag"></span> Tarifs</a>
     <a class="nav-item" data-tab="espace"><span data-ico="palette"></span> Apparence</a>
-    <div class="nav-section">Compte</div>
-    <a class="nav-item" id="link-public-profile" href="/artists.html" target="_blank" rel="noopener"><span data-ico="eye"></span> Voir mon profil public</a>
-    <a class="nav-item" id="nav-admin" href="/dashboard/admin.html" style="display:none;"><span data-ico="shield"></span> Administration</a>
-    <a class="nav-item" id="btn-logout" href="#"><span data-ico="logout"></span> Déconnexion</a>
+    <a class="nav-item" id="link-public-profile" href="/artists.html" target="_blank" rel="noopener"><span data-ico="eye"></span> Voir ma fiche</a>
+    <div class="sb-foot">
+      <a class="nav-item" id="nav-admin" href="/dashboard/admin.html" style="display:none;"><span data-ico="shield"></span> Administration</a>
+      <a class="nav-item" id="btn-logout" href="#"><span data-ico="logout"></span> Déconnexion</a>
+    </div>
   </aside>
 
   <!-- MAIN -->
   <main class="dash-main">
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
-      <div>
-        <h1 class="dash-title" id="dash-greeting">Bonjour !</h1>
-        <p class="dash-sub" id="dash-date"></p>
+    <!-- En-tête : le titre change avec l'onglet ; le statut en ligne reste toujours visible -->
+    <header class="dh">
+      <div class="dh-txt">
+        <span class="eyebrow" id="dh-eyebrow">Mon espace</span>
+        <h1 id="dash-greeting">Bonjour</h1>
+        <p id="dh-help"></p>
       </div>
-      <div style="display:flex;gap:8px;">
-        <span class="badge is-info" id="active-badge">Profil hors ligne</span>
-        <button class="btn btn-primary btn-sm" id="btn-toggle-active">Activer mon profil</button>
+      <div class="dh-status">
+        <span class="status-pill" id="active-badge">Profil hors ligne</span>
+        <button class="btn btn-primary btn-sm" id="btn-toggle-active">Mettre en ligne</button>
       </div>
-    </div>
+    </header>
 
-    <!-- Stats -->
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-card"><div class="num" id="stat-reservations">–</div><div class="lbl">Prestations ce mois</div></div>
-      <div class="stat-card"><div class="num" id="stat-revenue">–</div><div class="lbl">Chiffre du mois</div></div>
-      <div class="stat-card"><div class="num" id="stat-rating">–</div><div class="lbl">Note moyenne</div></div>
-      <div class="stat-card"><div class="num" id="stat-requests">–</div><div class="lbl">Demandes en attente</div></div>
+    <!-- ═══ ONGLET ACCUEIL ═══ -->
+    <div id="tab-accueil" style="display:none;">
+      <section class="blk">
+        <div class="rule-head"><span class="lbl">À faire</span><span class="aside" id="dash-date"></span></div>
+        <div id="todo-list"><div class="quiet">Chargement…</div></div>
+      </section>
+
+      <section class="starter" id="starter" hidden aria-labelledby="starter-t">
+        <span class="eyebrow">Pour démarrer</span><h2 id="starter-t">Votre fiche est prête à <span id="starter-pct">0</span> %</h2>
+        <p>Les clientes choisissent sur photos : une fiche complète apparaît mieux dans la recherche et reçoit plus de demandes.</p>
+        <div class="starter-bar" aria-hidden="true"><span id="starter-fill"></span></div>
+        <ol class="starter-list" id="starter-list"></ol>
+      </section>
+
+      <section class="blk">
+        <div class="rule-head"><span class="lbl">Prochaines prestations</span><a href="#" data-tab="reservations">Agenda →</a></div>
+        <div id="next-list"><div class="quiet">Chargement…</div></div>
+      </section>
+
+      <section class="blk">
+        <div class="rule-head"><span class="lbl">Ce mois-ci</span></div>
+        <div class="tally" id="stats-grid">
+          <div class="stat-card"><div class="num" id="stat-reservations">–</div><div class="lbl">Prestations</div></div>
+          <div class="stat-card"><div class="num" id="stat-revenue">–</div><div class="lbl">Chiffre</div></div>
+          <div class="stat-card"><div class="num" id="stat-rating">–</div><div class="lbl">Note moyenne</div></div>
+          <div class="stat-card"><div class="num" id="stat-requests">–</div><div class="lbl">Demandes en attente</div></div>
+        </div>
+      </section>
     </div>
 
     <!-- ═══ ONGLET RÉSERVATIONS ═══ -->
     <div id="tab-reservations" style="display:none;">
+      <div class="seg" role="tablist" aria-label="Agenda">
+        <button type="button" role="tab" data-tab="reservations">Rendez-vous</button>
+        <button type="button" role="tab" data-tab="disponibilites">Mes disponibilités</button>
+      </div>
       <div class="tabs">
         <div class="tab active" onclick="filterBookings('all',this)">Toutes</div>
         <div class="tab" onclick="filterBookings('confirmed',this)">Confirmées</div>
@@ -275,10 +414,13 @@
 
     <!-- ═══ ONGLET DISPONIBILITÉS ═══ -->
     <div id="tab-disponibilites" style="display:none;">
-      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Gérer mes disponibilités</h2>
+      <div class="seg" role="tablist" aria-label="Agenda">
+        <button type="button" role="tab" data-tab="reservations">Rendez-vous</button>
+        <button type="button" role="tab" data-tab="disponibilites">Mes disponibilités</button>
+      </div>
 
       <!-- Récurrence hebdomadaire -->
-      <p style="font-size:.84rem;color:var(--gris);margin:-8px 0 16px;">Facultatif : sans agenda, vos clientes vous envoient une demande de devis et vous convenez de la date ensemble. Avec un agenda <em>et</em> des prestations tarifées, elles peuvent réserver un créneau directement.</p>
+      <p class="tab-note">Facultatif : sans agenda, vos clientes vous envoient une demande de devis et vous convenez de la date ensemble. Avec un agenda <em>et</em> des prestations tarifées, elles peuvent réserver un créneau directement.</p>
       <div class="panel-d" style="margin-bottom:16px;">
         <div style="margin-bottom:10px;">
           <strong style="font-size:.95rem;">Semaine type</strong>
@@ -331,83 +473,80 @@
 
     <!-- ═══ ONGLET AVIS ═══ -->
     <div id="tab-avis" style="display:none;">
-      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Avis de mes clientes</h2>
       <div id="reviews-dash"></div>
     </div>
 
     <!-- ═══ ONGLET DEMANDES ═══ -->
     <div id="tab-demandes" style="display:none;">
-      <section class="starter" id="starter" hidden aria-labelledby="starter-t">
-        <div class="starter-head">
-          <div><span class="eyebrow">Pour démarrer</span><h2 id="starter-t">Votre profil est prêt à <span id="starter-pct">0</span> %</h2>
-            <p>Les clientes choisissent sur photos : un profil complet apparaît mieux dans la recherche et reçoit plus de demandes.</p></div>
-        </div>
-        <div class="starter-bar" aria-hidden="true"><span id="starter-fill"></span></div>
-        <ol class="starter-list" id="starter-list"></ol>
-      </section>
-      <div style="margin-bottom:16px;">
-        <h2 style="font-size:1.1rem;font-weight:800;">Demandes reçues</h2>
-        <p style="font-size:.82rem;color:var(--gris);">Lisez le besoin de la cliente, puis répondez-lui par un devis.</p>
-      </div>
       <div id="demandes-list"><div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div></div>
     </div>
 
     <!-- ═══ ONGLET DEVIS ═══ -->
     <div id="tab-devis" style="display:none;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
-        <div>
-          <h2 style="font-size:1.1rem;font-weight:800;">Mes devis</h2>
-          <p style="font-size:.82rem;color:var(--gris);">Créez, envoyez et suivez la signature de vos devis.</p>
-        </div>
-        <a href="/dashboard/devis.html" class="btn btn-primary btn-sm">+ Nouveau devis</a>
-      </div>
+      <div class="tab-actions"><a href="/dashboard/devis.html" class="btn btn-primary btn-sm">Nouveau devis</a></div>
       <div id="devis-list-dash"><div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div></div>
     </div>
 
     <!-- ═══ ONGLET PROFIL ═══ -->
     <div id="tab-profil" style="display:none;">
-      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Mon profil public</h2>
-      <div class="profile-form">
-        <div class="form-row">
-          <div class="field"><label>Prénom & Nom</label><input type="text" id="p-name"/></div>
-          <div class="field"><label>Ville</label><input type="text" id="p-city"/></div>
-        </div>
-        <div class="field"><label>Nom de scène <span style="color:var(--gris);font-weight:400;font-size:.8rem;">(affiché sur votre profil public)</span></label><input type="text" id="p-display-name" placeholder="Ex : Nadia Beauty, Studio Glam..."/></div>
-        <div class="field"><label>Bio / Présentation</label><textarea id="p-bio" rows="4" placeholder="Parlez de votre parcours, style, spécialités..."></textarea></div>
-        <div class="form-row">
-          <div class="field"><label>Instagram</label><input type="url" id="p-instagram" placeholder="https://instagram.com/..."/></div>
-          <div class="field"><label>TikTok</label><input type="url" id="p-tiktok" placeholder="https://tiktok.com/..."/></div>
-        </div>
-        <div class="form-row">
-          <div class="field"><label>YouTube</label><input type="url" id="p-youtube"/></div>
-          <div class="field"><label>Site web</label><input type="url" id="p-website"/></div>
-        </div>
-        <div class="field">
-          <label>Spécialités</label>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="specialties-check">
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="mariage" class="spec-cb"/> Mariage</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="soiree" class="spec-cb"/> Soirée</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="quotidien" class="spec-cb"/> Quotidien</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="editorial" class="spec-cb"/> Éditorial / Shooting</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="scene" class="spec-cb"/> Scène / Spectacle</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="coiffure" class="spec-cb"/> Coiffure</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="ongles" class="spec-cb"/> Ongles</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;background:var(--surface-2);padding:6px 12px;border-radius:20px;"><input type="checkbox" value="airbrush" class="spec-cb"/> Airbrush</label>
+      <div class="pf">
+        <section class="pf-sec">
+          <div class="pf-h"><h3>Qui vous êtes</h3><p>Votre nom de scène est celui que voient les clientes.</p></div>
+          <div class="pf-b">
+            <div class="field"><label for="p-display-name">Nom de scène</label><input type="text" id="p-display-name" placeholder="Ex : Nadia Beauty, Studio Glam…"/></div>
+            <div class="form-row">
+              <div class="field"><label for="p-name">Prénom et nom</label><input type="text" id="p-name" autocomplete="name"/><small>Privé : sert aux devis et aux échanges.</small></div>
+              <div class="field"><label for="p-city">Ville</label><input type="text" id="p-city" autocomplete="address-level2"/><small>Pour la recherche par ville et par distance.</small></div>
+            </div>
           </div>
-        </div>
-        <button class="btn btn-primary" id="btn-save-profile">Enregistrer le profil</button>
+        </section>
+        <section class="pf-sec">
+          <div class="pf-h"><h3>Votre présentation</h3><p>Quelques lignes sur votre parcours, votre style, ce qui vous distingue.</p></div>
+          <div class="pf-b">
+            <div class="field"><label for="p-bio">Présentation</label><textarea id="p-bio" rows="5" maxlength="1200" placeholder="Ex : Maquilleuse depuis huit ans, je travaille surtout pour les mariages et les shootings. Teint lumineux, tenue longue durée…"></textarea><small id="bio-count">0 caractère</small></div>
+          </div>
+        </section>
+        <section class="pf-sec">
+          <div class="pf-h"><h3>Vos spécialités</h3><p>Elles servent aux filtres de recherche.</p></div>
+          <div class="pf-b"><div class="spec-pills" id="specialties-check">
+            <label class="spec-pill"><input type="checkbox" value="mariage" class="spec-cb"/><span>Mariage</span></label>
+            <label class="spec-pill"><input type="checkbox" value="soiree" class="spec-cb"/><span>Soirée</span></label>
+            <label class="spec-pill"><input type="checkbox" value="quotidien" class="spec-cb"/><span>Quotidien</span></label>
+            <label class="spec-pill"><input type="checkbox" value="editorial" class="spec-cb"/><span>Éditorial / Shooting</span></label>
+            <label class="spec-pill"><input type="checkbox" value="scene" class="spec-cb"/><span>Scène / Spectacle</span></label>
+            <label class="spec-pill"><input type="checkbox" value="coiffure" class="spec-cb"/><span>Coiffure</span></label>
+            <label class="spec-pill"><input type="checkbox" value="ongles" class="spec-cb"/><span>Ongles</span></label>
+            <label class="spec-pill"><input type="checkbox" value="airbrush" class="spec-cb"/><span>Airbrush</span></label>
+          </div></div>
+        </section>
+        <section class="pf-sec">
+          <div class="pf-h"><h3>Vos réseaux</h3><p>Facultatif. Des liens complets, commençant par https://</p></div>
+          <div class="pf-b">
+            <div class="form-row">
+              <div class="field"><label for="p-instagram">Instagram</label><input type="url" id="p-instagram" placeholder="https://instagram.com/…"/></div>
+              <div class="field"><label for="p-tiktok">TikTok</label><input type="url" id="p-tiktok" placeholder="https://tiktok.com/@…"/></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label for="p-youtube">YouTube</label><input type="url" id="p-youtube" placeholder="https://youtube.com/…"/></div>
+              <div class="field"><label for="p-website">Site web</label><input type="url" id="p-website" placeholder="https://…"/></div>
+            </div>
+          </div>
+        </section>
+        <div class="pf-save"><span>Les modifications apparaissent sur votre fiche dès l’enregistrement.</span><button class="btn btn-primary" id="btn-save-profile">Enregistrer</button></div>
       </div>
 
-      <div class="danger-zone" style="margin-top:24px;">
+      <details class="del">
+      <summary>Supprimer mon compte</summary>
+      <div class="danger-zone" style="margin-top:14px;">
         <p class="dz-title">Supprimer mon compte</p>
         <p>Action définitive : profil, prestations, disponibilités, devis, demandes, messages et diagnostics seront supprimés (droit à l'effacement — RGPD).</p>
         <button class="btn btn-sm btn-danger" id="btn-delete-account">Supprimer définitivement mon compte</button>
       </div>
+      </details>
     </div>
 
     <!-- ═══ ONGLET PHOTOS ═══ -->
     <div id="tab-photos" style="display:none;">
-      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Mon portfolio</h2>
       <label class="upload-zone" for="photo-input">
         <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp" multiple/>
         <div style="font-size:1.8rem;line-height:0;margin-bottom:12px;color:var(--gb-ink-2);" data-ico="image"></div>
@@ -419,7 +558,6 @@
 
     <!-- ═══ ONGLET SERVICES ═══ -->
     <div id="tab-services" style="display:none;">
-      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Mes prestations</h2>
       <div id="services-list-dash"></div>
       <div class="panel-d" style="margin-top:16px;">
         <p style="font-weight:800;margin-bottom:4px;">Ajouter une prestation</p>
@@ -444,8 +582,6 @@
     </div>
     <!-- ═══ ONGLET MON ESPACE ═══ -->
     <div id="tab-espace" style="display:none;">
-      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Apparence de mon profil</h2>
-      <p style="font-size:.85rem;color:var(--gris);margin-bottom:24px;">Personnalisez l'apparence de votre profil public</p>
 
       <!-- Aperçu live -->
       <div class="espace-preview" id="live-preview">
@@ -521,23 +657,25 @@
 <!-- Barre du bas (mobile) -->
 <nav class="mobile-nav" aria-label="Navigation">
   <div class="mobile-nav-inner">
+    <button type="button" class="mobile-nav-item" data-tab="accueil"><span data-ico="home"></span>Accueil</button>
     <button type="button" class="mobile-nav-item" id="mnav-dem" data-tab="demandes"><span data-ico="inbox"></span>Demandes</button>
     <button type="button" class="mobile-nav-item" data-tab="devis"><span data-ico="doc"></span>Devis</button>
     <a class="mobile-nav-item" id="mnav-msg" href="/messages.html"><span data-ico="chat"></span>Messages</a>
-    <button type="button" class="mobile-nav-item" data-tab="profil"><span data-ico="user"></span>Profil</button>
     <button type="button" class="mobile-nav-item" id="mnav-more" aria-haspopup="true"><span data-ico="more"></span>Plus</button>
   </div>
 </nav>
 <div class="more-sheet" id="more-sheet">
   <div class="sheet" role="menu">
     <div class="grab"></div>
-    <a class="nav-item" data-tab="reservations"><span data-ico="check"></span> Réservations</a>
-    <a class="nav-item" data-tab="disponibilites"><span data-ico="calendar"></span> Disponibilités</a>
-    <a class="nav-item" data-tab="avis"><span data-ico="star"></span> Avis clientes</a>
-    <a class="nav-item" data-tab="photos"><span data-ico="image"></span> Portfolio</a>
-    <a class="nav-item" data-tab="services"><span data-ico="tag"></span> Prestations &amp; tarifs</a>
+    <div class="nav-section">Mon activité</div>
+    <a class="nav-item" data-tab="reservations" data-group="agenda"><span data-ico="calendar"></span> Agenda</a>
+    <a class="nav-item" data-tab="avis"><span data-ico="star"></span> Avis</a>
+    <div class="nav-section">Ma vitrine</div>
+    <a class="nav-item" data-tab="profil"><span data-ico="user"></span> Présentation</a>
+    <a class="nav-item" data-tab="photos"><span data-ico="image"></span> Photos</a>
+    <a class="nav-item" data-tab="services"><span data-ico="tag"></span> Tarifs</a>
     <a class="nav-item" data-tab="espace"><span data-ico="palette"></span> Apparence</a>
-    <a class="nav-item" id="m-link-public" href="/artists.html" target="_blank" rel="noopener"><span data-ico="eye"></span> Voir mon profil public</a>
+    <a class="nav-item" id="m-link-public" href="/artists.html" target="_blank" rel="noopener"><span data-ico="eye"></span> Voir ma fiche</a>
     <a class="nav-item" id="m-logout" href="#"><span data-ico="logout"></span> Déconnexion</a>
   </div>
 </div>
@@ -558,7 +696,7 @@ document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ICON[el.d
 const user = await getCurrentUser();
 if (!user) { location.href = '/auth/login.html?redirect=' + encodeURIComponent(location.pathname); await new Promise(() => {}); }
 
-let artistData = null, profileData = null;
+let artistData = null, profileData = null, greetName = '';
 let calDate = new Date(); calDate.setDate(1);
 let selectedCalDay = null, slotsToSave = [];
 
@@ -567,7 +705,7 @@ const ALL_SLOTS = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:0
 // Init
 async function init() {
   const today = new Date();
-  document.getElementById('dash-date').textContent = today.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('dash-date').textContent = today.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
 
   // Charger profil + artiste en parallèle
   const [profileRes, artistRes] = await Promise.all([
@@ -591,7 +729,7 @@ async function init() {
   if (profile?.role === 'admin') { const na = document.getElementById('nav-admin'); if (na) na.style.display = 'flex'; }
   const displayName = artist?.display_name || profile?.full_name || user.email;
   document.getElementById('sb-name').textContent   = displayName;
-  document.getElementById('dash-greeting').textContent = `Bonjour ${displayName.split(' ')[0]} !`;
+  greetName = displayName.split(' ')[0];
   document.getElementById('p-name').value  = profile?.full_name || '';
   document.getElementById('p-city').value  = profile?.city || '';
 
@@ -619,6 +757,7 @@ async function init() {
   if (artist) {
     document.getElementById('p-display-name').value = artist.display_name || '';
     document.getElementById('p-bio').value       = artist.bio || '';
+    bioCount();
     document.getElementById('p-instagram').value = artist.instagram || '';
     document.getElementById('p-tiktok').value    = artist.tiktok || '';
     document.getElementById('p-youtube').value   = artist.youtube || '';
@@ -636,7 +775,7 @@ async function init() {
   loadServices();
   // Premier écran : les demandes — c'est là que le travail arrive (ou l'onglet demandé dans l'adresse)
   const wanted = location.hash.slice(1);
-  showTab(TABS.includes(wanted) ? wanted : 'demandes');
+  showTab(TABS.includes(wanted) ? wanted : 'accueil');
   updateNavBadges();
   // Le diagnostic visage n'apparaît dans le menu que s'il est réellement branché côté serveur
   fetch('/api/config').then(r => r.json()).then(c => { if (c.diagnosticEnabled) document.getElementById('nav-diag').hidden = false; }).catch(() => {});
@@ -685,11 +824,12 @@ document.addEventListener('click', (e) => {
 function renderActive(on) {
   refreshStarter();
   const badge = document.getElementById('active-badge');
-  badge.textContent = on ? 'Profil en ligne' : 'Profil hors ligne';
-  badge.className = 'badge ' + (on ? 'is-ok' : 'is-info');
+  badge.textContent = on ? 'Fiche en ligne' : 'Fiche hors ligne';
+  badge.className = 'status-pill' + (on ? ' on' : '');
+  badge.title = on ? 'Les clientes peuvent vous trouver et vous écrire' : 'Personne ne voit votre fiche pour l’instant';
   const btn = document.getElementById('btn-toggle-active');
-  btn.textContent = on ? 'Mettre hors ligne' : 'Mettre mon profil en ligne';
-  btn.className = 'btn btn-sm ' + (on ? 'btn-ghost' : 'btn-primary');
+  btn.textContent = on ? 'Mettre hors ligne' : 'Mettre en ligne';
+  btn.className = 'btn btn-sm ' + (on ? 'btn-quiet' : 'btn-primary');
 }
 
 // Chiffres du mois : réservations de créneaux ET devis signés (la plupart des prestations passent par un devis)
@@ -933,7 +1073,7 @@ document.getElementById('btn-apply-template')?.addEventListener('click', applyTe
 async function loadReviews() {
   const { data } = await supabase.from('reviews_public').select('*').eq('artist_id',artistData?.id).order('created_at',{ascending:false});
   const el = document.getElementById('reviews-dash');
-  if (!data||data.length===0) { el.innerHTML='<p style="color:var(--gris);text-align:center;padding:40px;">Aucun avis pour l\'instant. Vos clientes peuvent en laisser un après une prestation réservée sur GlamBook.</p>'; return; }
+  if (!data||data.length===0) { el.innerHTML='<p style="color:var(--gris);text-align:center;padding:40px;">Aucun avis pour l\'instant. Vos clientes peuvent en laisser un une fois la prestation passée, que ce soit après un devis signé ou un rendez-vous réservé.</p>'; return; }
   el.innerHTML = data.map(r=>`
     <div style="background:var(--blanc);border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--gb-line);">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
@@ -1097,6 +1237,11 @@ document.getElementById('btn-toggle-active').addEventListener('click', async () 
   showToast(newVal ? 'Votre profil est en ligne' : 'Votre profil n’est plus visible');
 });
 
+// Compteur de la présentation (60 caractères : le seuil de la liste de démarrage)
+const bioEl = document.getElementById('p-bio');
+function bioCount() { const n = bioEl.value.trim().length; document.getElementById('bio-count').textContent = n + (n > 1 ? ' caractères' : ' caractère') + (n < 60 ? ' · au moins 60 conseillés' : ''); }
+bioEl.addEventListener('input', bioCount);
+
 // Logout
 ['btn-logout', 'm-logout'].forEach(id => document.getElementById(id)?.addEventListener('click', async (e) => {
   e.preventDefault();
@@ -1239,25 +1384,85 @@ document.getElementById('btn-save-espace').addEventListener('click', async () =>
   showToast('Apparence enregistrée');
 });
 
-// Navigation onglets
-const TABS = ['reservations','disponibilites','avis','demandes','devis','profil','photos','services','espace'];
+// Navigation onglets — chaque onglet a son titre et une phrase qui dit à quoi il sert
+const TABS = ['accueil','reservations','disponibilites','avis','demandes','devis','profil','photos','services','espace'];
+const HEAD = {
+  accueil:        ['Mon espace', null, 'Ce qui vous attend aujourd’hui, en un coup d’œil.'],
+  demandes:       ['Mon activité', 'Les <em>demandes</em>', 'Lisez le besoin de la cliente, puis répondez-lui par un devis.'],
+  devis:          ['Mon activité', 'Mes <em>devis</em>', 'Créez, envoyez et suivez la signature de vos devis.'],
+  reservations:   ['Mon activité', 'Mon <em>agenda</em>', 'Les rendez-vous réservés par vos clientes sur vos créneaux.'],
+  disponibilites: ['Mon activité', 'Mon <em>agenda</em>', 'Ouvrez des créneaux pour être réservée en ligne. Facultatif.'],
+  avis:           ['Mon activité', 'Mes <em>avis</em>', 'Ce que vos clientes disent de vous, tel qu’affiché sur votre fiche.'],
+  profil:         ['Ma vitrine', 'Ma <em>présentation</em>', 'Ce que les clientes lisent sur votre fiche.'],
+  photos:         ['Ma vitrine', 'Mes <em>photos</em>', 'Vos réalisations. La première sert de couverture dans la recherche.'],
+  services:       ['Ma vitrine', 'Mes <em>tarifs</em>', 'Facultatif : sans tarif, votre fiche affiche « Sur devis ».'],
+  espace:         ['Ma vitrine', '<em>Apparence</em>', 'Couleur d’accent, photo de couverture et sections visibles.'],
+};
 function showTab(name) {
   if (!TABS.includes(name)) return;
   TABS.forEach(t => { document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none'; });
-  // Les chiffres du mois n'ont leur place que sur l'accueil (Demandes) : ailleurs ils repoussaient le contenu
-  document.getElementById('stats-grid').hidden = name !== 'demandes';
-  history.replaceState(null, '', name === 'demandes' ? location.pathname : '#' + name);
-  // Même état actif dans la barre latérale, la barre du bas et la feuille « Plus »
-  document.querySelectorAll('[data-tab]').forEach(el => el.classList.toggle('active', el.dataset.tab === name));
+  const [eb, title, help] = HEAD[name];
+  document.getElementById('dh-eyebrow').textContent = eb;
+  document.getElementById('dash-greeting').innerHTML = title || `Bonjour${greetName ? ' <em>' + esc(greetName) + '</em>' : ''}`;
+  document.getElementById('dh-help').textContent = help;
+  history.replaceState(null, '', name === 'accueil' ? location.pathname : '#' + name);
+  // Même état actif dans la barre latérale, la barre du bas et la feuille « Plus » (Agenda couvre deux vues)
+  const agenda = name === 'reservations' || name === 'disponibilites';
+  document.querySelectorAll('[data-tab]').forEach(el => el.classList.toggle('active',
+    el.closest('.seg') ? el.dataset.tab === name : (el.dataset.group === 'agenda' ? agenda : el.dataset.tab === name)));
   const inBar = !!document.querySelector(`.mobile-nav-inner [data-tab="${name}"]`);
   document.getElementById('mnav-more').classList.toggle('active', !inBar);
   document.getElementById('more-sheet').classList.remove('open');
+  if (name === 'accueil') loadAccueil();
   if (name === 'espace') initEspace();
   if (name === 'devis') loadDevis();
   if (name === 'demandes') loadDemandes();
   if (name === 'disponibilites') renderCalendar();
   window.scrollTo({ top: 0 });
 }
+
+// ── Accueil : ce qui demande une action, puis les prochaines prestations ──
+async function loadAccueil() {
+  const todo = document.getElementById('todo-list'), next = document.getElementById('next-list');
+  const today = localISODate();
+  const [reqs, quotes, bks, convs] = await Promise.all([
+    listArtistRequests('pending').then(r => r.filter(x => x.artistId === artistData.id)).catch(() => []),
+    listMyQuotes().catch(() => []),
+    supabase.from('bookings').select('id,date,time_slot,status,client_name, services(name)').eq('artist_id', artistData.id)
+      .gte('date', today).in('status', ['pending', 'confirmed']).order('date').then(r => r.data || []).catch(() => []),
+    myConversations().catch(() => []),
+  ]);
+  const unread = (convs || []).reduce((s, c) => s + (Number(c.unread) || 0), 0);
+  const waiting = quotes.filter(q => q.status === 'sent');
+  const drafts = quotes.filter(q => q.status === 'draft');
+  const toConfirm = bks.filter(b => b.status === 'pending');
+  const items = [
+    reqs.length && { n: reqs.length, t: reqs.length > 1 ? 'demandes à chiffrer' : 'demande à chiffrer', d: reqs.slice(0, 2).map(r => r.clientName || 'Cliente').join(', ') + (reqs.length > 2 ? '…' : ''), go: 'Répondre', tab: 'demandes', hot: true },
+    toConfirm.length && { n: toConfirm.length, t: toConfirm.length > 1 ? 'rendez-vous à confirmer' : 'rendez-vous à confirmer', d: 'Réservés sur vos créneaux', go: 'Confirmer', tab: 'reservations', hot: true },
+    unread && { n: unread, t: unread > 1 ? 'messages non lus' : 'message non lu', d: 'Dans votre messagerie', go: 'Lire', href: '/messages.html' },
+    waiting.length && { n: waiting.length, t: waiting.length > 1 ? 'devis en attente de signature' : 'devis en attente de signature', d: 'Vous pouvez renvoyer le lien à la cliente', go: 'Voir', tab: 'devis' },
+    drafts.length && { n: drafts.length, t: drafts.length > 1 ? 'brouillons de devis' : 'brouillon de devis', d: 'Pas encore envoyés', go: 'Reprendre', tab: 'devis' },
+  ].filter(Boolean);
+  todo.innerHTML = items.length ? items.map(i => `<div class="todo${i.hot ? ' hot' : ''}">
+      <span class="n">${i.n}</span>
+      <div class="tx"><b>${esc(i.t)}</b><span>${esc(i.d)}</span></div>
+      ${i.href ? `<a class="btn ${i.hot ? 'btn-primary' : 'btn-ghost'} btn-sm" href="${i.href}">${i.go}</a>` : `<button type="button" class="btn ${i.hot ? 'btn-primary' : 'btn-ghost'} btn-sm" data-goto="${i.tab}">${i.go}</button>`}
+    </div>`).join('')
+    : `<p class="quiet">Rien d’urgent pour l’instant.${artistData.is_active ? ' C’est le bon moment pour ajouter des photos à votre portfolio.' : ' Mettez votre fiche en ligne pour recevoir vos premières demandes.'}</p>`;
+  // Prochaines prestations : devis signés à venir + créneaux réservés
+  const upcoming = [
+    ...quotes.filter(q => q.status === 'signed' && q.eventDate && q.eventDate.slice(0, 10) >= today)
+      .map(q => ({ d: new Date(q.eventDate), who: q.client.name || 'Cliente', what: q.client.eventAddress || 'Devis ' + (q.quoteNumber || ''), tag: 'Devis signé', amt: euros(q.totalCents) })),
+    ...bks.filter(b => b.status === 'confirmed').map(b => ({ d: new Date(b.date + 'T' + (b.time_slot || '12:00')), who: b.client_name || 'Cliente', what: b.services?.name || 'Rendez-vous', tag: 'Réservé en ligne', amt: '' })),
+  ].sort((x, y) => x.d - y.d).slice(0, 4);
+  next.innerHTML = upcoming.length ? upcoming.map(u => `<div class="nx">
+      <div class="dt"><span class="d">${u.d.getDate()}</span><span class="m">${u.d.toLocaleDateString('fr-FR', { month: 'short' })}</span></div>
+      <div class="tx"><b>${esc(u.who)}</b><span>${esc(u.what)} · ${u.d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span></div>
+      <div class="rt"><span class="tg">${u.tag}</span>${u.amt ? `<span class="amt">${esc(u.amt)}</span>` : ''}</div>
+    </div>`).join('')
+    : '<p class="quiet">Aucune prestation prévue. Elles apparaissent ici dès qu’un devis est signé.</p>';
+}
+document.addEventListener('click', (e) => { const g = e.target.closest('[data-goto]'); if (g) showTab(g.dataset.goto); });
 window.showTab = showTab;
 document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showTab(el.dataset.tab); }));
 document.getElementById('mnav-more').addEventListener('click', () => document.getElementById('more-sheet').classList.add('open'));
@@ -1427,17 +1632,19 @@ async function loadDevis() {
   box.innerHTML = quotes.map(q => {
     const st = DEVIS_STATUS[q.status] || DEVIS_STATUS.draft;
     const date = q.createdAt ? new Date(q.createdAt).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }) : '';
-    return `<div class="booking-row">
+    const ev = q.eventDate ? new Date(q.eventDate).toLocaleDateString('fr-FR', { day:'numeric', month:'long' }) : '';
+    return `<div class="booking-row qrow">
       <div class="booking-info">
-        <div class="client-name">${esc(q.quoteNumber || 'Devis')} · ${esc(q.client.name || 'Cliente')}</div>
-        <div class="booking-meta">${esc(euros(q.totalCents))} · ${esc(date)}</div>
+        <div class="q-name">${esc(q.client.name || 'Cliente')}</div>
+        <div class="booking-meta">${esc(q.quoteNumber || 'Devis')} · ${ev ? 'événement le ' + esc(ev) : 'créé le ' + esc(date)}</div>
       </div>
+      <span class="q-amt">${esc(euros(q.totalCents))}</span>
       <span class="booking-status ${st.cls}">${st.label}</span>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${q.status !== 'signed' ? `<a class="btn btn-ghost btn-sm" href="/dashboard/devis.html?id=${esc(q.id)}">Éditer</a>` : ''}
+      <div class="q-act">
+        ${q.status === 'sent' ? `<button class="btn btn-ghost btn-sm" data-act="link" data-id="${esc(q.id)}">Copier le lien</button>` : ''}
+        ${q.status !== 'signed' ? `<a class="btn btn-ghost btn-sm" href="/dashboard/devis.html?id=${esc(q.id)}">${q.status === 'draft' ? 'Reprendre' : 'Modifier'}</a>` : ''}
         <button class="btn btn-ghost btn-sm" data-act="pdf"  data-id="${esc(q.id)}">PDF</button>
-        ${q.status === 'sent' ? `<button class="btn btn-ghost btn-sm" data-act="link" data-id="${esc(q.id)}">Lien</button>` : ''}
-        <button class="btn btn-ghost btn-sm" data-act="del" data-id="${esc(q.id)}" aria-label="Supprimer le devis">${ICON.trash}</button>
+        <button class="btn btn-quiet btn-sm" data-act="del" data-id="${esc(q.id)}" aria-label="Supprimer le devis ${esc(q.quoteNumber || '')}">${ICON.trash}</button>
       </div>
     </div>`;
   }).join('');

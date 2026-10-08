@@ -7,21 +7,21 @@ import { supabase, getProfile } from '/js/supabase.js';
 import { ICON } from '/js/utils.js';
 
 const PRO = [
-  ['Activité'],
+  ['accueil', 'Accueil', 'home'],
+  ['Mon activité'],
   ['demandes', 'Demandes', 'inbox'],
   ['devis', 'Devis', 'doc'],
   ['messages', 'Messages', 'chat', '/messages.html'],
-  ['reservations', 'Réservations', 'check'],
-  ['disponibilites', 'Disponibilités', 'calendar'],
-  ['avis', 'Avis clientes', 'star'],
-  ['Profil public'],
-  ['profil', 'Mon profil', 'user'],
-  ['photos', 'Portfolio', 'image'],
-  ['services', 'Prestations & tarifs', 'tag'],
+  ['reservations', 'Agenda', 'calendar'],
+  ['avis', 'Avis', 'star'],
+  ['Ma vitrine'],
+  ['profil', 'Présentation', 'user'],
+  ['photos', 'Photos', 'image'],
+  ['services', 'Tarifs', 'tag'],
   ['espace', 'Apparence', 'palette'],
 ];
-const MOBILE = [['demandes', 'Demandes', 'inbox'], ['devis', 'Devis', 'doc'], ['messages', 'Messages', 'chat', '/messages.html'], ['profil', 'Profil', 'user'], ['more', 'Tableau', 'more', '/dashboard/artist.html']];
-const href = (key, url) => url || '/dashboard/artist.html' + (key === 'demandes' ? '' : '#' + key);
+const MOBILE = [['accueil', 'Accueil', 'home'], ['demandes', 'Demandes', 'inbox'], ['devis', 'Devis', 'doc'], ['messages', 'Messages', 'chat', '/messages.html'], ['more', 'Plus', 'more', '/dashboard/artist.html']];
+const href = (key, url) => url || '/dashboard/artist.html' + (key === 'accueil' ? '' : '#' + key);
 const e = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 export async function mountShell(active) {

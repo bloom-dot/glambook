@@ -324,3 +324,13 @@ Lancés par Fernand après la revue des parcours (page « Parcours GlamBook »).
 6. **Un seul espace cliente** : Mon espace reprend les rendez-vous (à venir + historique repliable), l'annulation et les avis. `dashboard/client.html` redirige vers `/mes-devis.html#sec-bookings` (l'ancienne page est conservée hors du site).
 7. **Cadre commun** (`js/shell.js`) : Messages et l'éditeur de devis gardent la barre latérale du tableau de bord pour une maquilleuse (barre du bas sur mobile) ; la barre du site pour une cliente.
 - Cache : `glambook-v23`.
+
+## 19. Espace maquilleuse repensé (8 octobre 2026, nuit)
+
+Fernand garde la charte E. Objectif : un tableau de bord facile à comprendre et à utiliser.
+- **Nouvel onglet Accueil** (ouvert par défaut) : « À faire » (demandes à chiffrer, rendez-vous à confirmer, messages non lus, devis en attente de signature, brouillons — chacun avec son bouton), puis la liste de démarrage si la fiche est incomplète, les prochaines prestations (devis signés à venir + créneaux réservés) et les chiffres du mois.
+- **Menu simplifié** : Accueil · Mon activité (Demandes, Devis, Messages, Agenda, Avis) · Ma vitrine (Présentation, Photos, Tarifs, Apparence, Voir ma fiche). « Agenda » regroupe Rendez-vous et Disponibilités avec une bascule. Mobile : Accueil, Demandes, Devis, Messages, Plus. Même menu dans `js/shell.js`.
+- **En-tête par onglet** : surtitre, titre (« Les *demandes* »…), une phrase qui dit à quoi sert l'onglet ; statut « Fiche en ligne / hors ligne » toujours visible.
+- **Présentation** en quatre sections (Qui vous êtes, Votre présentation avec compteur, Vos spécialités en pastilles, Vos réseaux), bouton Enregistrer toujours visible en bas ; suppression du compte repliée.
+- Listes en lignes à filets (devis : nom de la cliente en grand, montant, état, « Copier le lien »), compteurs du mois en rangée.
+- Ancienne version conservée hors du site. Cache : `glambook-v24`.
