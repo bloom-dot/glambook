@@ -526,3 +526,33 @@ body.auth .nav { background: transparent; border: none; position: absolute; widt
   padding: 8px; color: var(--gb-ink-2); font-size: 1.1rem; line-height: 0; border-radius: 8px; }
 .pw-toggle:hover { color: var(--gb-ink); }
 @media (max-width: 480px) { .auth-card { padding: 30px 22px; border-radius: 18px; } }
+
+/* ══════════════════════════════════════
+   MENU DÉROULANT « maison » (js/select.js)
+   Le <select> natif reste caché dessous et porte la valeur.
+   ══════════════════════════════════════ */
+.gbs { position: relative; display: inline-block; min-width: 0; }
+.gbs-native { position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0; pointer-events: none; inset: 0; }
+.gbs-btn { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; color: var(--gb-ink); font: 400 1.05rem var(--gb-font-body); }
+.gbs-btn .gbs-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gbs-btn .gb-ico { width: 18px; height: 18px; color: var(--gb-ink-3); transition: transform .2s, color .2s; flex: 0 0 auto; }
+.gbs-btn:hover .gb-ico, .gbs.is-open .gbs-btn .gb-ico { color: var(--gb-champagne); }
+.gbs.is-open .gbs-btn .gb-ico { transform: rotate(180deg); }
+.gbs-btn:focus-visible { outline: 2px solid var(--gb-champagne); outline-offset: 4px; border-radius: 2px; }
+.gbs-list { position: absolute; z-index: 80; top: calc(100% + 10px); left: -14px; min-width: calc(100% + 28px); max-height: 300px; overflow-y: auto;
+  margin: 0; padding: 6px; list-style: none; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-md);
+  box-shadow: 0 18px 40px rgba(0,0,0,.55); outline: none; animation: gbs-in .14s ease-out; }
+.gbs.up .gbs-list { top: auto; bottom: calc(100% + 10px); }
+@keyframes gbs-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.gbs-list li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--gb-r-sm); cursor: pointer; white-space: nowrap;
+  font-size: .76rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-ink-2); }
+.gbs-list li .gb-ico { width: 15px; height: 15px; color: var(--gb-gold); visibility: hidden; flex: 0 0 auto; }
+.gbs-list li[aria-selected="true"] { color: var(--gb-ink); }
+.gbs-list li[aria-selected="true"] .gb-ico { visibility: visible; }
+.gbs-list li.is-active { background: var(--gb-gold-tint); color: var(--gb-champagne); }
+/* Variante « champ encadré » (filtres de la page de recherche) */
+.gbs-box .gbs-btn { height: 40px; padding: 0 12px 0 14px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-md); font-size: .88rem; }
+.gbs-box .gbs-btn:hover, .gbs-box.is-open .gbs-btn { border-color: var(--gb-champagne); }
+.gbs-box .gbs-btn:focus-visible { outline-offset: 2px; }
+.gbs-box .gbs-list { left: 0; min-width: 100%; top: calc(100% + 6px); }
+.gbs-box.up .gbs-list { bottom: calc(100% + 6px); }

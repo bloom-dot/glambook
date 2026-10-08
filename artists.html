@@ -103,7 +103,7 @@
     <div class="tools">
       <input class="filter-input" id="f-city" placeholder="Ville ou région" type="text" aria-label="Ville ou région"/>
       <button class="tool-btn" id="f-near" type="button" title="Rechercher autour de ma position"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> Autour de moi</button>
-      <select class="sort-select" id="f-radius" title="Rayon de recherche" aria-label="Rayon de recherche">
+      <select class="sort-select gb-select" data-gbs-class="gbs-box" id="f-radius" title="Rayon de recherche" aria-label="Rayon de recherche">
         <option value="0">Partout</option>
         <option value="5">5 km</option>
         <option value="10">10 km</option>
@@ -111,7 +111,7 @@
         <option value="50">50 km</option>
       </select>
       <input class="filter-input" id="f-date" type="date" aria-label="Date de l'événement" style="min-width:150px;"/>
-      <select class="sort-select push" id="f-sort" aria-label="Trier">
+      <select class="sort-select gb-select" data-gbs-class="gbs-box push" id="f-sort" aria-label="Trier">
         <option value="rating">Les plus d'avis</option>
         <option value="price_asc">Prix croissant</option>
         <option value="price_desc">Prix décroissant</option>
@@ -139,7 +139,9 @@
 import { supabase, esc, safeUrl, specialtyLabel } from '/js/supabase.js';
 import { showToast, localISODate, ICON } from '/js/utils.js';
 import { initNav } from '/js/nav.js';
+import { enhanceSelects } from '/js/select.js';
 initNav();
+enhanceSelects();
 
 const params  = new URLSearchParams(location.search);
 let filters   = {

@@ -305,6 +305,7 @@ Direction E choisie par Fernand (mélange de A « Sombre Luxe » et C « Éditor
 - **Recherche** : grand titre, occasions en onglets, filtres en ligne, même carte que l'accueil.
 - **Fiche maquilleuse** : la couverture (ou, à défaut, la première photo du portfolio) en plein cadre avec le nom en capitales ; présentation en italique ; portfolio en mosaïque ; avis en citations. Sur mobile, barre fixe « Écrire | Demander un devis / Réserver ». La couleur choisie par la maquilleuse ne teinte plus que le surtitre et la sélection (`--artist-accent`).
 - Tableau de bord, messages, inscription, signature : rose remplacé par l'or / le champagne, logos alignés.
-- Cache du service worker : `glambook-v19`.
+- Cache du service worker : `glambook-v20`.
+- Menus déroulants : `js/select.js` remplace l'apparence du menu natif (illisible sous Windows) pour tout `<select class="gb-select">` ; le select d'origine reste caché et garde la valeur. Utilisé sur l'accueil (occasion) et la recherche (rayon, tri).
 - Photos (8 octobre) : cadre gris retiré de `cat-mariage.jpg` et `cat-soiree.jpg` (restes du découpage d'une planche) ; l'accueil se partage avec `hero.jpg` en grand format. `portrait.jpg` et `cat-toutes.jpg` ne sont plus utilisées.
 - Nouvelles photos générées par Fernand (8 octobre, soir) : `hero.jpg` (maquilleuse de face, cliente de profil, moitié gauche noire pour le titre, 1376 × 768), `bandeau-pro.jpg` (maquilleuse qui prépare son matériel), `cat-shooting.jpg` (eye-liner graphique sans paillettes, recadrée sur les yeux). Les anciennes sont gardées hors du site. À terme : une photo d'accueil d'au moins 2 400 px de large pour les grands écrans.
