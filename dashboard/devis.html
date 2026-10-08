@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Nouveau devis — GlamBook</title>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#E8547A"/>
+  <meta name="theme-color" content="#0E0E10"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
   <style>
@@ -66,11 +66,11 @@
     .link-box { display:flex; gap:8px; margin-bottom:16px; }
     .link-box input { font-size:.8rem; }
 
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    .toast.error { background:var(--rose-f); }
     .back-link { font-size:.85rem; color:var(--gris); text-decoration:none; }
-    .back-link:hover { color:var(--rose); }
+    .back-link:hover { color:var(--gb-ink); }
+    .req-note { border:1px solid var(--gb-line-strong); background:var(--gb-gold-tint); border-radius:var(--radius); padding:16px 18px; margin-bottom:18px; }
+    .req-note .lbl { font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--gb-champagne); margin-bottom:6px; }
+    .req-note .txt { font-size:.9rem; white-space:pre-wrap; }
   </style>
 </head>
 <body>
@@ -82,10 +82,16 @@
         <div class="sub" id="quoteNo">Brouillon</div>
       </div>
       <div class="actions">
-        <button class="btn btn-ghost" id="btnPreview">👁 Prévisualiser le PDF</button>
+        <button class="btn btn-ghost" id="btnPreview">Aperçu PDF</button>
         <button class="btn btn-secondary" id="btnSave">Enregistrer</button>
         <button class="btn btn-primary" id="btnSend">Envoyer à la cliente</button>
       </div>
+    </div>
+
+    <!-- Rappel de la demande à laquelle ce devis répond (rempli par le script si ?request=…) -->
+    <div class="req-note" id="reqNote" hidden>
+      <div class="lbl" id="reqNoteLbl">Demande de la cliente</div>
+      <div class="txt" id="reqNoteTxt"></div>
     </div>
 
     <!-- MUA -->
@@ -162,7 +168,7 @@
   <!-- Modal lien de signature -->
   <div class="modal-bg" id="modal">
     <div class="modal">
-      <h3>Devis envoyé ✨</h3>
+      <h3>Devis envoyé</h3>
       <p id="modalMsg">Partagez ce lien unique avec votre cliente. Elle pourra consulter le devis et le signer depuis son téléphone.</p>
       <div class="link-box">
         <input id="shareLink" readonly/>
@@ -176,9 +182,12 @@
 
   <script type="module">
     import { emptyQuote, computeTotals, euros, parseEuros, lineTotalCents, validateForSend, generateQuoteNumber } from '/js/devis/model.js';
-    import { saveQuote, markAsSent, emailQuote, signatureUrl, getMyArtistId, getQuote, getShareToken } from '/js/devis/store.js';
-    import { previewQuotePdf } from '/js/devis/pdf.js';
-    import { getCurrentUser, getProfile } from '/js/supabase.js';
+    import { saveQuote, markAsSent, emailQuote, signatureUrl, getMyArtistId, getQuote, getShareToken, listMyQuotes } from '/js/devis/store.js';
+    import { supabase, getCurrentUser, getProfile } from '/js/supabase.js';
+    import { fromRow as requestFromRow, requestToQuote } from '/js/booking/store.js';
+
+    // Devis préparé en réponse à une demande : /dashboard/devis.html?request=<id>
+    const requestId = new URLSearchParams(location.search).get('request');
     import { showToast, esc } from '/js/utils.js';
 
     let quote = emptyQuote();
@@ -279,7 +288,10 @@
     };
     $('logoRemove').onclick = () => { quote.mua.logoUrl = ''; showLogo(''); $('logoInput').value = ''; };
 
-    $('btnPreview').onclick = () => previewQuotePdf(quote);
+    $('btnPreview').onclick = async () => {
+      try { const { previewQuotePdf } = await import('/js/devis/pdf.js'); previewQuotePdf(quote); }
+      catch (e) { console.error(e); showToast('L’aperçu PDF est indisponible pour le moment.', 'error'); }
+    };
 
     async function persist() {
       const saved = await saveQuote(quote);
@@ -314,6 +326,11 @@
           const { shareToken } = await markAsSent(quote.id);
           url = signatureUrl(shareToken);
         }
+        // Le devis répond à une demande : elle passe à « devis envoyé » et quitte la liste d'attente
+        if (requestId) {
+          const { error: linkErr } = await supabase.from('booking_requests').update({ status: 'quoted', quote_id: quote.id }).eq('id', requestId);
+          if (linkErr) console.warn('Lien demande ↔ devis :', linkErr.message);
+        }
         $('shareLink').value = url;
         $('modalMsg').textContent = emailed
           ? `Un email a été envoyé à ${quote.client.email}. Vous pouvez aussi partager ce lien :`
@@ -336,7 +353,7 @@
       try { await navigator.clipboard.writeText($('shareLink').value); showToast('Lien copié !'); }
       catch { $('shareLink').select(); document.execCommand('copy'); showToast('Lien copié !'); }
     };
-    $('btnCloseModal').onclick = () => $('modal').classList.remove('show');
+    $('btnCloseModal').onclick = () => { $('modal').classList.remove('show'); if (requestId) location.href = '/dashboard/artist.html'; };
 
     const STATUS_LABEL = { draft:'Brouillon', sent:'Envoyé', signed:'Signé', declined:'Refusé', expired:'Expiré' };
 
@@ -382,13 +399,15 @@
       $('btnSave').style.display = 'none';
       $('btnSend').style.display = 'none';
       const bar = document.createElement('div');
-      bar.style.cssText = 'background:#E7F7EE;color:#1B8A4B;border-radius:var(--radius-sm);padding:12px 16px;font-size:.85rem;font-weight:600;margin-bottom:16px;';
-      bar.textContent = '✓ Ce devis a été signé par la cliente — il n’est plus modifiable.';
+      bar.className = 'is-ok';
+      bar.style.cssText = 'border-radius:var(--radius-sm);padding:12px 16px;font-size:.85rem;font-weight:600;margin-bottom:16px;';
+      bar.textContent = 'Ce devis a été signé par la cliente : il n’est plus modifiable.';
       document.querySelector('.wrap').insertBefore(bar, document.querySelector('.panel'));
     }
 
     // ── Init : édition d'un devis existant (?id=) ou nouveau ──
     (async () => {
+      if (!(await getCurrentUser())) { location.href = '/auth/login.html?redirect=' + encodeURIComponent(location.pathname + location.search); return; }
       const editId = new URLSearchParams(location.search).get('id');
 
       if (editId) {
@@ -406,7 +425,27 @@
         } catch (e) { console.error(e); showToast('Chargement impossible.', 'error'); }
       }
 
-      // Nouveau devis : préremplissage depuis le profil connecté
+      // Devis en réponse à une demande : cliente, date, lieu et prestations demandées sont repris
+      if (requestId) {
+        try {
+          const { data: row, error } = await supabase.from('booking_requests').select('*').eq('id', requestId).maybeSingle();
+          if (error || !row) throw error || new Error('introuvable');
+          const req = requestFromRow(row);
+          const number = quote.quoteNumber;
+          quote = requestToQuote(req, {}, {});
+          quote.quoteNumber = number;
+          quote.paymentTerms = emptyQuote().paymentTerms;
+          document.querySelector('.top h1').textContent = 'Devis pour ' + (req.clientName || 'la cliente');
+          if (req.note) { $('reqNoteTxt').textContent = req.note; $('reqNote').hidden = false; }
+          if (row.status !== 'pending') { $('reqNoteLbl').textContent = 'Demande de la cliente (déjà traitée)'; }
+        } catch (e) { console.error(e); showToast('La demande n’a pas pu être chargée.', 'error'); }
+      }
+
+      // Vos informations : reprises du dernier devis (SIRET, adresse, logo), sinon du profil
+      try {
+        const last = (await listMyQuotes())[0];
+        if (last?.mua) for (const k of ['name', 'siret', 'address', 'email', 'phone', 'logoUrl']) if (!quote.mua[k] && last.mua[k]) quote.mua[k] = last.mua[k];
+      } catch (_) {}
       try {
         const user = await getCurrentUser();
         if (user) {
@@ -416,10 +455,8 @@
           if (prof?.phone && !quote.mua.phone) { quote.mua.phone = prof.phone; $('mua_phone').value = prof.phone; }
         }
       } catch (_) {}
-      $('payment_terms').value = quote.paymentTerms;
+      fillForm(quote);
       $('quoteNo').textContent = `${quote.quoteNumber} · Brouillon`;
-      renderItems();
-      renderTotals();
     })();
   </script>
 </body>

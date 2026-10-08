@@ -11,7 +11,7 @@ function injectStyles() {
   const css = `
   .fs-cam{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:3/4;max-height:360px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;}
   .fs-cam video,.fs-cam img{width:100%;height:100%;object-fit:cover;}
-  .fs-ph{color:#777;font-size:.9rem;text-align:center;padding:20px;}
+  .fs-ph{color:var(--gb-ink-3);font-size:.9rem;text-align:center;padding:20px;}
   .fs-actions{display:flex;gap:10px;flex-wrap:wrap;}
   .fs-actions .btn{flex:1;}
   .fs-note{font-size:.74rem;color:var(--gris);text-align:center;margin:8px 0;}
@@ -29,14 +29,14 @@ function injectStyles() {
   .fs-scan{position:absolute;left:8%;right:8%;height:2px;top:14%;background:linear-gradient(90deg,transparent,var(--or),transparent);box-shadow:0 0 12px 2px rgba(212,175,55,.5);animation:fs-sweep 2.4s ease-in-out infinite;}
   @keyframes fs-sweep{0%{top:14%;opacity:0;}15%{opacity:1;}85%{opacity:1;}100%{top:86%;opacity:0;}}
   .fs-check{position:absolute;left:50%;top:46%;width:60px;height:60px;transform:translate(-50%,-50%) scale(.4);opacity:0;transition:opacity .3s,transform .3s cubic-bezier(.2,1.4,.4,1);}
-  .fs-check circle{fill:none;stroke:#22B573;stroke-width:3;opacity:.25;}
-  .fs-check path{fill:none;stroke:#22B573;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:44;stroke-dashoffset:44;transition:stroke-dashoffset .4s ease .1s;}
+  .fs-check circle{fill:none;stroke:var(--gb-ok);stroke-width:3;opacity:.25;}
+  .fs-check path{fill:none;stroke:var(--gb-ok);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:44;stroke-dashoffset:44;transition:stroke-dashoffset .4s ease .1s;}
   .fs-hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:rgba(17,17,17,.6);color:#fff;font-size:.76rem;font-weight:700;white-space:nowrap;backdrop-filter:blur(4px);transition:background .4s;}
   .fs-hint .dot{width:7px;height:7px;border-radius:50%;background:var(--rose);animation:fs-blink 1.2s ease-in-out infinite;}
   @keyframes fs-blink{0%,100%{opacity:.35;}50%{opacity:1;}}
-  .fs-cam.detected .fs-oval ellipse{stroke:#22B573;stroke-dasharray:0;opacity:1;filter:drop-shadow(0 0 8px rgba(34,181,115,.55));animation:none;}
+  .fs-cam.detected .fs-oval ellipse{stroke:var(--gb-ok);stroke-dasharray:0;opacity:1;filter:drop-shadow(0 0 8px rgba(34,181,115,.55));animation:none;}
   .fs-cam.detected .fs-scan{opacity:0;animation:none;}
-  .fs-cam.detected .fs-corner{border-color:#22B573;transform:scale(.92);}
+  .fs-cam.detected .fs-corner{border-color:var(--gb-ok);transform:scale(.92);}
   .fs-cam.detected .fs-check{opacity:1;transform:translate(-50%,-50%) scale(1);}
   .fs-cam.detected .fs-check path{stroke-dashoffset:0;}
   .fs-cam.detected .fs-hint{background:rgba(27,138,75,.85);}
@@ -66,9 +66,9 @@ const TEMPLATE = `
   </div>
   <p class="fs-note" data-note></p>
   <div class="fs-actions">
-    <button type="button" class="btn btn-secondary" data-cam-btn>📷 Caméra</button>
+    <button type="button" class="btn btn-secondary" data-cam-btn>Caméra</button>
     <button type="button" class="btn btn-primary fs-hidden" data-capture>Prendre la photo</button>
-    <label class="btn btn-ghost" data-import-label style="margin:0;">🖼️ Importer<input type="file" accept="image/*" capture="user" class="fs-hidden" data-file/></label>
+    <label class="btn btn-ghost" data-import-label style="margin:0;">Importer<input type="file" accept="image/*" capture="user" class="fs-hidden" data-file/></label>
     <button type="button" class="btn btn-ghost btn-sm fs-hidden" data-retake>↺ Reprendre</button>
   </div>
   <canvas class="fs-hidden" data-canvas></canvas>
@@ -176,7 +176,7 @@ export function createFaceScan(hostEl, opts = {}) {
     try { box = await detectApi.detect(video); } catch { return; }
     const ok = box && wellFramed(box, video.videoWidth, video.videoHeight);
     cam.classList.toggle('detected', ok);
-    setHint(ok ? 'Visage bien cadré ✓' : 'Centrez le visage dans l’ovale');
+    setHint(ok ? 'Visage bien cadré' : 'Centrez le visage dans l’ovale');
     if (ok) { if (++stable >= 5 && !autoShot) { autoShot = true; setHint('Parfait, on prend la photo…'); setTimeout(capture, 400); } }
     else stable = 0;
   }

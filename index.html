@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>GlamBook — Réservez votre maquilleuse professionnelle</title>
-  <meta name="description" content="Trouvez et réservez une maquilleuse professionnelle près de chez vous. Photos de réalisations, avis clients, disponibilités en temps réel."/>
+  <meta name="description" content="Trouvez une maquilleuse professionnelle près de chez vous : portfolios, avis clientes, devis personnalisé et échange direct."/>
   <link rel="canonical" href="https://glambook-pi.vercel.app/"/>
 
   <!-- Open Graph -->
@@ -13,10 +13,13 @@
   <meta property="og:title" content="GlamBook — Réservez votre maquilleuse professionnelle"/>
   <meta property="og:description" content="Trouvez et réservez une maquilleuse professionnelle près de chez vous. Portfolios, avis clients, réservation en ligne sécurisée."/>
   <meta property="og:url" content="https://glambook-pi.vercel.app/"/>
-  <meta property="og:image" content="https://glambook-pi.vercel.app/icons/icon-512.png"/>
+  <meta property="og:image" content="https://glambook-pi.vercel.app/img/hero.jpg"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="618"/>
+  <meta property="og:image:alt" content="Maquilleuse professionnelle au travail"/>
   <meta property="og:locale" content="fr_FR"/>
   <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="GlamBook — Réservez votre maquilleuse professionnelle"/>
   <meta name="twitter:description" content="Portfolios, avis clients, réservation en ligne sécurisée."/>
   <meta name="twitter:image" content="https://glambook-pi.vercel.app/icons/icon-512.png"/>
@@ -55,7 +58,8 @@
   <link rel="preconnect" href="https://lcrrdwlnxmneqfzqediu.supabase.co"/>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="var(--gb-rose)"/>
+  <meta name="theme-color" content="#0E0E10"/>
+  <link rel="preload" as="image" href="/img/hero.jpg"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"/>
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"/>
   <meta name="mobile-web-app-capable" content="yes"/>
@@ -64,490 +68,137 @@
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
   <style>
-    /* Les couleurs viennent de la charte « Sombre Luxe » (css/main.css).
-       Aucun jeton n'est redéfini ici : c'est ce qui garantit que l'accueil
-       et le reste du site partagent exactement la même palette. */
-    body { background: var(--gb-ground); overflow-x: hidden; color: var(--gb-ink); }
+    /* Accueil « Noir éditorial » — toutes les couleurs et polices viennent de css/main.css */
+    body { background: var(--gb-ground); overflow-x: hidden; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+    .nav { background: rgba(14,14,16,.82); }
+    .nav-links .nav-plain { color: var(--gb-ink-2); }
 
-    /* ── NAV (dark glass) ── */
-    .nav { background: rgba(8,4,8,.7); backdrop-filter: blur(24px); border-bottom: 1px solid rgba(232,84,122,.06); }
-    .nav-logo { color: #fff; }
-    .nav-links a { color: rgba(255,255,255,.55); }
-    .nav-links a:hover { background: rgba(232,84,122,.1); color: #fff; }
-    .nav-links .btn-nav { background: var(--gb-cta); box-shadow: 0 4px 18px rgba(212,175,55,.22); color: var(--gb-cta-ink); font-weight: 700; }
-    .nav-links .btn-nav:hover { box-shadow: 0 6px 26px rgba(212,175,55,.34); color: var(--gb-cta-ink); background: var(--gb-cta); }
-    /* Deconnexion : action rare, donc discrete (charte, niveau 4) */
-    .nav-links .nav-quiet { color: var(--gb-ink-3); font-size: .84rem; }
-    .nav-links .nav-quiet:hover { color: var(--gb-ink-2); background: transparent; }
+    /* ── Hero : la photo plein cadre, le titre en capitales serrées ── */
+    .hero { position: relative; min-height: 600px; display: flex; align-items: flex-end; overflow: hidden; }
+    .hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% center; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14,14,16,.94) 0%, rgba(14,14,16,.62) 48%, rgba(14,14,16,.05) 100%); }
+    .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--gb-ground) 0%, rgba(14,14,16,0) 32%); }
+    .hero .wrap { position: relative; z-index: 1; width: 100%; padding-bottom: 64px; }
+    .hero h1 { font-size: clamp(4rem, 11vw, 9.3rem); line-height: .86; margin: 18px 0 20px; }
+    .hero-sub { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.5rem; line-height: 1.3; color: #D9D4DB; max-width: 34ch; margin: 0; }
 
-    /* ═══════════════════════════════════
-       SECTION 1 — HERO (3D immersif)
-       Only section with WebGL canvas
-       ═══════════════════════════════════ */
-    .hero-wrap {
-      position: relative; min-height: 62vh; overflow: hidden;
-      display: flex; align-items: center; justify-content: center;
-      padding: 96px 20px 48px;
-      background-image: linear-gradient(100deg, rgba(8,4,8,.96) 0%, rgba(8,4,8,.78) 42%, rgba(8,4,8,.30) 100%), url('/img/hero.jpg');
-      background-size: cover; background-position: right center; background-repeat: no-repeat;
-    }
-    @media (max-width: 760px) {
-      .hero-wrap {
-        background-image: linear-gradient(rgba(8,4,8,.84), rgba(8,4,8,.72)), url('/img/hero.jpg');
-        background-position: center;
-      }
-    }
-    /* Ancien fond animé (particules) remplacé par la photo éditoriale */
-    #hero-canvas { display: none; }
-    .hero-content {
-      position: relative; z-index: 2; text-align: center; max-width: 800px;
-    }
-    /* Icones : trait de 1,5 px, jamais de remplissage (charte) */
-    .gb-ico { width: 1em; height: 1em; display: block; flex: 0 0 auto; }
-    .hero-badge .gb-ico { width: .95em; height: .95em; display: inline-block; vertical-align: -.12em; }
-    .step-icon .gb-ico { width: 24px; height: 24px; color: var(--gb-champagne); }
-    .reas-item .ri .gb-ico, .cta-card .icon .gb-ico { width: 26px; height: 26px; }
-    .hsb-near .gb-ico { width: 20px; height: 20px; margin: 0 auto; }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(212,175,55,.08); border: 1px solid rgba(212,175,55,.2);
-      color: var(--gb-gold); font-size: .7rem; font-weight: 700;
-      letter-spacing: .12em; text-transform: uppercase;
-      padding: 8px 20px; border-radius: 28px; margin-bottom: 28px;
-    }
-    .hero-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(3rem, 7.5vw, 5.2rem); font-weight: 600;
-      line-height: 1.02; letter-spacing: -.005em; margin-bottom: 22px;
-    }
-    .hero-title .glow {
-      background: linear-gradient(120deg, var(--gb-powder) 0%, var(--gb-gold) 45%, var(--gb-rose-deep) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .hero-title em { font-style: italic; font-weight: 600; padding-right: .04em; }
-    /* Halo lumineux tamisé derrière le titre */
-    .hero-halo {
-      position: absolute; top: 44%; left: 50%; transform: translate(-50%,-50%);
-      width: min(720px, 92%); height: 380px; z-index: 0; pointer-events: none;
-      background: radial-gradient(ellipse at center, rgba(212,175,55,.22), rgba(196,58,96,.14) 46%, transparent 70%);
-      filter: blur(52px);
-    }
-    .hero-sub {
-      font-size: 1rem; color: var(--gb-ink-2); max-width: 520px;
-      margin: 0 auto 28px; line-height: 1.6;
-    }
-    .hero-ctas {
-      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .hero-fade {
-      position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
-      background: linear-gradient(to top, var(--gb-ground), transparent);
-      z-index: 1;
-    }
+    /* ── Recherche : un bandeau sous la photo ── */
+    .search { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto 220px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-md); overflow: hidden; }
+    .search .f { padding: 16px 24px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--gb-line); min-width: 0; }
+    .search label { font-size: .68rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--gb-ink-3); }
+    .search input, .search select { width: 100%; background: transparent; border: none; color: var(--gb-ink); font: 400 1.05rem var(--gb-font-body); padding: 2px 0; outline: none; }
+    .search input::placeholder { color: var(--gb-ink-3); }
+    .search select option { background: var(--gb-surface); color: var(--gb-ink); }
+    .search .near { border: none; border-right: 1px solid var(--gb-line); background: transparent; color: var(--gb-champagne); width: 64px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .search .near .gb-ico { width: 22px; height: 22px; }
+    .search .near:hover { background: var(--gb-surface-2); }
+    .search .near-lbl { display: none; }
+    .search .go { border: none; background: var(--gb-gold); color: var(--gb-cta-ink); font: 800 1.35rem var(--gb-font-body); font-stretch: 75%; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
+    .search .go:hover { background: var(--gb-champagne); }
+    .pledges { display: flex; flex-wrap: wrap; gap: 10px 32px; margin: 18px 0 0; padding: 0; list-style: none; font-size: .82rem; color: var(--gb-ink-2); }
+    .pledges li { display: flex; align-items: center; gap: 8px; }
+    .pledges .gb-ico { color: var(--gb-champagne); width: 17px; height: 17px; }
+    .pro-link { font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-champagne); text-decoration: none; }
 
-    /* ── Buttons ── */
-    .btn-glow {
-      background: var(--gb-cta); color: var(--gb-cta-ink);
-      padding: 16px 36px; border-radius: 12px; font-size: .95rem; font-weight: 800; letter-spacing: .01em;
-      border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-      box-shadow: 0 6px 22px rgba(212,175,55,.2); transition: all .3s; font-family: 'Plus Jakarta Sans', inherit;
-    }
-    .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212,175,55,.34); }
-    .btn-outline {
-      background: transparent; color: rgba(255,255,255,.75); padding: 16px 36px;
-      border-radius: 12px; font-size: .95rem; font-weight: 600;
-      border: 1.5px solid rgba(255,255,255,.12); cursor: pointer;
-      text-decoration: none; transition: all .3s; font-family: inherit;
-    }
-    .btn-outline:hover { border-color: rgba(212,175,55,.45); color: var(--gb-ink); background: transparent; }
-    /* Niveau 2 : contour rose — l'alternative, jamais un second aplat dore */
-    .btn-line {
-      background: transparent; color: var(--gb-rose); border: 1.5px solid var(--gb-rose);
-      padding: 16px 38px; border-radius: 12px; font-size: .95rem; font-weight: 700;
-      cursor: pointer; text-decoration: none; display: inline-flex;
-      transition: all .3s; font-family: inherit;
-    }
-    .btn-line:hover { background: var(--gb-rose-tint); }
-    .btn-gold {
-      background: var(--gb-cta); color: var(--gb-cta-ink);
-      padding: 16px 40px; border-radius: 12px; font-size: .95rem; font-weight: 800;
-      border: none; cursor: pointer; text-decoration: none; display: inline-flex;
-      box-shadow: 0 6px 22px rgba(212,175,55,.2); transition: all .3s; font-family: inherit;
-    }
-    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212,175,55,.34); }
+    section.block { padding: 72px 0 0; }
 
-    /* ── Scroll indicator ── */
-    .scroll-hint {
-      position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
-      z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 4px;
-      color: var(--gb-ink-2); font-size: .6rem; letter-spacing: .15em; text-transform: uppercase;
-      animation: bobDown 2s ease-in-out infinite; pointer-events: none;
-    }
-    .scroll-hint .line { width: 1px; height: 22px; background: linear-gradient(to bottom, rgba(232,84,122,.5), transparent); }
-    @media (max-height: 700px) { .scroll-hint { display: none; } }
-    @keyframes bobDown { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(8px); } }
+    /* ── Index des occasions ── */
+    .index a { display: grid; grid-template-columns: 56px minmax(0, 1fr) 220px; align-items: center; gap: 24px; padding: 8px 0; border-bottom: 1px solid var(--gb-line); text-decoration: none; color: var(--gb-ink); }
+    .index .n { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.4rem; color: var(--gb-gold); }
+    .index .w { font-size: clamp(2.6rem, 6vw, 4rem); font-weight: 800; font-stretch: var(--gb-condensed); line-height: 1; text-transform: uppercase; transition: color .2s, padding-left .2s; }
+    .index img { width: 220px; height: 64px; object-fit: cover; border-radius: 4px; opacity: .85; transition: opacity .2s; }
+    .index a:hover .w { color: var(--gb-champagne); padding-left: 8px; }
+    .index a:hover img { opacity: 1; }
 
-    /* ═══════════════════════════════════
-       SEARCH SECTION (below hero)
-       ═══════════════════════════════════ */
-    .search-section {
-      background: var(--gb-ground); padding: 48px 20px;
-    }
-    .hero-search {
-      max-width: 700px; margin: 0 auto;
-      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-      border-radius: 20px; padding: 24px 24px 20px;
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 12px 48px rgba(0,0,0,.4);
-    }
-    .search-row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .search-row .f { flex: 1; min-width: 150px; }
-    .search-row .f label { display: block; font-size: .68rem; font-weight: 700; color: var(--gb-ink-2); margin-bottom: 5px; letter-spacing: .1em; text-transform: uppercase; }
-    .search-row .f input, .search-row .f select {
-      width: 100%; padding: 13px 14px; border-radius: 10px;
-      border: 1.5px solid rgba(255,255,255,.08); background: rgba(255,255,255,.05);
-      color: #fff; font-size: .88rem; font-family: inherit; transition: all .25s;
-    }
-    .search-row .f input::placeholder { color: rgba(255,255,255,.2); }
-    .search-row .f select option { background: var(--gb-cta-ink); }
-    .search-row .f input:focus, .search-row .f select:focus {
-      outline: none; border-color: var(--rose); box-shadow: 0 0 0 3px rgba(232,84,122,.12);
-    }
-    .btn-search {
-      width: 100%; margin-top: 16px; padding: 14px;
-      background: linear-gradient(135deg, var(--rose), var(--gb-rose-deep));
-      color: #fff; border: none; border-radius: 12px;
-      font-size: .9rem; font-weight: 700; cursor: pointer;
-      box-shadow: 0 0 24px rgba(232,84,122,.2); transition: all .3s; font-family: inherit;
-    }
-    .btn-search:hover { box-shadow: 0 0 40px rgba(232,84,122,.4); transform: translateY(-1px); }
+    /* ── Maquilleuses : même carte que la page de recherche ── */
+    .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+    .skel-card .sk-cover { height: 220px; border-radius: var(--gb-r-md); }
+    .skel-card .sk-line { height: 14px; margin-top: 12px; }
 
-    /* ═══ Barre de recherche unifiée dans le hero (style Doctolib) ═══ */
-    .hero-search-bar {
-      margin: 32px auto 0; max-width: 720px;
-      display: flex; align-items: stretch; gap: 8px;
-      background: rgba(24,24,27,.6); backdrop-filter: blur(18px);
-      border: 1px solid var(--bord-strong); border-radius: 16px;
-      padding: 8px; text-align: left;
-      box-shadow: 0 22px 60px rgba(0,0,0,.55);
-    }
-    .hsb-field { flex: 1; min-width: 0; padding: 6px 14px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid rgba(255,255,255,.07); }
-    .hsb-field label { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gb-champagne); margin-bottom: 3px; }
-    .hsb-field input, .hsb-field select { width: 100%; background: transparent; border: none; color: var(--gb-ink); font-size: .92rem; font-family: inherit; outline: none; padding: 2px 0; cursor: pointer; }
-    .hsb-field input[type=date] { color-scheme: dark; }
-    .hsb-field input::placeholder { color: rgba(255,255,255,.32); }
-    .hsb-field select option { background: var(--gb-surface); color: var(--gb-ink); }
-    .hsb-near { flex: 0 0 auto; width: 46px; border-radius: 12px; border: 1px solid var(--bord-strong); background: rgba(255,255,255,.03); color: var(--gb-champagne); font-size: 1.05rem; cursor: pointer; transition: background .2s, border-color .2s; }
-    .hsb-near:hover { background: rgba(212,175,55,.12); border-color: rgba(212,175,55,.4); }
-    .hsb-go { flex: 0 0 auto; padding: 0 26px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: .9rem; color: var(--gb-cta-ink); background: var(--gb-cta); box-shadow: 0 4px 20px rgba(212,175,55,.22); transition: box-shadow .2s, transform .2s; font-family: inherit; }
-    .hsb-go:hover { box-shadow: 0 0 42px rgba(212,175,55,.42); transform: translateY(-1px); }
-    .hero-secondary { margin-top: 18px; font-size: .82rem; }
-    .hero-secondary a { color: rgba(255,255,255,.6); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.22); padding-bottom: 1px; transition: color .2s, border-color .2s; }
-    .hero-secondary a:hover { color: var(--gb-champagne); border-color: var(--gb-champagne); }
-    @media (max-width: 680px) {
-      .hero-search-bar { flex-direction: column; gap: 6px; padding: 10px; }
-      .hsb-field { border-right: none; border-bottom: 1px solid rgba(255,255,255,.07); padding: 9px 12px; }
-      .hsb-go { padding: 13px; }
-      .hsb-near { width: 100%; height: 44px; }
-    }
+    /* ── Comment ça marche : quatre temps numérotés ── */
+    .steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; }
+    .steps .n { font-family: var(--gb-font-serif); font-style: italic; font-size: 2.6rem; color: var(--gb-gold); line-height: 1; }
+    .steps h3 { font-size: 1.5rem; font-stretch: var(--gb-condensed); text-transform: uppercase; margin: 10px 0 6px; }
+    .steps p { color: var(--gb-ink-2); font-size: .92rem; line-height: 1.55; margin: 0; }
 
-    /* ═══════════════════════════════════
-       SKELETON LOADERS
-       ═══════════════════════════════════ */
-    @keyframes shimmer {
-      0% { background-position: -400px 0; }
-      100% { background-position: 400px 0; }
-    }
-    .skeleton {
-      background: linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.05) 75%);
-      background-size: 800px 100%;
-      animation: shimmer 1.4s infinite linear;
-      border-radius: 8px;
-    }
-    .skel-num { display: inline-block; width: 64px; height: 2rem; }
-    .skel-card { border-radius: 16px; overflow: hidden; background: var(--gb-surface); border: 1px solid var(--gb-line); }
-    .skel-card .sk-cover { height: 190px; }
-    .skel-card .sk-body { padding: 18px; }
-    .skel-card .sk-line { height: 14px; margin-bottom: 10px; }
-    @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+    /* ── Bandeau pro ── */
+    .pro { display: grid; grid-template-columns: minmax(0, 1fr) 460px; border: 1px solid var(--gb-line); border-radius: var(--radius); overflow: hidden; background: var(--gb-surface); }
+    .pro-text { padding: 48px; display: flex; flex-direction: column; gap: 16px; justify-content: center; }
+    .pro-text h2 { font-size: clamp(2.6rem, 5vw, 3.6rem); margin: 0; }
+    .pro-text p { color: var(--gb-ink-2); margin: 0; max-width: 46ch; line-height: 1.6; }
+    .pro-perks { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: .88rem; color: var(--gb-ink-2); }
+    .pro-perks li::before { content: '— '; color: var(--gb-gold); }
+    .pro img { width: 100%; height: 100%; object-fit: cover; min-height: 320px; }
 
-    /* ═══════════════════════════════════
-       TRUST SIGNALS
-       Social proof — critical for hesitant clients (mariée, first-timers)
-       ═══════════════════════════════════ */
-    .trust-strip {
-      background: var(--gb-ground); padding: 56px 20px;
-    }
-    .trust-row {
-      max-width: 900px; margin: 0 auto;
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center;
-    }
-    .trust-item .num {
-      font-size: 2rem; font-weight: 900; display: block;
-      background: linear-gradient(135deg, var(--rose), var(--or));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .trust-item .lbl { font-size: .7rem; color: var(--gb-ink-2); letter-spacing: .1em; text-transform: uppercase; margin-top: 4px; }
+    /* ── Espace personnel (connectée) ── */
+    .home-me { padding-top: 40px; }
+    .me-box { border: 1px solid var(--gb-line); border-radius: var(--radius); background: var(--gb-surface); padding: 26px 28px; }
+    .me-box h2 { font-size: 2.6rem; margin: 0 0 4px; }
+    .me-box .sub { color: var(--gb-ink-2); }
+    .blk-title { font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gb-champagne); font-weight: 700; margin: 20px 0 10px; }
+    .rdv-list { display: grid; gap: 10px; }
+    .rdv-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: var(--gb-ground); border: 1px solid var(--gb-line); border-radius: var(--gb-r-md); padding: 12px 14px; }
+    .rdv-item .r-main { min-width: 0; }
+    .rdv-item .r-svc { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rdv-item .r-meta { color: var(--gb-ink-2); font-size: .82rem; margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+    .rdv-badge { font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--gb-r-sm); white-space: nowrap; }
+    .me-artists { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+    .me-artist { display: flex; align-items: center; gap: 10px; background: var(--gb-ground); border: 1px solid var(--gb-line); border-radius: var(--gb-r-md); padding: 10px 12px; text-decoration: none; color: var(--gb-ink); }
+    .me-artist:hover { border-color: var(--gb-champagne); }
+    .me-artist .av { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: var(--gb-surface-2); display: flex; align-items: center; justify-content: center; color: var(--gb-champagne); font-weight: 700; flex: 0 0 auto; }
+    .me-artist .nm { font-weight: 600; font-size: .88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .me-artist .ct { color: var(--gb-ink-2); font-size: .76rem; display: flex; align-items: center; gap: 4px; }
+    .me-actions { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
 
-    /* ═══════════════════════════════════
-       HOW IT WORKS
-       Reduces anxiety — shows the process is simple
-       ═══════════════════════════════════ */
-    .how-section {
-      background: var(--gb-ground); padding: 80px 20px;
-    }
-    .section-head { text-align: center; margin-bottom: 56px; }
-    .section-head h2 { font-size: 2rem; font-weight: 900; letter-spacing: -.03em; margin-bottom: 10px; }
-    .section-head p { color: var(--gb-ink-2); font-size: 1rem; }
+    /* ── Pied de page ── */
+    .footer { margin-top: 96px; border-top: 1px solid var(--gb-line); padding: 36px 0 28px; color: var(--gb-ink-2); }
+    .footer .row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 18px; }
+    .footer .links { display: flex; gap: 22px; flex-wrap: wrap; }
+    .footer .links a { color: var(--gb-ink-2); text-decoration: none; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; }
+    .footer .links a:hover { color: var(--gb-champagne); }
+    .footer .copy { margin-top: 22px; font-family: var(--gb-font-serif); font-style: italic; font-size: 1rem; }
 
-    .steps-grid {
-      max-width: 1000px; margin: 0 auto;
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
-      position: relative;
+    @media (max-width: 900px) {
+      .search { grid-template-columns: 1fr 1fr; }
+      .search .f:nth-child(2) { border-right: none; }
+      .search .f, .search .near { border-bottom: 1px solid var(--gb-line); }
+      .search .near { width: auto; height: 52px; border-right: 1px solid var(--gb-line); }
+      .search .go { height: 58px; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .grid3 { grid-template-columns: 1fr 1fr; }
+      .pro { grid-template-columns: 1fr; }
+      .pro img { order: -1; min-height: 220px; max-height: 260px; }
     }
-    .step-card {
-      text-align: center; padding: 32px 16px 28px; border-radius: 20px;
-      background: var(--gb-surface); border: 1px solid var(--gb-line);
-      transition: all .4s; position: relative;
+    @media (max-width: 600px) {
+      .wrap { padding: 0 16px; }
+      .hero { min-height: 600px; }
+      .hero > img { object-position: 60% 15%; height: 72%; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+      .hero::before { background: linear-gradient(rgba(14,14,16,0) 20%, rgba(14,14,16,.85) 60%, var(--gb-ground) 72%); }
+      .hero .eyebrow .far { display: none; }
+      .rule-head .aside { display: none; }
+      .search .near-lbl { display: inline; }
+      .hero-sub { font-size: 1.25rem; }
+      .search { grid-template-columns: 1fr; }
+      .search .f { border-right: none; }
+      .search .near { border-right: none; justify-content: flex-start; padding: 0 24px; gap: 10px; width: 100%; font: 600 .78rem var(--gb-font-body); letter-spacing: .12em; text-transform: uppercase; }
+      .index a { grid-template-columns: 36px minmax(0, 1fr) 84px; gap: 12px; }
+      .index img { width: 84px; height: 48px; }
+      .grid3, .steps { grid-template-columns: 1fr; }
+      .pro-text { padding: 28px 22px; }
+      section.block { padding-top: 56px; }
     }
-    .step-card:hover { border-color: rgba(232,84,122,.2); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(232,84,122,.08); }
-    .step-icon {
-      width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 16px;
-      background: linear-gradient(135deg, rgba(232,84,122,.12), rgba(212,175,55,.08));
-      border: 1px solid rgba(232,84,122,.15);
-      display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
-      box-shadow: 0 0 20px rgba(232,84,122,.08);
-    }
-    .step-num { font-size: .6rem; font-weight: 800; color: var(--rose); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
-    .step-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 8px; }
-    .step-card p { font-size: .82rem; color: var(--gb-ink-2); line-height: 1.6; }
-
-    /* ═══════════════════════════════════
-       FEATURED ARTISTS
-       Shows real people — builds trust, inspires
-       ═══════════════════════════════════ */
-    .featured-section {
-      background: var(--gb-ground); padding: 80px 20px;
-    }
-    .artists-grid {
-      max-width: 1100px; margin: 0 auto;
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;
-    }
-    .a-card {
-      background: var(--gb-surface); border: 1px solid var(--gb-line);
-      border-radius: 16px; overflow: hidden; text-decoration: none; color: #fff;
-      display: block; transition: all .4s;
-    }
-    .a-card:hover { border-color: rgba(232,84,122,.25); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(232,84,122,.1); }
-    .a-card .cover { width: 100%; height: 190px; object-fit: cover; background: linear-gradient(135deg, rgba(232,84,122,.06), rgba(212,175,55,.04)); }
-    .a-card .body { padding: 18px; }
-    .a-card .hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .a-card .av {
-      width: 44px; height: 44px; border-radius: 50%; margin-top: -30px;
-      border: 3px solid rgba(14,8,14,.9); flex-shrink: 0;
-      background: linear-gradient(135deg, var(--rose-cl), var(--gb-rose-tint));
-      display: flex; align-items: center; justify-content: center;
-      color: var(--rose); font-weight: 800; font-size: .95rem;
-    }
-    .a-card .nm { font-size: .92rem; font-weight: 700; }
-    .a-card .ct { font-size: .78rem; color: var(--gb-ink-2); }
-    .a-card .tg { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
-    .a-card .tg span { font-size: .68rem; font-weight: 600; padding: 3px 9px; border-radius: 16px; background: rgba(232,84,122,.08); color: var(--rose); border: 1px solid rgba(232,84,122,.12); }
-    .a-card .mt { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--gb-line); }
-    .a-card .stars { color: var(--or); font-size: .82rem; }
-    .a-card .pr { font-weight: 700; color: var(--rose); font-size: .88rem; }
-
-    /* ═══════════════════════════════════
-       DUAL CTA — Client + Artiste
-       Two audiences, two paths — no confusion
-       ═══════════════════════════════════ */
-    .dual-cta {
-      background: var(--gb-ground); padding: 80px 20px;
-    }
-    .cta-grid {
-      max-width: 900px; margin: 0 auto;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
-    }
-    .cta-card {
-      padding: 48px 32px; border-radius: 24px; text-align: center;
-      border: 1px solid var(--gb-line); transition: all .4s;
-      position: relative; overflow: hidden;
-    }
-    .cta-card::before {
-      content: ''; position: absolute; inset: 0; opacity: 0;
-      transition: opacity .4s;
-    }
-    .cta-card:hover::before { opacity: 1; }
-    .cta-client {
-      background: linear-gradient(160deg, rgba(232,84,122,.06) 0%, rgba(232,84,122,.02) 100%);
-    }
-    .cta-client::before { background: radial-gradient(ellipse at 50% 100%, rgba(232,84,122,.08), transparent 70%); }
-    .cta-client:hover { border-color: rgba(232,84,122,.2); }
-    .cta-artist {
-      background: linear-gradient(160deg, rgba(212,175,55,.06) 0%, rgba(212,175,55,.02) 100%);
-    }
-    .cta-artist::before { background: radial-gradient(ellipse at 50% 100%, rgba(212,175,55,.08), transparent 70%); }
-    .cta-artist:hover { border-color: rgba(212,175,55,.2); }
-    .cta-card .icon { display: flex; width: 54px; height: 54px; margin: 0 auto 20px; align-items: center;
-      justify-content: center; border-radius: 16px; color: var(--gb-champagne);
-      background: linear-gradient(135deg, rgba(232,216,206,.12), rgba(212,175,55,.07));
-      border: 1px solid rgba(212,175,55,.18); }
-    .cta-card h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; position: relative; }
-    .cta-card p { font-size: .9rem; color: var(--gb-ink-2); line-height: 1.6; margin-bottom: 28px; max-width: 300px; margin-left: auto; margin-right: auto; position: relative; }
-    .cta-card .btn { position: relative; }
-
-    /* La carte entiere est un lien : curseur main sur toute la surface,
-       et le bouton reagit au survol de la carte, pas seulement de lui-meme. */
-    .cta-card { display: block; text-decoration: none; color: inherit; cursor: pointer; }
-    .cta-card .btn-glow, .cta-card .btn-line { position: relative; z-index: 2; }
-    .cta-card:hover .btn-glow { transform: translateY(-2px); box-shadow: 0 10px 34px rgba(212,175,55,.34); }
-    .cta-card:hover .btn-line { background: var(--gb-rose-tint); }
-    .cta-card:focus-visible { outline: 2px solid var(--gb-champagne); outline-offset: 3px; }
-
-    /* ═══════════════════════════════════
-       REASSURANCE (why GlamBook)
-       Addresses objections for both audiences
-       ═══════════════════════════════════ */
-    .reassurance {
-      background: var(--gb-ground); padding: 80px 20px;
-    }
-    .reas-grid {
-      max-width: 900px; margin: 0 auto;
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-    }
-    .reas-item {
-      padding: 28px 20px; border-radius: 16px;
-      background: var(--gb-surface); border: 1px solid var(--gb-line);
-      text-align: center; transition: all .3s;
-    }
-    .reas-item:hover { border-color: rgba(232,84,122,.15); }
-    .reas-item .ri { display: flex; width: 46px; height: 46px; margin: 0 auto 14px; align-items: center;
-      justify-content: center; border-radius: 12px; color: var(--gb-champagne);
-      background: linear-gradient(135deg, rgba(232,216,206,.12), rgba(212,175,55,.07));
-      border: 1px solid rgba(212,175,55,.18); }
-    .reas-item h4 { font-size: .9rem; font-weight: 700; margin-bottom: 8px; }
-    .reas-item p { font-size: .8rem; color: var(--gb-ink-2); line-height: 1.6; }
-
-    /* ═══════════════════════════════════
-       FOOTER
-       ═══════════════════════════════════ */
-    .footer-imm {
-      background: rgba(4,2,4,.95); border-top: 1px solid var(--gb-line);
-      padding: 44px 20px 28px; color: var(--gb-ink-2);
-    }
-    .footer-imm .inner { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
-    .footer-imm .brand { font-size: 1.15rem; font-weight: 900; }
-    .footer-imm .brand span:first-child { color: var(--rose); }
-    .footer-imm .brand span:last-child { color: var(--or); }
-    .footer-imm .links { display: flex; gap: 20px; flex-wrap: wrap; }
-    .footer-imm .links a { color: var(--gb-ink-2); text-decoration: none; font-size: .78rem; transition: color .3s; }
-    .footer-imm .links a:hover { color: var(--rose); }
-    .footer-imm .copy { width: 100%; text-align: center; font-size: .7rem; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--gb-line); }
-
-    /* ═══════════════════════════════════
-       RESPONSIVE
-       ═══════════════════════════════════ */
-    @media (max-width: 768px) {
-      .trust-row { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-      .steps-grid { grid-template-columns: 1fr 1fr; }
-      .cta-grid { grid-template-columns: 1fr; }
-      .reas-grid { grid-template-columns: 1fr; }
-      .hero-title { font-size: clamp(2rem, 8vw, 3rem); }
-    }
-    @media (max-width: 480px) {
-      .steps-grid { grid-template-columns: 1fr; }
-      .search-row { flex-direction: column; }
-      .hero-ctas { flex-direction: column; align-items: center; }
-      .artists-grid { grid-template-columns: 1fr; }
-      .trust-row { grid-template-columns: 1fr 1fr; }
-    }
-
-    /* ═══════════════════════════════════
-       GSAP ANIMATIONS (initial states)
-       ═══════════════════════════════════ */
-    /* Effet d'apparition au défilement désactivé : tout le contenu est visible d'emblée */
-    .anim-up { opacity: 1 !important; transform: none !important; }
-    .anim-scale { opacity: 1 !important; transform: none !important; }
-  
-
-    /* ═══ Fusionné depuis les blocs <style> qui vivaient dans le corps de page ═══ */
-
-  .home-me { max-width: 1120px; margin: 30px auto 4px; padding: 0 20px; }
-  .home-me-inner { background: linear-gradient(135deg, var(--gb-surface), var(--gb-surface-2)); border: 1px solid var(--gb-line); border-radius: 20px; padding: 26px 28px; box-shadow: 0 16px 48px rgba(0,0,0,.4); }
-  .home-me h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.85rem; font-weight: 600; color: var(--gb-ink); margin: 0 0 2px; }
-  .home-me .sub { color: var(--gb-ink-2); font-size: .9rem; }
-  .home-me .blk-title { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-champagne); font-weight: 700; margin: 20px 0 10px; }
-  .rdv-list { display: grid; gap: 10px; }
-  .rdv-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: var(--gb-ground); border: 1px solid var(--gb-line); border-radius: 12px; padding: 12px 14px; }
-  .rdv-item .r-main { min-width: 0; }
-  .rdv-item .r-svc { color: var(--gb-ink); font-weight: 600; font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .rdv-item .r-meta { color: var(--gb-ink-2); font-size: .82rem; margin-top: 2px; }
-  .rdv-badge { font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
-  .rdv-badge.b-pending { background: rgba(231,199,102,.14); color: var(--gb-champagne); }
-  .rdv-badge.b-quoted { background: rgba(232,84,122,.16); color: var(--gb-rose); }
-  .me-artists { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-  .me-artist { display: flex; align-items: center; gap: 10px; background: var(--gb-ground); border: 1px solid var(--gb-line); border-radius: 12px; padding: 10px 12px; text-decoration: none; transition: border-color .2s, box-shadow .2s; }
-  .me-artist:hover { border-color: rgba(212,175,55,.4); box-shadow: 0 0 18px rgba(212,175,55,.12); }
-  .me-artist .av { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, rgba(232,216,206,.2), rgba(212,175,55,.15)); display: flex; align-items: center; justify-content: center; color: var(--gb-champagne); font-weight: 700; flex: 0 0 auto; }
-  .me-artist .nm { color: var(--gb-ink); font-weight: 600; font-size: .88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .me-artist .ct { color: var(--gb-ink-2); font-size: .76rem; }
-  .home-me .me-actions { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
-
-
-  .cat-section { padding: 44px 20px 8px; }
-  .cat-head { max-width: 1120px; margin: 0 auto 22px; }
-  .cat-head h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2rem; font-weight: 600; }
-  .cat-head p { color: var(--gb-ink-2); margin-top: 4px; }
-  .cat-grid { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
-  .cat-tile { position: relative; display: block; height: 180px; border-radius: 16px; overflow: hidden; text-decoration: none; color: var(--gb-ink); border: 1px solid rgba(255,255,255,.06); background: var(--gb-surface); transition: border-color .25s, box-shadow .25s; }
-  .cat-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
-  .cat-tile .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; background: linear-gradient(135deg, rgba(232,216,206,.14), rgba(212,175,55,.10)); }
-  .cat-tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,4,8,.85) 0%, rgba(8,4,8,.12) 58%, transparent 100%); }
-  .cat-tile .label { position: absolute; left: 16px; bottom: 14px; z-index: 2; color: var(--gb-ink); font-weight: 700; font-size: 1.05rem; }
-  .cat-tile:hover img { transform: scale(1.06); }
-  .cat-tile:hover { border-color: rgba(212,175,55,.4); box-shadow: 0 12px 40px rgba(0,0,0,.5), 0 0 26px rgba(212,175,55,.16); }
-
-
-  .pro-band { max-width: 1120px; margin: 40px auto 8px; padding: 0 20px; }
-  .pro-band-inner {
-    display: grid; grid-template-columns: 1.05fr .95fr; align-items: stretch;
-    border-radius: 22px; overflow: hidden;
-    border: 1px solid var(--gb-line);
-    background: linear-gradient(135deg, var(--gb-surface) 0%, var(--gb-surface-2) 100%);
-    box-shadow: 0 20px 60px rgba(0,0,0,.45);
-  }
-  .pro-band-text { padding: 44px 40px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
-  .pro-band-text .eyebrow { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gb-champagne); font-weight: 700; }
-  .pro-band-text h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.3rem; line-height: 1.08; font-weight: 600; color: var(--gb-ink); margin: 0; }
-  .pro-band-text h2 em { font-style: italic; background: linear-gradient(100deg,var(--gb-powder),var(--gb-gold) 55%,var(--gb-rose-deep)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .pro-band-text p { color: var(--gb-ink-2); font-size: 1rem; line-height: 1.55; margin: 0; max-width: 46ch; }
-  .pro-band-perks { list-style: none; padding: 0; margin: 6px 0 4px; display: flex; flex-wrap: wrap; gap: 10px 20px; }
-  .pro-band-perks li { color: var(--gb-ink-2); font-size: .92rem; display: flex; align-items: center; gap: 8px; }
-  .pro-band-perks li::before { content: '✓'; color: var(--gb-champagne); font-weight: 800; }
-  .pro-band-cta { margin-top: 8px; }
-  .pro-band-media { position: relative; min-height: 320px; }
-  .pro-band-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .pro-band-media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--gb-surface-2) 0%, rgba(31,31,35,.35) 26%, transparent 60%); }
-  @media (max-width: 760px) {
-    .pro-band-inner { grid-template-columns: 1fr; }
-    .pro-band-media { min-height: 220px; order: -1; }
-    .pro-band-media::after { background: linear-gradient(0deg, var(--gb-surface-2) 0%, transparent 55%); }
-    .pro-band-text { padding: 30px 24px; }
-    .pro-band-text h2 { font-size: 1.9rem; }
-  }
-
   </style>
 </head>
 <body>
-<a href="#main" class="skip-link" style="position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;padding:8px 16px;background:var(--gb-rose);color:#fff;text-decoration:none;font-weight:600;border-radius:0 0 8px 0;" onfocus="this.style.cssText='position:fixed;left:0;top:0;z-index:9999;padding:8px 16px;background:var(--gb-rose);color:#fff;text-decoration:none;font-weight:600;border-radius:0 0 8px 0;'" onblur="this.style.cssText='position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;'">Aller au contenu</a>
+<a href="#main" class="skip-link">Aller au contenu</a>
 
-<!-- NAV -->
 <nav class="nav">
-  <div class="nav-inner">
+  <div class="nav-inner" style="max-width:1200px;">
     <a href="/" class="nav-logo">Glam<span>Book</span></a>
     <div class="nav-links">
-      <a href="/artists.html" class="hide-mobile">Explorer</a>
+      <a href="/artists.html" class="hide-mobile nav-plain">Maquilleuses</a>
+      <a href="/auth/register.html?role=artist" class="hide-mobile nav-plain">Pour les pros</a>
       <span id="nav-auth">
         <a href="/auth/login.html">Connexion</a>
         <a href="/auth/register.html" class="btn-nav btn">Rejoindre</a>
@@ -556,396 +207,140 @@
   </div>
 </nav>
 
-<!-- ═══ HERO — 3D immersif (seul encart avec WebGL) ═══ -->
-<section class="hero-wrap" id="hero">
-  <canvas id="hero-canvas"></canvas>
-  <div class="hero-content">
-    <div class="hero-halo" aria-hidden="true"></div>
-    <div class="hero-badge anim-up"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></svg> LA PLATEFORME N&deg;1 DES MAKEUP ARTISTS</div>
-    <h1 class="hero-title anim-up">
-      Trouvez votre<br/><span class="glow">maquilleuse <em>id&eacute;ale</em></span>
-    </h1>
-    <p class="hero-sub anim-up">
-      Parcourez les profils, consultez les r&eacute;alisations et r&eacute;servez directement en ligne. Simple, rapide, s&eacute;curis&eacute;.
-    </p>
-    <form class="hero-search-bar anim-up" onsubmit="doSearch(); return false;">
-      <div class="hsb-field">
-        <label>Prestation</label>
-        <select id="search-service">
-          <option value="">Toutes</option>
-          <option value="mariage">Mariage</option>
-          <option value="soiree">Soir&eacute;e</option>
-          <option value="quotidien">Quotidien</option>
-          <option value="editorial">Shooting</option>
-          <option value="scene">Sc&egrave;ne</option>
-        </select>
+<main id="main">
+<section class="hero">
+  <img src="/img/hero.jpg" alt="" fetchpriority="high"/>
+  <div class="wrap">
+    <span class="eyebrow">Maquilleuses professionnelles<span class="far"> · près de chez vous</span></span>
+    <h1>Votre visage.<br>Leur <em>métier</em>.</h1>
+    <p class="hero-sub">Des portfolios, pas des promesses. Choisissez sur pièces, demandez un devis.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <form class="search" onsubmit="doSearch(); return false;" role="search">
+    <div class="f">
+      <label for="search-service">Occasion</label>
+      <select id="search-service">
+        <option value="">Toutes</option>
+        <option value="mariage">Mariage</option>
+        <option value="soiree">Soirée</option>
+        <option value="quotidien">Quotidien</option>
+        <option value="editorial">Shooting</option>
+        <option value="scene">Scène</option>
+      </select>
+    </div>
+    <div class="f">
+      <label for="search-city">Où</label>
+      <input type="text" id="search-city" placeholder="Ville, code postal" autocomplete="address-level2"/>
+    </div>
+    <div class="f">
+      <label for="search-date">Quand</label>
+      <input type="date" id="search-date"/>
+    </div>
+    <button type="button" class="near" onclick="doSearchNear(this)" aria-label="Rechercher autour de moi" title="Autour de moi"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg><span class="near-lbl">Autour de moi</span></button>
+    <button type="submit" class="go hsb-go">Chercher →</button>
+  </form>
+  <ul class="pledges">
+    <li><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>Devis gratuit, sans engagement</li>
+    <li><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>Échange direct avec la maquilleuse</li>
+    <li><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/></svg>Aucuns frais de réservation</li>
+  </ul>
+
+  <!-- Espace personnel : révélé par le script si une session est active -->
+  <section class="home-me" id="home-me" hidden>
+    <div class="me-box">
+      <h2 id="me-hello">Bon retour</h2>
+      <div class="sub">Votre espace GlamBook en un coup d'œil.</div>
+      <div id="me-rdv-wrap" hidden>
+        <div class="blk-title">Vos rendez-vous à venir</div>
+        <div class="rdv-list" id="me-rdv"></div>
       </div>
-      <div class="hsb-field">
-        <label>O&ugrave; ?</label>
-        <input type="text" id="search-city" placeholder="Ville ou r&eacute;gion"/>
+      <div id="me-artists-wrap" hidden>
+        <div class="blk-title">Vos maquilleuses</div>
+        <div class="me-artists" id="me-artists"></div>
       </div>
-      <div class="hsb-field">
-        <label>Date</label>
-        <input type="date" id="search-date"/>
+      <div class="me-actions"></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="rule-head"><span class="lbl">Index des occasions</span><span class="aside">cinq façons d'être maquillée</span></div>
+    <nav class="index" aria-label="Occasions">
+      <a href="/artists.html?service=mariage"><span class="n">01</span><span class="w">Mariage</span><img src="/img/cat-mariage.jpg" alt="" loading="lazy"/></a>
+      <a href="/artists.html?service=soiree"><span class="n">02</span><span class="w">Soirée</span><img src="/img/cat-soiree.jpg" alt="" loading="lazy"/></a>
+      <a href="/artists.html?service=editorial"><span class="n">03</span><span class="w">Shooting</span><img src="/img/cat-shooting.jpg" alt="" loading="lazy"/></a>
+      <a href="/artists.html?service=quotidien"><span class="n">04</span><span class="w">Quotidien</span><img src="/img/cat-quotidien.jpg" alt="" loading="lazy"/></a>
+      <a href="/artists.html?service=scene"><span class="n">05</span><span class="w">Scène</span><img src="/img/cat-scene.jpg" alt="" loading="lazy"/></a>
+    </nav>
+  </section>
+
+  <section class="block">
+    <div class="rule-head"><span class="lbl">Les maquilleuses</span><a href="/artists.html">Tout voir →</a></div>
+    <div class="grid3" id="featured-grid" aria-live="polite">
+      <div class="skel-card"><div class="skeleton sk-cover"></div><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div>
+      <div class="skel-card"><div class="skeleton sk-cover"></div><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div>
+      <div class="skel-card"><div class="skeleton sk-cover"></div><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="rule-head"><span class="lbl">Comment ça marche</span><span class="aside">du premier message au jour J</span></div>
+    <div class="steps">
+      <div><span class="n">01</span><h3>Choisissez</h3><p>Parcourez les portfolios par ville et par occasion.</p></div>
+      <div><span class="n">02</span><h3>Décrivez</h3><p>L'événement, le lieu, le nombre de personnes, le style voulu.</p></div>
+      <div><span class="n">03</span><h3>Signez</h3><p>Elle vous répond par un devis, à lire et signer depuis votre téléphone.</p></div>
+      <div><span class="n">04</span><h3>Brillez</h3><p>Le jour venu, elle vient à vous avec ce qu'il faut.</p></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="pro">
+      <div class="pro-text">
+        <span class="eyebrow">Vous êtes maquilleuse</span>
+        <h2>Votre portfolio. Vos <em>clientes</em>.</h2>
+        <p>Un profil gratuit, des demandes qui arrivent déjà décrites, des devis signés en ligne.</p>
+        <ul class="pro-perks"><li>Profil et portfolio gratuits</li><li>Devis et signature en ligne</li><li>Messagerie avec vos clientes</li></ul>
+        <div><a href="/auth/register.html?role=artist" class="btn btn-secondary" style="border-color:var(--gb-ink-3);color:var(--gb-ink);">Créer mon profil</a></div>
       </div>
-      <button type="button" class="hsb-near" onclick="doSearchNear(this)" title="Rechercher autour de moi" aria-label="Rechercher autour de moi"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></button>
-      <button type="submit" class="hsb-go">Rechercher</button>
-    </form>
-    <div class="hero-secondary anim-up">
-      <a href="/auth/register.html?role=artist">Vous &ecirc;tes maquilleuse ? Cr&eacute;ez votre profil &rarr;</a>
-    </div>
-  </div>
-  <div class="scroll-hint" aria-hidden="true"><span>D&eacute;couvrir</span><span class="line"></span></div>
-  <div class="hero-fade" style="pointer-events:none;"></div>
-</section>
-
-<!-- Recherche déplacée dans le hero (barre unifiée .hero-search-bar) -->
-
-<!-- ═══ TRUST SIGNALS — social proof for anxious brides & first-timers ═══ -->
-<div class="trust-strip">
-  <div class="trust-row">
-    <div class="trust-item anim-up"><span class="num" id="stat-artists"><span class="skeleton skel-num"></span></span><span class="lbl">Artistes v&eacute;rifi&eacute;es</span></div>
-    <div class="trust-item anim-up"><span class="num" id="stat-bookings"><span class="skeleton skel-num"></span></span><span class="lbl">R&eacute;servations</span></div>
-    <div class="trust-item anim-up"><span class="num" id="stat-rating">4.9&#9733;</span><span class="lbl">Note moyenne</span></div>
-    <div class="trust-item anim-up"><span class="num">0&euro;</span><span class="lbl">Frais de r&eacute;servation</span></div>
-  </div>
-</div>
-
-<!-- ═══ HOME CONNECTÉE — bloc personnalisé (révélé par JS si session active) ═══ -->
-<section class="home-me" id="home-me" hidden>
-  <div class="home-me-inner">
-    <h2 id="me-hello">Bon retour</h2>
-    <div class="sub">Votre espace GlamBook en un coup d'&oelig;il.</div>
-    <div id="me-rdv-wrap" hidden>
-      <div class="blk-title">Vos rendez-vous &agrave; venir</div>
-      <div class="rdv-list" id="me-rdv"></div>
-    </div>
-    <div id="me-artists-wrap" hidden>
-      <div class="blk-title">Vos maquilleuses</div>
-      <div class="me-artists" id="me-artists"></div>
-    </div>
-    <div class="me-actions">
-      <a href="/mes-devis.html" class="btn-outline">Mes devis &amp; rendez-vous</a>
-      <a href="/messages.html" class="btn-outline">Mes messages</a>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ CATÉGORIES — exploration par prestation (style Doctolib) ═══ -->
-<section class="cat-section">
-  <div class="cat-head">
-    <h2 class="anim-up">Explorez par prestation</h2>
-    <p class="anim-up">Trouvez l'artiste id&eacute;ale pour chaque occasion</p>
-  </div>
-  <div class="cat-grid anim-up">
-    <a class="cat-tile" href="/artists.html?service=mariage"><img src="/img/cat-mariage.jpg" alt="Maquillage mariage" loading="lazy"/><span class="label">Mariage</span></a>
-    <a class="cat-tile" href="/artists.html?service=soiree"><img src="/img/cat-soiree.jpg" alt="Maquillage soirée" loading="lazy"/><span class="label">Soir&eacute;e</span></a>
-    <a class="cat-tile" href="/artists.html?service=quotidien"><img src="/img/cat-quotidien.jpg" alt="Maquillage quotidien, teint naturel lumineux" loading="lazy"/><span class="label">Quotidien</span></a>
-    <a class="cat-tile" href="/artists.html?service=editorial"><img src="/img/cat-shooting.jpg" alt="Maquillage shooting, eyeliner graphique doré" loading="lazy"/><span class="label">Shooting</span></a>
-    <a class="cat-tile" href="/artists.html?service=scene"><img src="/img/cat-scene.jpg" alt="Maquillage de scène, paillettes et éclat" loading="lazy"/><span class="label">Sc&egrave;ne</span></a>
-    <a class="cat-tile" href="/artists.html"><img src="/img/cat-toutes.jpg" alt="Toutes les prestations : pinceaux et produits professionnels" loading="lazy"/><span class="label">Toutes</span></a>
-  </div>
-</section>
-
-<!-- ═══ HOW IT WORKS — reduces friction, shows simplicity ═══ -->
-<section class="how-section">
-  <div class="section-head">
-    <h2 class="anim-up">Comment &ccedil;a marche ?</h2>
-    <p class="anim-up">R&eacute;server une maquilleuse pro n'a jamais &eacute;t&eacute; aussi simple</p>
-  </div>
-  <div class="steps-grid">
-    <div class="step-card anim-up">
-      <div class="step-icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg></div>
-      <div class="step-num">&Eacute;tape 1</div>
-      <h3>Explorez</h3>
-      <p>Parcourez les profils par ville, date et sp&eacute;cialit&eacute;.</p>
-    </div>
-    <div class="step-card anim-up">
-      <div class="step-icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h7M4 12h7M4 18h7"/><path d="M17 4v16"/><path d="m14 7 3-3 3 3"/><path d="m20 17-3 3-3-3"/></svg></div>
-      <div class="step-num">&Eacute;tape 2</div>
-      <h3>Comparez</h3>
-      <p>Portfolios, avis clients et tarifs en un coup d'&oelig;il.</p>
-    </div>
-    <div class="step-card anim-up">
-      <div class="step-icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg></div>
-      <div class="step-num">&Eacute;tape 3</div>
-      <h3>R&eacute;servez</h3>
-      <p>Choisissez votre cr&eacute;neau et confirmez en ligne.</p>
-    </div>
-    <div class="step-card anim-up">
-      <div class="step-icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 14 9l6.5 2-6.5 2-2 6.5-2-6.5L3.5 11 10 9Z"/></svg></div>
-      <div class="step-num">&Eacute;tape 4</div>
-      <h3>Brillez</h3>
-      <p>Votre artiste confirme. Il ne reste plus qu'&agrave; briller.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ FEATURED ARTISTS — real people = trust ═══ -->
-<section class="featured-section">
-  <div style="max-width:1100px;margin:0 auto;">
-    <div class="section-head">
-      <h2 class="anim-up">Artistes en vedette</h2>
-      <p class="anim-up">Les maquilleuses les plus appr&eacute;ci&eacute;es</p>
-    </div>
-    <div class="artists-grid" id="featured-grid" aria-live="polite">
-      <div class="skel-card"><div class="skeleton sk-cover"></div><div class="sk-body"><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div></div>
-      <div class="skel-card"><div class="skeleton sk-cover"></div><div class="sk-body"><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div></div>
-      <div class="skel-card"><div class="skeleton sk-cover"></div><div class="sk-body"><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div></div>
-    </div>
-    <div style="text-align:center;margin-top:36px;">
-      <a href="/artists.html" class="btn-outline">Voir toutes les artistes &#8594;</a>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ DUAL CTA — two audiences, two clear paths ═══ -->
-<section class="dual-cta">
-  <div class="section-head">
-    <h2 class="anim-up">Rejoignez GlamBook</h2>
-    <p class="anim-up">Que vous cherchiez une maquilleuse ou que vous en soyez une</p>
-  </div>
-  <div class="cta-grid">
-    <a href="/artists.html" class="cta-card cta-client anim-scale">
-      <span class="icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 2-.9 2-2 0-.6-.2-1-.6-1.4-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h1.6A4.5 4.5 0 0 0 21 9.8C21 6 17 3 12 3Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg></span>
-      <h3>Je cherche une maquilleuse</h3>
-      <p>Mariage, soir&eacute;e, shooting&hellip; Trouvez l'artiste parfaite pour votre occasion.</p>
-      <span class="btn-glow">Explorer les artistes</span>
-    </a>
-    <a href="/auth/register.html?role=artist" class="cta-card cta-artist anim-scale">
-      <span class="icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5 3 21l6.5-6.5Z"/><path d="M14.6 3.9a2 2 0 0 1 2.8 0l2.7 2.7a2 2 0 0 1 0 2.8l-6.9 6.9-5.5-5.5Z"/></svg></span>
-      <h3>Je suis makeup artist</h3>
-      <p>Cr&eacute;ez votre profil gratuitement, g&eacute;rez vos dispos et recevez des r&eacute;servations.</p>
-      <span class="btn-line">Cr&eacute;er mon profil</span>
-    </a>
-  </div>
-</section>
-
-<!-- ═══ REASSURANCE — addresses objections ═══ -->
-<section class="reassurance">
-  <div class="section-head">
-    <h2 class="anim-up">Pourquoi GlamBook ?</h2>
-  </div>
-  <div class="reas-grid">
-    <div class="reas-item anim-up">
-      <span class="ri"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-      <h4>R&eacute;servation s&eacute;curis&eacute;e</h4>
-      <p>Vos donn&eacute;es sont prot&eacute;g&eacute;es. Annulation gratuite jusqu'&agrave; 48h avant le rendez-vous.</p>
-    </div>
-    <div class="reas-item anim-up">
-      <span class="ri"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
-      <h4>Artistes v&eacute;rifi&eacute;es</h4>
-      <p>Chaque profil est valid&eacute;. Portfolios authentiques et avis clients r&eacute;els.</p>
-    </div>
-    <div class="reas-item anim-up">
-      <span class="ri"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg></span>
-      <h4>Support r&eacute;actif</h4>
-      <p>&Eacute;quipe disponible pour vous accompagner avant et apr&egrave;s votre r&eacute;servation.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ BANDEAU PRO — recrutement maquilleuses (style Doctolib "Vous êtes praticien ?") ═══ -->
-<section class="pro-band">
-  <div class="pro-band-inner anim-up">
-    <div class="pro-band-text">
-      <span class="eyebrow">Vous &ecirc;tes maquilleuse ?</span>
-      <h2>D&eacute;veloppez votre activit&eacute; et faites <em>briller</em> votre talent.</h2>
-      <p>Cr&eacute;ez votre profil en quelques minutes, mettez en avant votre portfolio et recevez des demandes de r&eacute;servation qualifi&eacute;es, sans commission &agrave; l'inscription.</p>
-      <ul class="pro-band-perks">
-        <li>Profil &amp; portfolio gratuits</li>
-        <li>Agenda et dispos en ligne</li>
-        <li>Devis &amp; paiements int&eacute;gr&eacute;s</li>
-        <li>0&euro; de frais d'inscription</li>
-      </ul>
-      <div class="pro-band-cta">
-        <a href="/auth/register.html?role=artist" class="btn-glow">Cr&eacute;er mon profil pro &#8594;</a>
-      </div>
-    </div>
-    <div class="pro-band-media">
       <img src="/img/bandeau-pro.jpg" alt="Maquilleuse professionnelle au travail" loading="lazy"/>
     </div>
-  </div>
-</section>
+  </section>
+</div>
+</main>
 
-<!-- FOOTER -->
-<footer class="footer-imm">
-  <div class="inner">
-    <div class="brand"><span>Glam</span><span>Book</span></div>
-    <div class="links">
-      <a href="/artists.html">Maquilleuses</a>
-      <a href="/auth/register.html?role=artist">Devenir artiste</a>
-      <a href="/legal/mentions-legales.html">Mentions l&eacute;gales</a>
-      <a href="/legal/cgu.html">CGU</a>
-      <a href="/legal/cgv.html">CGV</a>
-      <a href="/legal/confidentialite.html">Confidentialit&eacute;</a>
-      <a href="mailto:contact@glambook.fr">Contact</a>
+<footer class="footer">
+  <div class="wrap">
+    <div class="row">
+      <a href="/" class="nav-logo" style="font-size:1.6rem;">Glam<span>Book</span></a>
+      <nav class="links" aria-label="Liens utiles">
+        <a href="/artists.html">Maquilleuses</a>
+        <a href="/auth/register.html?role=artist">Pour les pros</a>
+        <a href="/legal/mentions-legales.html">Mentions légales</a>
+        <a href="/legal/cgu.html">CGU</a>
+        <a href="/legal/cgv.html">CGV</a>
+        <a href="/legal/confidentialite.html">Confidentialité</a>
+        <a href="mailto:contact@glambook.fr">Contact</a>
+      </nav>
     </div>
-    <div class="copy">&copy; 2026 GlamBook &mdash; La plateforme des makeup artists professionnels</div>
+    <div class="copy">© 2026 GlamBook — maquilleuses professionnelles</div>
   </div>
 </footer>
 
 <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
-<!-- ═══ SCRIPTS — WebGL et GSAP retirés (hero photo + contenu visible d'emblée) ═══ -->
-<!-- three.js retiré : le hero est désormais une photo (plus de WebGL) -->
-<!-- GSAP retiré : les animations d'apparition sont désactivées (contenu visible
-     immédiatement via .anim-up{opacity:1!important}). Le ticker rAF permanent de
-     GSAP alourdissait la page inutilement. -->
-
-<script>
-// Appareils modestes / reduced-motion : gradient CSS au lieu du WebGL
-function heroFallback() {
-  const canvas = document.getElementById('hero-canvas');
-  if (canvas) canvas.style.cssText =
-    'position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%, rgba(232,84,122,.14), transparent 55%), radial-gradient(ellipse at 70% 60%, rgba(212,175,55,.1), transparent 55%), var(--gb-ground);';
-}
-
-function initHero() {
-  // Le hero est désormais une photo (voir .hero-wrap background-image).
-  // Le canvas WebGL est masqué : on n'initialise plus THREE.js pour
-  // économiser CPU/GPU/batterie et libérer le thread principal.
-  return;
-  const lowEnd = (navigator.hardwareConcurrency || 8) <= 4
-    || matchMedia('(prefers-reduced-motion: reduce)').matches
-    || (navigator.deviceMemory && navigator.deviceMemory <= 4);
-  if (lowEnd || !window.THREE) { heroFallback(); return; }
-
-  const canvas = document.getElementById('hero-canvas');
-  const heroWrap = document.querySelector('.hero-wrap');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, heroWrap.offsetWidth / heroWrap.offsetHeight, 0.1, 100);
-  camera.position.set(0, 0, 5);
-
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-  renderer.setSize(heroWrap.offsetWidth, heroWrap.offsetHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor(0x080408, 1);
-
-  // Particles (120 suffisent visuellement, moitié du coût GPU)
-  const N = 120;
-  const pos = new Float32Array(N * 3);
-  const col = new Float32Array(N * 3);
-  const szs = new Float32Array(N);
-  const vel = [];
-  const rose = new THREE.Color(0xE8547A);
-  const gold = new THREE.Color(0xD4AF37);
-  const white = new THREE.Color(0xffffff);
-
-  for (let i = 0; i < N; i++) {
-    pos[i*3]   = (Math.random()-.5) * 16;
-    pos[i*3+1] = (Math.random()-.5) * 12;
-    pos[i*3+2] = (Math.random()-.5) * 10 - 2;
-    const c = Math.random() < .35 ? rose : Math.random() < .55 ? gold : white;
-    col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b;
-    szs[i] = Math.random() * 2.5 + .5;
-    vel.push({ x:(Math.random()-.5)*.002, y:(Math.random()-.5)*.002 });
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  geo.setAttribute('size', new THREE.BufferAttribute(szs, 1));
-
-  const mat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 } },
-    vertexShader: `
-      attribute float size;
-      varying vec3 vColor;
-      uniform float uTime;
-      void main() {
-        vColor = color;
-        vec3 p = position;
-        p.y += sin(uTime*.4 + position.x*.5) * .25;
-        p.x += cos(uTime*.3 + position.z*.3) * .15;
-        vec4 mv = modelViewMatrix * vec4(p,1.);
-        gl_PointSize = size * (180. / -mv.z);
-        gl_Position = projectionMatrix * mv;
-      }`,
-    fragmentShader: `
-      varying vec3 vColor;
-      void main() {
-        float d = length(gl_PointCoord - .5);
-        if(d>.5) discard;
-        float a = smoothstep(.5,.08,d) * .55;
-        gl_FragColor = vec4(vColor, a);
-      }`,
-    transparent: true, vertexColors: true, depthWrite: false,
-    blending: THREE.AdditiveBlending
-  });
-  scene.add(new THREE.Points(geo, mat));
-
-  // Glowing orbs
-  function orb(color, p, s) {
-    const g = new THREE.SphereGeometry(1,24,24);
-    const m = new THREE.ShaderMaterial({
-      uniforms: { uCol:{value:new THREE.Color(color)}, uT:{value:0} },
-      vertexShader: `varying vec3 vN; void main(){ vN=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
-      fragmentShader: `uniform vec3 uCol; uniform float uT; varying vec3 vN; void main(){ float i=pow(.6-dot(vN,vec3(0,0,1)),3.); float pulse=.8+.2*sin(uT*.7); gl_FragColor=vec4(uCol*i*pulse, i*.3); }`,
-      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
-    });
-    const mesh = new THREE.Mesh(g,m);
-    mesh.position.set(p.x,p.y,p.z); mesh.scale.setScalar(s);
-    return mesh;
-  }
-  const o1=orb(0xE8547A,{x:-3,y:1.5,z:-4},2);
-  const o2=orb(0xD4AF37,{x:3.5,y:-.5,z:-5},1.8);
-  scene.add(o1,o2);
-
-  let mouseX=0, mouseY=0, t=0, running=true;
-  document.addEventListener('mousemove', e => {
-    mouseX = (e.clientX/window.innerWidth - .5)*2;
-    mouseY = (e.clientY/window.innerHeight - .5)*2;
-  });
-
-  function animate() {
-    if (!running) return;
-    requestAnimationFrame(animate);
-    t += .016;
-    mat.uniforms.uTime.value = t;
-    o1.material.uniforms.uT.value = t;
-    o2.material.uniforms.uT.value = t;
-    o1.position.y = 1.5 + Math.sin(t*.35)*.4;
-    o2.position.x = 3.5 + Math.cos(t*.25)*.4;
-
-    const pa = geo.attributes.position.array;
-    for(let i=0;i<N;i++){
-      pa[i*3]+=vel[i].x; pa[i*3+1]+=vel[i].y;
-      if(Math.abs(pa[i*3])>8) vel[i].x*=-1;
-      if(Math.abs(pa[i*3+1])>6) vel[i].y*=-1;
-    }
-    geo.attributes.position.needsUpdate = true;
-
-    camera.position.x += (mouseX*.25 - camera.position.x)*.02;
-    camera.position.y += (-mouseY*.15 - camera.position.y)*.02;
-    camera.lookAt(0,0,-2);
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  // Stop rendering when hero is off-screen
-  const obs = new IntersectionObserver(([e]) => {
-    running = e.isIntersecting;
-    if (running) animate();
-  }, { threshold: 0 });
-  obs.observe(heroWrap);
-
-  window.addEventListener('resize', () => {
-    const w = heroWrap.offsetWidth, h = heroWrap.offsetHeight;
-    camera.aspect = w/h; camera.updateProjectionMatrix();
-    renderer.setSize(w,h);
-  });
-}
-
-// Animations d'apparition supprimées (GSAP retiré). Le contenu est visible
-// immédiatement — voir .anim-up / .anim-scale { opacity:1 !important } dans le <style>.
-document.addEventListener('DOMContentLoaded', () => { initHero(); });
-</script>
-
 <!-- ═══ SUPABASE DATA ═══ -->
 <script type="module">
 import { supabase, esc, safeUrl, getProfile, specialtyLabel } from '/js/supabase.js';
+import { ICON, localISODate } from '/js/utils.js';
 
-document.getElementById('search-date').min = new Date().toISOString().split('T')[0];
+// Lien « mot de passe oublié » : Supabase renvoie sur l'adresse du site avec un jeton dans l'URL.
+// On passe la main à la page dédiée, en conservant le jeton.
+if (/type=recovery/.test(location.hash) || /type=recovery/.test(location.search)) {
+  location.replace('/auth/reset.html' + location.search + location.hash);
+}
+
+document.getElementById('search-date').min = localISODate();
 
 // ── Home personnalisée : révélée uniquement si une session est active ──
 async function loadMe() {
@@ -981,8 +376,8 @@ async function loadMe() {
     : 'Votre espace GlamBook en un coup d’œil.';
   // Boutons d'action + libellé du bloc RDV selon le rôle
   document.querySelector('#home-me .me-actions').innerHTML = isArtist
-    ? '<a href="/dashboard/artist.html" class="btn-outline">Mon tableau de bord</a><a href="/messages.html" class="btn-outline">Mes messages</a>'
-    : '<a href="/mes-devis.html" class="btn-outline">Mes devis &amp; rendez-vous</a><a href="/messages.html" class="btn-outline">Mes messages</a>';
+    ? '<a href="/dashboard/artist.html" class="btn btn-ghost btn-sm">Mon tableau de bord</a><a href="/messages.html" class="btn btn-ghost btn-sm">Mes messages</a>'
+    : '<a href="/mes-devis.html" class="btn btn-ghost btn-sm">Mes devis et rendez-vous</a><a href="/messages.html" class="btn btn-ghost btn-sm">Mes messages</a>';
   const rdvTitle = document.querySelector('#me-rdv-wrap .blk-title');
   if (rdvTitle) rdvTitle.textContent = isArtist ? 'Vos prochaines demandes' : 'Vos rendez-vous à venir';
   document.getElementById('home-me').hidden = false;
@@ -999,15 +394,15 @@ async function loadMe() {
       .filter(r => !r.event_date || new Date(r.event_date).getTime() >= yesterday)
       .slice(0, 3);
     if (upcoming.length) {
-      const LBL = { pending: ['En attente', 'b-pending'], quoted: ['Devis reçu', 'b-quoted'] };
+      const LBL = { pending: ['En attente', 'is-info'], quoted: ['Devis reçu', 'is-warn'] };
       document.getElementById('me-rdv').innerHTML = upcoming.map(r => {
-        const [lbl, cls] = LBL[r.status] || ['En cours', 'b-pending'];
-        const svc = (r.services_snapshot || []).map(s => s.name).join(', ') || 'Prestation';
+        const [lbl, cls] = LBL[r.status] || ['En cours', 'is-info'];
+        const svc = (r.services_snapshot || []).map(s => s.name).join(', ') || 'Demande de devis';
         const when = r.event_date
           ? new Date(r.event_date).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })
           : 'Date à définir';
         return `<div class="rdv-item"><div class="r-main"><div class="r-svc">${esc(svc)}</div>`
-          + `<div class="r-meta">\u{1F4C5} ${esc(when)}</div></div>`
+          + `<div class="r-meta">${ICON.calendar} ${esc(when)}</div></div>`
           + `<span class="rdv-badge ${cls}">${lbl}</span></div>`;
       }).join('');
       document.getElementById('me-rdv-wrap').hidden = false;
@@ -1023,10 +418,10 @@ async function loadMe() {
           const name = esc(a.display_name || 'Maquilleuse');
           const href = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : `/artist.html?id=${encodeURIComponent(a.id)}`;
           const av = safeUrl(a.avatar_url);
-          const avh = av ? `<img class="av" src="${av}" alt=""/>` : `<span class="av">${name[0] || '✦'}</span>`;
+          const avh = av ? `<img class="av" src="${esc(av)}" alt=""/>` : `<span class="av">${name[0] || '·'}</span>`;
           return `<a class="me-artist" href="${href}">${avh}`
             + `<div style="min-width:0"><div class="nm">${name}</div>`
-            + `<div class="ct">\u{1F4CD} ${esc(a.city || 'France')}</div></div></a>`;
+            + `<div class="ct">${ICON.pin} ${esc(a.city || 'France')}</div></div></a>`;
         }).join('');
         document.getElementById('me-artists-wrap').hidden = false;
       }
@@ -1034,48 +429,43 @@ async function loadMe() {
   } catch (e) { console.error('home-me', e); }
 }
 
-async function loadStats() {
-  // Vue agrégée : bookings n'est plus lisible publiquement (RLS)
-  const { data } = await supabase.from('public_stats').select('*').maybeSingle();
-  const e1 = document.getElementById('stat-artists');
-  const e2 = document.getElementById('stat-bookings');
-  const e3 = document.getElementById('stat-rating');
-  if(e1) e1.textContent = (data?.artists_count||0)+'+';
-  if(e2) e2.textContent = (data?.bookings_count||0)+'+';
-  if(e3 && data?.avg_rating) e3.textContent = Number(data.avg_rating).toFixed(1)+'★';
-}
+// La bande de reassurance affiche des engagements, plus des compteurs :
+// annoncer « 0+ reservations » sur une plateforme qui demarre produisait
+// l'effet inverse de celui recherche. A reintroduire quand les chiffres parlent.
+async function loadStats() { /* volontairement vide */ }
 
 async function loadFeatured() {
   // Vue artists_public : jointure profils + photos faite en SQL (fini le N+1)
   const { data: artists } = await supabase
     .from('artists_public')
-    .select('id, slug, display_name, avatar_url, city, rating_avg, review_count, price_from, specialties, photos')
-    .order('rating_avg',{ascending:false}).limit(6);
+    .select('id, slug, display_name, city, review_count, price_from, specialties, photos, created_at')
+    .order('review_count',{ascending:false}).order('created_at',{ascending:false}).limit(3);
 
   const grid = document.getElementById('featured-grid');
   if(!artists||artists.length===0){
-    grid.innerHTML='<p style="color:rgba(255,255,255,.35);grid-column:1/-1;text-align:center;padding:60px 0;">Bientôt disponible — soyez la première à rejoindre GlamBook !</p>';
+    grid.innerHTML='<p style="color:var(--gb-ink-3);grid-column:1/-1;text-align:center;padding:60px 0;">Les premiers profils arrivent. Vous êtes maquilleuse ? <a href="/auth/register.html?role=artist" style="color:var(--gb-champagne);">Créez le vôtre</a>.</p>';
     return;
   }
-  grid.innerHTML = artists.map(a => {
+  const PH = `<div class="artist-card-cover cover-ph" role="img" aria-label="Pas encore de photo">${ICON.image}</div>`;
+  grid.innerHTML = artists.slice(0, 3).map(a => {
     const name = esc(a.display_name||'Maquilleuse');
-    const city = esc(a.city||'France');
     const coverUrl = safeUrl((a.photos||[])[0]?.url)||'';
-    const avatarUrl = safeUrl(a.avatar_url);
-    const stars = '★'.repeat(Math.round(a.rating_avg||5))+'☆'.repeat(5-Math.round(a.rating_avg||5));
+    const price = parseInt(a.price_from) || 0;
+    const specs = (a.specialties||[]).slice(0,2).map(s => esc(specialtyLabel(s)).toLowerCase()).join(', ');
     const href = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : `/artist.html?id=${encodeURIComponent(a.id)}`;
-    return `<a href="${href}" class="a-card anim-up" aria-label="Voir le profil de ${name}">
-      <img class="cover" src="${coverUrl}" alt="Réalisations de ${name}" loading="lazy"
-           onerror="this.style.cssText='height:190px;background:linear-gradient(135deg,rgba(232,84,122,.06),rgba(212,175,55,.04))'"/>
-      <div class="body"><div class="hdr">
-        <div class="av">${avatarUrl ? `<img src="${avatarUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>` : name[0]}</div>
-        <div><div class="nm">${name}</div><div class="ct">\u{1F4CD} ${city}</div></div>
-      </div>
-      <div class="tg">${(a.specialties||[]).slice(0,3).map(s=>'<span>'+esc(specialtyLabel(s))+'</span>').join('')}</div>
-      <div class="mt"><div><span class="stars">${stars}</span> <span style="font-size:.72rem;color:rgba(255,255,255,.4);">(${parseInt(a.review_count)||0})</span></div><span class="pr">À partir de ${parseInt(a.price_from)||'–'}€</span></div></div></a>`;
+    return `<a href="${href}" class="artist-card" aria-label="Voir le profil de ${name}">
+      ${coverUrl ? `<img class="artist-card-cover" src="${esc(coverUrl)}" alt="" loading="lazy"/>` : PH}
+      <div class="artist-card-body">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+          <span class="artist-name">${name}</span><span class="artist-price">${price ? 'dès ' + price + ' €' : 'Sur devis'}</span>
+        </div>
+        <div class="artist-city">${esc(a.city || 'France')}${specs ? ' — ' + specs : ''}</div>
+        ${(parseInt(a.review_count) || 0) ? '' : '<div style="margin-top:8px;"><span class="new-badge">Nouvelle sur GlamBook</span></div>'}
+      </div></a>`;
   }).join('');
 
-  document.querySelectorAll('.a-card.anim-up').forEach(el => { el.style.opacity='1'; el.style.transform='none'; });
+  // Une photo qui ne charge pas laisse la place à la surface neutre, pas à une image cassée
+  grid.querySelectorAll('img.artist-card-cover').forEach(img => img.addEventListener('error', () => { img.outerHTML = PH; }, { once: true }));
 }
 
 function buildSearchParams() {
@@ -1099,38 +489,27 @@ window.doSearch = function() {
 window.doSearchNear = function(btn) {
   const p = buildSearchParams();
   if (!navigator.geolocation) { window.location.href = '/artists.html?' + p.toString(); return; }
-  const original = btn ? btn.innerHTML : '';
-  if (btn) { btn.disabled = true; btn.innerHTML = '⏳'; }
+  if (btn) { btn.disabled = true; btn.style.opacity = '.5'; }
   navigator.geolocation.getCurrentPosition((pos) => {
     p.set('lat', pos.coords.latitude.toFixed(5));
     p.set('lng', pos.coords.longitude.toFixed(5));
     p.set('radius', '10');
     window.location.href = '/artists.html?' + p.toString();
   }, () => {
-    if (btn) { btn.disabled = false; btn.innerHTML = original; }
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     // Position refusée : bascule sur la recherche classique
     window.location.href = '/artists.html?' + p.toString();
   }, { enableHighAccuracy: false, timeout: 8000 });
 };
 
 loadStats();
-loadFeatured();
-loadMe();
+loadFeatured().catch((e) => {
+  console.error('featured', e);
+  document.getElementById('featured-grid').innerHTML = '<p style="color:var(--gb-ink-3);grid-column:1/-1;text-align:center;padding:60px 0;">Les profils ne peuvent pas être affichés pour le moment.</p>';
+});
+loadMe().catch((e) => console.error('home-me', e));
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 <script src="/js/pwa-install.js"></script>
-<script>
-  // Filet de sécurité : si une animation d'apparition (GSAP) ne s'exécute pas,
-  // on rend visibles les éléments restés masqués pour ne jamais cacher le contenu.
-  (function(){
-    function reveal(){
-      document.querySelectorAll('.anim-up, .anim-scale').forEach(function(el){
-        if (parseFloat(getComputedStyle(el).opacity) === 0) { el.style.opacity='1'; el.style.transform='none'; }
-      });
-    }
-    window.addEventListener('load', function(){ setTimeout(reveal, 1400); });
-    setTimeout(reveal, 3000);
-  })();
-</script>
 </body>
 </html>

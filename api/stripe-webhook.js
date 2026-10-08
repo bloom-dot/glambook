@@ -1,7 +1,5 @@
 const Stripe = require('stripe');
 
-// Le corps brut est requis pour vérifier la signature Stripe
-module.exports.config = { api: { bodyParser: false } };
 
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
@@ -12,11 +10,14 @@ function readRawBody(req) {
   });
 }
 
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return res.status(503).json({ error: 'Paiement en ligne non configuré' });
+  }
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const sig = req.headers['stripe-signature'];
 
@@ -83,3 +84,8 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Erreur de traitement' });
   }
 };
+
+// Le corps brut est requis pour vérifier la signature Stripe.
+// La config doit être posée APRÈS l'export du handler, sinon elle est perdue.
+module.exports = handler;
+module.exports.config = { api: { bodyParser: false } };

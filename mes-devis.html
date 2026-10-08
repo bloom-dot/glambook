@@ -6,118 +6,169 @@
   <title>Mon espace — GlamBook</title>
   <meta name="robots" content="noindex"/>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#E8547A"/>
+  <meta name="theme-color" content="#0E0E10"/>
   <link rel="stylesheet" href="/css/main.css"/>
-  <script defer src="/js/theme.js"></script>
   <style>
-    body { background: var(--gris-cl); }
-    .wrap { max-width: 760px; margin: 0 auto; padding: 22px 16px 90px; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
-    .topbar .logo { font-size:1.3rem; font-weight:900; color:var(--rose); text-decoration:none; letter-spacing:-.03em; }
-    .topbar .logo span { color:var(--or); }
-    .topbar a.nav { font-size:.85rem; color:var(--gris); text-decoration:none; margin-left:14px; }
-    .topbar a.nav:hover { color:var(--rose); }
-    h2 { font-size:1.05rem; font-weight:800; margin:22px 0 12px; }
-    .card { background:var(--blanc); border:1px solid var(--bord); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-    .card .nm { font-weight:700; font-size:.92rem; }
-    .card .meta { font-size:.8rem; color:var(--gris); margin-top:2px; }
-    .pill { font-size:.7rem; font-weight:700; padding:4px 11px; border-radius:20px; text-transform:uppercase; letter-spacing:.03em; }
-    .p-sent { background:#FFFBEB; color:#92400E; } .p-signed { background:#ECFDF5; color:#065F46; }
-    .p-pending { background:#EEF2FF; color:#3730A3; } .p-quoted { background:#FDF2F8; color:#9D174D; }
-    .empty { color:var(--gris); text-align:center; padding:26px; font-size:.86rem; }
-    .danger { margin-top:36px; border:1px solid #FECACA; background:#FEF2F2; border-radius:var(--radius); padding:16px 18px; }
-    .danger h3 { color:#991B1B; font-size:.9rem; margin-bottom:6px; }
-    .danger p { font-size:.8rem; color:#7F1D1D; margin-bottom:10px; }
-    .btn-danger { background:#DC2626; color:#fff; }
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    .toast.error { background:var(--rose-f); }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 28px 16px 90px; }
+    .hello { font-size: 1.9rem; margin-bottom: 2px; }
+    .hello-sub { color: var(--gb-ink-2); font-size: .9rem; margin-bottom: 8px; }
+    h2 { font-size: 1.25rem; margin: 30px 0 12px; }
+    .row { background: var(--gb-surface); border: 1px solid var(--gb-line); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .row .nm { font-weight: 700; font-size: .92rem; }
+    .row .meta { font-size: .8rem; color: var(--gb-ink-2); margin-top: 3px; display: flex; gap: 4px 14px; flex-wrap: wrap; }
+    .row .need { font-size: .82rem; color: var(--gb-ink-2); margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .row .right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .pill { font-size: .7rem; font-weight: 700; padding: 4px 11px; border-radius: 20px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+    .empty { color: var(--gb-ink-2); text-align: center; padding: 26px; font-size: .86rem; border: 1px dashed var(--gb-line-strong); border-radius: var(--radius); }
+    .empty .btn { margin-top: 12px; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <a href="/" class="logo">Glam<span>Book</span></a>
-      <div><a href="/messages.html" class="nav">💬 Messages</a><a href="/" class="nav">Accueil</a></div>
-    </div>
-
-    <h2>Mes devis</h2>
-    <div id="quotes"><div class="empty">Chargement…</div></div>
-
-    <h2>Mes demandes de réservation</h2>
-    <div id="requests"><div class="empty">Chargement…</div></div>
-
-    <div class="danger">
-      <h3>Supprimer mon compte</h3>
-      <p>Cette action est définitive : vos données personnelles, demandes et messages seront supprimés (droit à l'effacement — RGPD).</p>
-      <button class="btn btn-danger btn-sm" id="btnDelete">Supprimer définitivement mon compte</button>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+    <div class="nav-links">
+      <a href="/artists.html" class="hide-mobile">Maquilleuses</a>
+      <a href="/messages.html">Messages</a>
+      <a href="#" id="btn-logout" class="nav-quiet">Déconnexion</a>
     </div>
   </div>
+</nav>
 
-  <div class="toast" id="toast"></div>
+<main class="wrap">
+  <h1 class="hello" id="hello">Mon espace</h1>
+  <p class="hello-sub">Vos devis, vos demandes et vos rendez-vous au même endroit.</p>
 
-  <script type="module">
-    import { supabase, getCurrentUser } from '/js/supabase.js';
-    import { euros } from '/js/devis/model.js';
-    import { showToast, esc } from '/js/utils.js';
+  <h2>Devis à signer et devis signés</h2>
+  <div id="quotes"><div class="empty">Chargement…</div></div>
 
-    const $ = (id) => document.getElementById(id);
-    const STATUS = { sent:['À signer','p-sent'], signed:['Signé','p-signed'], pending:['En attente','p-pending'], quoted:['Devis reçu','p-quoted'], declined:['Refusé','p-pending'] };
-    const fmt = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) : '';
+  <h2>Demandes envoyées</h2>
+  <div id="requests"><div class="empty">Chargement…</div></div>
 
-    const user = await getCurrentUser();
-    if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname)}`; }
+  <div id="bookings-wrap" hidden>
+    <h2>Rendez-vous réservés</h2>
+    <div id="bookings"></div>
+  </div>
 
-    // Devis reçus (RPC sécurisé par email)
-    (async () => {
-      try {
-        const { data, error } = await supabase.rpc('my_quotes');
-        if (error) throw error;
-        const rows = data || [];
-        $('quotes').innerHTML = rows.length ? rows.map(q => {
-          const [lbl, cls] = STATUS[q.status] || ['—','p-sent'];
-          return `<div class="card">
-            <div><div class="nm">${esc(q.quote_number || 'Devis')} · ${esc(q.mua_name || '')}</div>
-              <div class="meta">${esc(euros(q.total_cents))} · reçu le ${esc(fmt(q.created_at))}</div></div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span class="pill ${cls}">${lbl}</span>
-              <a class="btn btn-primary btn-sm" href="/signature.html?t=${encodeURIComponent(q.share_token)}">${q.status==='signed'?'Voir':'Consulter & signer'}</a>
-            </div></div>`;
-        }).join('') : '<div class="empty">Aucun devis pour le moment.</div>';
-      } catch (e) { console.error(e); $('quotes').innerHTML = '<div class="empty">Impossible de charger vos devis.</div>'; }
-    })();
+  <div class="danger-zone">
+    <h3>Supprimer mon compte</h3>
+    <p>Cette action est définitive : vos données personnelles, demandes et messages seront supprimés (droit à l'effacement — RGPD).</p>
+    <button class="btn btn-danger btn-sm" id="btnDelete">Supprimer définitivement mon compte</button>
+  </div>
+</main>
 
-    // Demandes de réservation (RLS : les siennes)
-    (async () => {
-      try {
-        const { data, error } = await supabase.from('booking_requests')
-          .select('id,event_date,event_address,services_snapshot,status,created_at')
-          .order('created_at', { ascending: false });
-        if (error) throw error;
-        const rows = data || [];
-        $('requests').innerHTML = rows.length ? rows.map(r => {
-          const [lbl, cls] = STATUS[r.status] || ['—','p-pending'];
-          const svc = (r.services_snapshot || []).map(s => s.name).join(', ');
-          return `<div class="card">
-            <div><div class="nm">${esc(svc || 'Prestation')}</div>
-              <div class="meta">${r.event_date ? '📅 ' + esc(new Date(r.event_date).toLocaleString('fr-FR',{dateStyle:'long',timeStyle:'short'})) : ''} ${r.event_address ? '· ' + esc(r.event_address) : ''}</div></div>
-            <span class="pill ${cls}">${lbl}</span></div>`;
-        }).join('') : '<div class="empty">Aucune demande pour le moment.</div>';
-      } catch (e) { console.error(e); $('requests').innerHTML = '<div class="empty">Impossible de charger vos demandes.</div>'; }
-    })();
+<div class="toast" id="toast" role="status"></div>
 
-    // Suppression de compte
-    $('btnDelete').onclick = async () => {
-      if (!confirm('Supprimer définitivement votre compte et toutes vos données ? Cette action est irréversible.')) return;
-      if (!confirm('Dernière confirmation : voulez-vous vraiment tout supprimer ?')) return;
-      try {
-        const { error } = await supabase.rpc('delete_my_account');
-        if (error) throw error;
-        await supabase.auth.signOut().catch(()=>{});
-        alert('Votre compte a été supprimé. À bientôt.');
-        location.href = '/';
-      } catch (e) { console.error(e); showToast('Suppression impossible : ' + (e.message||''), 'error'); }
-    };
-  </script>
+<script type="module">
+  import { supabase, getCurrentUser, getProfile } from '/js/supabase.js';
+  import { euros } from '/js/devis/model.js';
+  import { showToast, esc, ICON, localISODate } from '/js/utils.js';
+
+  const $ = (id) => document.getElementById(id);
+  const STATUS = {
+    sent: ['À signer', 'is-warn'], signed: ['Signé', 'is-ok'],
+    pending: ['En attente de réponse', 'is-info'], quoted: ['Devis reçu', 'is-warn'], declined: ['Non retenue', 'is-info'],
+    confirmed: ['Confirmé', 'is-ok'], cancelled: ['Annulé', 'is-info'], done: ['Terminé', 'is-info'],
+  };
+  const fmt = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+
+  const user = await getCurrentUser();
+  if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname)}`; await new Promise(() => {}); }
+
+  getProfile(user.id).then(p => {
+    // Une maquilleuse a son propre tableau de bord
+    if (p?.role === 'artist') { const a = document.createElement('a'); a.href = '/dashboard/artist.html'; a.textContent = 'Tableau de bord'; a.className = 'hide-mobile'; document.querySelector('.nav-links').prepend(a); }
+    const first = (p?.full_name || '').trim().split(' ')[0];
+    if (first) $('hello').textContent = 'Bonjour ' + first;
+  }).catch(() => {});
+
+  $('btn-logout').addEventListener('click', async (e) => { e.preventDefault(); try { await supabase.auth.signOut(); } catch (_) {} location.href = '/'; });
+
+  // Devis reçus (RPC sécurisé par email)
+  (async () => {
+    try {
+      const { data, error } = await supabase.rpc('my_quotes');
+      if (error) throw error;
+      const rows = data || [];
+      $('quotes').innerHTML = rows.length ? rows.map(q => {
+        const [lbl, cls] = STATUS[q.status] || ['—', 'is-info'];
+        const signed = q.status === 'signed';
+        return `<div class="row">
+          <div><div class="nm">${esc(q.mua_name || 'Maquilleuse')} · ${esc(euros(q.total_cents))}</div>
+            <div class="meta"><span>${esc(q.quote_number || 'Devis')}</span><span>reçu le ${esc(fmt(q.created_at))}</span></div></div>
+          <div class="right">
+            <span class="pill ${cls}">${lbl}</span>
+            <a class="btn ${signed ? 'btn-ghost' : 'btn-primary'} btn-sm" href="/signature.html?t=${encodeURIComponent(q.share_token)}">${signed ? 'Voir' : 'Lire et signer'}</a>
+          </div></div>`;
+      }).join('') : '<div class="empty">Aucun devis pour le moment. Ils apparaissent ici dès qu’une maquilleuse répond à votre demande.</div>';
+    } catch (e) { console.error(e); $('quotes').innerHTML = '<div class="empty">Vos devis ne peuvent pas être affichés pour le moment.</div>'; }
+  })();
+
+  // Demandes de devis (RLS : les siennes)
+  (async () => {
+    try {
+      const { data, error } = await supabase.from('booking_requests')
+        .select('id,artist_id,client_id,event_date,event_address,services_snapshot,note,status,created_at')
+        .eq('client_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      const rows = data || [];
+      // Nom et lien de chaque maquilleuse contactée
+      const ids = [...new Set(rows.map(r => r.artist_id).filter(Boolean))];
+      const artists = new Map();
+      if (ids.length) {
+        const { data: arts } = await supabase.from('artists_public').select('id,slug,display_name').in('id', ids);
+        (arts || []).forEach(a => artists.set(a.id, a));
+      }
+      $('requests').innerHTML = rows.length ? rows.map(r => {
+        const [lbl, cls] = STATUS[r.status] || ['—', 'is-info'];
+        const svc = (r.services_snapshot || []).map(s => s.name).join(', ');
+        const a = artists.get(r.artist_id);
+        const who = a ? `<a href="${a.slug ? '/artiste/' + encodeURIComponent(a.slug) : '/artist.html?id=' + encodeURIComponent(a.id)}" style="color:inherit;">${esc(a.display_name || 'Maquilleuse')}</a>` : 'Maquilleuse';
+        const when = r.event_date ? new Date(r.event_date).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' }) : '';
+        return `<div class="row">
+          <div style="min-width:0;flex:1 1 260px;"><div class="nm">${who}${svc ? ' · ' + esc(svc) : ''}</div>
+            <div class="meta">${when ? `<span>${ICON.calendar} ${esc(when)}</span>` : ''}${r.event_address ? `<span>${ICON.pin} ${esc(r.event_address)}</span>` : ''}</div>
+            ${r.note ? `<div class="need">${esc(r.note)}</div>` : ''}</div>
+          <div class="right">
+            <span class="pill ${cls}">${lbl}</span>
+            ${r.status === 'pending' ? `<a class="btn btn-ghost btn-sm" href="/messages.html?artist=${encodeURIComponent(r.artist_id)}">Lui écrire</a>` : ''}
+          </div></div>`;
+      }).join('') : '<div class="empty">Vous n’avez pas encore envoyé de demande.<br/><a href="/artists.html" class="btn btn-primary btn-sm">Trouver une maquilleuse</a></div>';
+    } catch (e) { console.error(e); $('requests').innerHTML = '<div class="empty">Vos demandes ne peuvent pas être affichées pour le moment.</div>'; }
+  })();
+
+  // Rendez-vous réservés directement sur un créneau (affichés seulement s'il y en a)
+  (async () => {
+    try {
+      const { data, error } = await supabase.from('bookings')
+        .select('id,date,time_slot,status, artists(display_name), services(name)')
+        .eq('client_id', user.id).gte('date', localISODate()).in('status', ['pending', 'confirmed'])
+        .order('date', { ascending: true });
+      if (error || !data || !data.length) return;
+      $('bookings').innerHTML = data.map(b => {
+        const [lbl, cls] = STATUS[b.status] || ['—', 'is-info'];
+        const d = new Date(b.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        return `<div class="row"><div><div class="nm">${esc(b.artists?.display_name || 'Maquilleuse')}${b.services?.name ? ' · ' + esc(b.services.name) : ''}</div>
+          <div class="meta"><span>${ICON.calendar} ${esc(d)} à ${esc(b.time_slot)}</span></div></div>
+          <div class="right"><span class="pill ${cls}">${lbl}</span><a class="btn btn-ghost btn-sm" href="/dashboard/client.html">Gérer</a></div></div>`;
+      }).join('') + '<p style="font-size:.8rem;margin-top:8px;"><a href="/dashboard/client.html" style="color:var(--gb-champagne);">Historique, annulation et avis →</a></p>';
+      $('bookings-wrap').hidden = false;
+    } catch (e) { console.warn(e); }
+  })();
+
+  // Suppression de compte
+  $('btnDelete').onclick = async () => {
+    if (!confirm('Supprimer définitivement votre compte et toutes vos données ? Cette action est irréversible.')) return;
+    if (!confirm('Dernière confirmation : voulez-vous vraiment tout supprimer ?')) return;
+    try {
+      const { error } = await supabase.rpc('delete_my_account');
+      if (error) throw error;
+      await supabase.auth.signOut().catch(()=>{});
+      alert('Votre compte a été supprimé.');
+      location.href = '/';
+    } catch (e) { console.error(e); showToast('La suppression n’a pas abouti. Réessayez dans un instant.', 'error'); }
+  };
+</script>
 </body>
 </html>

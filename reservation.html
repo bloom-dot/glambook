@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Réserver avec diagnostic — GlamBook</title>
+  <title>Demande de devis — GlamBook</title>
   <meta name="robots" content="noindex"/>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#E8547A"/>
+  <meta name="theme-color" content="#0E0E10"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
   <style>
@@ -14,13 +14,15 @@
     .step-indicator { display:flex; gap:0; margin-bottom:24px; }
     .step-dot { flex:1; text-align:center; padding:10px 4px; font-size:.76rem; font-weight:700; border-bottom:3px solid var(--bord); color:var(--gris); }
     .step-dot.active { border-color:var(--rose); color:var(--rose); }
-    .step-dot.done   { border-color:#10B981; color:#10B981; }
+    .step-dot.done   { border-color:var(--gb-ok); color:var(--gb-ok); }
     .panel { background:var(--blanc); border:1px solid var(--bord); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:16px; }
     .panel h2 { font-size:1.05rem; font-weight:800; margin-bottom:4px; }
     .panel .h-sub { font-size:.83rem; color:var(--gris); margin-bottom:16px; }
     .field { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
     .field label { font-size:.75rem; font-weight:600; color:var(--gris); }
-    input, textarea { font-family:inherit; font-size:.92rem; padding:11px 13px; border:1.5px solid var(--bord); border-radius:var(--radius-sm); width:100%; }
+    input, textarea { font-family:inherit; font-size:.92rem; padding:11px 13px; border:1.5px solid var(--bord); border-radius:var(--radius-sm); width:100%; background:var(--gb-surface); color:var(--gb-ink); }
+    .rz-head { margin-bottom:18px; } .rz-head h1 { font-size:1.7rem; } .rz-head p { color:var(--gris); font-size:.88rem; }
+    .recap-need { background:var(--surface-2); border-radius:10px; padding:10px 12px; font-size:.88rem; white-space:pre-wrap; }
     input:focus, textarea:focus { outline:none; border-color:var(--rose); }
     .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     @media(max-width:520px){ .grid2 { grid-template-columns:1fr; } }
@@ -34,7 +36,7 @@
 
     .cam-wrap { position:relative; background:#000; border-radius:var(--radius-sm); overflow:hidden; aspect-ratio:3/4; max-height:360px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; }
     .cam-wrap video, .cam-wrap img { width:100%; height:100%; object-fit:cover; }
-    .cam-placeholder { color:#777; font-size:.9rem; text-align:center; padding:20px; }
+    .cam-placeholder { color:var(--gb-ink-3); font-size:.9rem; text-align:center; padding:20px; }
     .scan-actions { display:flex; gap:10px; flex-wrap:wrap; }
     .scan-actions .btn { flex:1; }
 
@@ -43,7 +45,7 @@
     .cam-wrap.cam-on .fg { opacity:1; }
     .fg-oval { position:absolute; inset:0; width:100%; height:100%; }
     .fg-oval ellipse { fill:none; stroke:var(--rose); stroke-width:3; stroke-dasharray:10 12; stroke-linecap:round;
-      filter:drop-shadow(0 0 6px rgba(232,84,122,.5)); transform-origin:50% 50%;
+      filter:drop-shadow(0 0 6px rgba(212,175,55,.5)); transform-origin:50% 50%;
       animation:fg-rot 6s linear infinite, fg-pulse 2s ease-in-out infinite; transition:stroke .4s ease, stroke-dasharray .4s ease; }
     @keyframes fg-rot { to { stroke-dashoffset:-88; } }
     @keyframes fg-pulse { 0%,100%{ opacity:.75; } 50%{ opacity:1; } }
@@ -58,18 +60,18 @@
     @keyframes fg-sweep { 0%{ top:14%; opacity:0; } 15%{ opacity:1; } 85%{ opacity:1; } 100%{ top:86%; opacity:0; } }
     .fg-check { position:absolute; left:50%; top:46%; width:60px; height:60px;
       transform:translate(-50%,-50%) scale(.4); opacity:0; transition:opacity .3s ease, transform .3s cubic-bezier(.2,1.4,.4,1); }
-    .fg-check circle { fill:none; stroke:#22B573; stroke-width:3; opacity:.25; }
-    .fg-check path { fill:none; stroke:#22B573; stroke-width:4; stroke-linecap:round; stroke-linejoin:round;
+    .fg-check circle { fill:none; stroke:var(--gb-ok); stroke-width:3; opacity:.25; }
+    .fg-check path { fill:none; stroke:var(--gb-ok); stroke-width:4; stroke-linecap:round; stroke-linejoin:round;
       stroke-dasharray:44; stroke-dashoffset:44; transition:stroke-dashoffset .4s ease .1s; }
     .fg-hint { position:absolute; left:50%; bottom:12px; transform:translateX(-50%); display:flex; align-items:center; gap:7px;
-      padding:7px 13px; border-radius:999px; background:rgba(17,17,17,.6); color:#fff; font-size:.76rem; font-weight:700;
+      padding:7px 13px; border-radius:999px; background:rgba(17,17,17,.6); color:var(--gb-on-accent); font-size:.76rem; font-weight:700;
       white-space:nowrap; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); transition:background .4s ease; }
     .fg-hint .dot { width:7px; height:7px; border-radius:50%; background:var(--rose); animation:fg-blink 1.2s ease-in-out infinite; }
     @keyframes fg-blink { 0%,100%{ opacity:.35; } 50%{ opacity:1; } }
     /* état détecté */
-    .cam-wrap.detected .fg-oval ellipse { stroke:#22B573; stroke-dasharray:0; opacity:1; filter:drop-shadow(0 0 8px rgba(34,181,115,.55)); animation:none; }
+    .cam-wrap.detected .fg-oval ellipse { stroke:var(--gb-ok); stroke-dasharray:0; opacity:1; filter:drop-shadow(0 0 8px rgba(34,181,115,.55)); animation:none; }
     .cam-wrap.detected .fg-scan { opacity:0; animation:none; }
-    .cam-wrap.detected .fg-corner { border-color:#22B573; transform:scale(.92); }
+    .cam-wrap.detected .fg-corner { border-color:var(--gb-ok); transform:scale(.92); }
     .cam-wrap.detected .fg-check { opacity:1; transform:translate(-50%,-50%) scale(1); }
     .cam-wrap.detected .fg-check path { stroke-dashoffset:0; }
     .cam-wrap.detected .fg-hint { background:rgba(27,138,75,.85); }
@@ -95,9 +97,6 @@
     @keyframes spin { to { transform:rotate(360deg); } }
     .center { text-align:center; padding:12px; }
     .hide { display:none !important; }
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    .toast.error { background:var(--rose-f); }
   </style>
 </head>
 <body>
@@ -107,6 +106,10 @@
 </div></nav>
 
 <div class="rz">
+  <div class="rz-head">
+    <h1 id="rz-title">Demande de devis</h1>
+    <p>Gratuit et sans engagement. La maquilleuse vous répond avec une proposition chiffrée.</p>
+  </div>
   <div class="gloss-track" style="margin-bottom:16px;"><div class="gloss-fill" id="glossFill" style="width:33%;"></div></div>
   <div class="step-indicator">
     <div class="step-dot active" id="sd-a">1 · Prestation</div>
@@ -129,7 +132,7 @@
       <h2>Événement</h2>
       <div class="h-sub">Quand et où aura lieu la prestation ?</div>
       <div class="grid2">
-        <div class="field"><label>Date &amp; heure</label><input id="event_date" type="datetime-local"/></div>
+        <div class="field"><label for="event_date">Date &amp; heure</label><input id="event_date" type="datetime-local"/></div>
         <div class="field"><label>Téléphone</label><input id="cli_phone" type="tel"/></div>
       </div>
       <div class="field"><label>Adresse de l'événement</label><input id="event_address" placeholder="N°, rue, ville"/></div>
@@ -169,13 +172,13 @@
         <span>J'accepte que ma photo soit analysée par une intelligence artificielle afin de générer des conseils maquillage. <b>La photo n'est pas conservée</b> ; seul le diagnostic (texte) est enregistré. Analyse cosmétique, non médicale. <a href="/legal/confidentialite.html" target="_blank" style="color:var(--rose);">En savoir plus</a>.</span>
       </label>
       <div class="scan-actions" style="margin-bottom:10px;">
-        <button class="btn btn-secondary" id="btnCam">📷 Caméra</button>
+        <button class="btn btn-secondary" id="btnCam"><span data-ico="camera"></span> Caméra</button>
         <button class="btn btn-primary hide" id="btnCapture" style="display:none;">Prendre la photo</button>
-        <label class="btn btn-ghost" for="fileInput" style="margin:0;">🖼️ Importer</label>
+        <label class="btn btn-ghost" for="fileInput" style="margin:0;"><span data-ico="image"></span> Importer</label>
         <input id="fileInput" type="file" accept="image/*" capture="user" class="hide"/>
       </div>
       <p class="fg-note" id="fgNote"></p>
-      <button class="btn btn-ghost btn-sm hide" id="btnRetake">↺ Reprendre</button>
+      <button class="btn btn-ghost btn-sm hide" id="btnRetake">Reprendre la photo</button>
       <canvas id="canvas" class="hide"></canvas>
 
       <div id="diagArea" class="hide">
@@ -208,13 +211,12 @@
   <!-- SUCCÈS -->
   <div id="done" class="hide">
     <div class="panel center" style="padding:44px 22px;">
-      <div style="font-size:2.6rem;margin-bottom:10px;">💌</div>
-      <h2 style="margin-bottom:6px;">Demande envoyée !</h2>
-      <p style="color:var(--gris);font-size:.9rem;">La maquilleuse va préparer votre devis personnalisé et vous l'enverra par email pour signature. À très vite ✨</p>
+      <div style="font-size:2.2rem;line-height:0;margin-bottom:16px;color:var(--gb-champagne);" data-ico="mail"></div>
+      <h2 style="margin-bottom:6px;">Demande envoyée</h2>
+      <p style="color:var(--gris);font-size:.9rem;">La maquilleuse prépare votre devis. Vous le recevrez par email et le retrouverez dans votre espace, où vous pourrez le signer.</p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;">
-        <a id="doneContact" class="btn btn-primary">💬 Discuter avec la maquilleuse</a>
-        <a href="/mes-devis.html" class="btn btn-secondary">Mon espace</a>
-        <a href="/" class="btn btn-ghost">Retour à l'accueil</a>
+        <a href="/mes-devis.html" class="btn btn-primary">Suivre ma demande</a>
+        <a id="doneContact" class="btn btn-ghost">Écrire à la maquilleuse</a>
       </div>
     </div>
   </div>
@@ -224,9 +226,11 @@
 
 <script type="module">
   import { supabase, getCurrentUser, getProfile } from '/js/supabase.js';
-  import { getArtistServices, requestFaceDiagnostic, createBookingRequest } from '/js/booking/store.js';
+  import { getArtistServices, getArtistName, requestFaceDiagnostic, createBookingRequest } from '/js/booking/store.js';
   import { euros } from '/js/devis/model.js';
-  import { showToast, esc } from '/js/utils.js';
+  import { showToast, esc, ICON } from '/js/utils.js';
+
+  document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ICON[el.dataset.ico] || ''; });
 
   const $ = (id) => document.getElementById(id);
   const artistId = new URLSearchParams(location.search).get('artist');
@@ -242,7 +246,22 @@
   // Auth requise
   const user = await getCurrentUser();
   if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`; }
-  if (!artistId) { showToast("Artiste introuvable.", 'error'); }
+  if (!artistId) {
+    document.querySelector('.rz').innerHTML = '<div class="state-msg"><h2>Maquilleuse introuvable</h2><p>Le lien suivi est incomplet.</p><a class="btn btn-primary" href="/artists.html">Voir les maquilleuses</a></div>';
+    throw new Error('artist manquant');
+  }
+  getArtistName(artistId).then(n => { if (n) $('rz-title').textContent = 'Demande de devis à ' + n; }).catch(() => {});
+
+  // Le diagnostic visage n'est proposé que s'il est réellement branché côté serveur :
+  // sans cela, l'étape 2 menait à un message d'erreur.
+  let diagEnabled = false;
+  try { diagEnabled = !!(await (await fetch('/api/config')).json()).diagnosticEnabled; } catch (_) {}
+  if (!diagEnabled) { $('sd-b').hidden = true; $('sd-c').textContent = '2 · Confirmation'; }
+
+  // Pas de date dans le passé
+  { const n = new Date(), p = (x) => String(x).padStart(2, '0');
+    $('event_date').min = `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}T00:00`; }
+
   if (artistId) { const dc = $('doneContact'); if (dc) dc.href = '/messages.html?artist=' + encodeURIComponent(artistId); }
 
   // ── ÉTAPE A : services + préremplissage ──
@@ -284,7 +303,7 @@
 
   // ── Navigation entre étapes ──
   function goto(step) {
-    const gf = $('glossFill'); if (gf) gf.style.width = ({ a:'33%', b:'66%', c:'100%' })[step] || '33%';
+    const gf = $('glossFill'); if (gf) gf.style.width = (diagEnabled ? { a:'33%', b:'66%', c:'100%' } : { a:'50%', c:'100%' })[step] || '33%';
     for (const s of ['a','b','c']) $('step-'+s).classList.toggle('hide', s !== step);
     $('done').classList.add('hide');
     $('sd-a').className = 'step-dot' + (step==='a'?' active':' done');
@@ -297,13 +316,14 @@
     if (state.services.length && state.selected.size === 0) return showToast('Sélectionnez au moins une prestation.', 'error');
     if (!state.services.length && !$('cli_note').value.trim()) return showToast('Décrivez la prestation souhaitée.', 'error');
     if (!$('event_date').value) return showToast("Indiquez la date de l'événement.", 'error');
-    if (!$('cli_name').value || !$('cli_email').value) return showToast('Renseignez vos nom et email.', 'error');
-    goto('b');
+    if (new Date($('event_date').value) < new Date()) return showToast("La date de l'événement est déjà passée.", 'error');
+    if (!$('cli_name').value.trim() || !/^\S+@\S+\.\S+$/.test($('cli_email').value.trim())) return showToast('Renseignez votre nom et un email valide.', 'error');
+    if (diagEnabled) goto('b'); else { buildRecap(); goto('c'); }
   };
   $('backA').onclick = () => { stopCam(); goto('a'); };
   $('skipB').onclick = () => { stopCam(); buildRecap(); goto('c'); };
   $('toC').onclick = () => { stopCam(); buildRecap(); goto('c'); };
-  $('backB').onclick = () => goto('b');
+  $('backB').onclick = () => goto(diagEnabled ? 'b' : 'a');
 
   // ── ÉTAPE B : caméra / upload ──
   let detectApi = null, detectTimer = null, stableCount = 0, autoShot = false;
@@ -389,7 +409,7 @@
     try { box = await detectApi.detect(v); } catch { return; }
     const ok = box && wellFramed(box, v.videoWidth, v.videoHeight);
     $('camWrap').classList.toggle('detected', ok);
-    setHint(ok ? 'Visage bien cadré ✓' : 'Centrez votre visage dans l’ovale');
+    setHint(ok ? 'Visage bien cadré' : 'Centrez votre visage dans l’ovale');
     if (ok) {
       stableCount++;
       if (stableCount >= 5 && !autoShot) {   // ~1,5 s stable → capture auto
@@ -466,7 +486,7 @@
       $('diagLoading').classList.add('hide');
       $('diagArea').classList.remove('hide');
       $('diagResult').classList.remove('hide');
-      $('diagResult').innerHTML = `<p style="color:var(--gris);font-size:.86rem;">Diagnostic indisponible (${esc(e.message)}). Vous pouvez continuer sans.</p>`;
+      $('diagResult').innerHTML = `<p style="color:var(--gris);font-size:.86rem;">Le diagnostic n’a pas pu être réalisé. Vous pouvez continuer sans.</p>`;
       $('toC').disabled = false;
     }
   }
@@ -507,12 +527,18 @@
         ${(state.diagnostic.recommandations_produits||[]).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}
       </div>`;
     }
-    $('recap').innerHTML = `
+    const note = $('cli_note').value.trim();
+    const noteHtml = note ? `<div style="font-size:.72rem;font-weight:700;color:var(--gris);margin:${chosen.length ? '12px' : '0'} 0 6px;">${chosen.length ? 'Vos précisions' : 'Votre besoin'}</div><div class="recap-need">${esc(note)}</div>` : '';
+    const pricedHtml = chosen.length ? `
       ${chosen.map(s => `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:.9rem;"><span>${esc(s.name)}</span><b>${esc(euros(s.price_cents))}</b></div>`).join('')}
       <div style="display:flex;justify-content:space-between;padding:10px 0;border-top:2px solid var(--rose);margin-top:6px;font-weight:800;">
-        <span>Sous-total prestations</span><span style="color:var(--rose-f)">${esc(euros(total))}</span>
+        <span>Sous-total prestations</span><span>${esc(euros(total))}</span>
       </div>
-      <p style="font-size:.78rem;color:var(--gris);margin-top:4px;">Les frais de déplacement éventuels seront calculés par la maquilleuse selon l'adresse.</p>
+      <p style="font-size:.78rem;color:var(--gris);margin-top:4px;">Les frais de déplacement éventuels seront calculés par la maquilleuse selon l'adresse.</p>` : '';
+    $('recap').innerHTML = `
+      ${pricedHtml}
+      ${noteHtml}
+      ${chosen.length ? '' : '<p style="font-size:.78rem;color:var(--gris);margin-top:8px;">Le prix vous sera proposé dans le devis. Rien n’est dû à ce stade.</p>'}
       <div style="margin-top:12px;font-size:.86rem;">
         <div><b>Événement :</b> ${esc(dt)}</div>
         <div><b>Adresse :</b> ${esc($('event_address').value || '—')}</div>
@@ -542,7 +568,7 @@
       $('sd-c').className = 'step-dot done';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
-      console.error(e); showToast(e.message || "Erreur lors de l'envoi.", 'error');
+      console.error(e); showToast("L'envoi a échoué. Vérifiez votre connexion et réessayez.", 'error');
       btn.disabled = false; btn.textContent = 'Envoyer ma demande';
     }
   };

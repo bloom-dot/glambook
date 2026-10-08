@@ -6,7 +6,7 @@
   <title>Réserver — GlamBook</title>
   <meta name="robots" content="noindex"/>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#E8547A"/>
+  <meta name="theme-color" content="#0E0E10"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
   <style>
@@ -18,7 +18,7 @@
       border-bottom: 3px solid var(--bord); color: var(--gris);
     }
     .step-dot.active { border-color: var(--rose); color: var(--rose); }
-    .step-dot.done   { border-color: #10B981; color: #10B981; }
+    .step-dot.done   { border-color: var(--gb-ok); color: var(--gb-ok); }
     .summary-card { background:var(--blanc); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; position: sticky; top: 80px; }
     .summary-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: 16px; }
     .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bord); font-size: .88rem; }
@@ -43,11 +43,11 @@
   </div>
 </nav>
 
-<div style="background:var(--ink);padding:28px 20px;">
+<div style="background:var(--gb-surface);border-bottom:1px solid var(--gb-line);padding:28px 20px;">
   <div style="max-width:860px;margin:0 auto;">
-    <h1 style="color:#fff;font-size:1.4rem;font-weight:800;margin-bottom:4px;">Finaliser ma réservation</h1>
+    <h1 style="font-size:1.6rem;margin-bottom:4px;">Finaliser ma réservation</h1>
     <div class="step-indicator" style="margin-top:20px;">
-      <div class="step-dot done">✓ Créneau</div>
+      <div class="step-dot done">Créneau</div>
       <div class="step-dot active">Coordonnées</div>
       <div class="step-dot" id="step-payment-dot">Paiement</div>
       <div class="step-dot" id="step-confirm-dot">Confirmation</div>
@@ -86,9 +86,9 @@
       <div id="stripe-form">
         <div id="card-element"></div>
       </div>
-      <div id="card-error" style="color:#DC2626;font-size:.82rem;margin-top:8px;display:none;" role="alert"></div>
+      <div id="card-error" style="color:var(--gb-bad);font-size:.82rem;margin-top:8px;display:none;" role="alert"></div>
       <div class="secure-note">
-        🔒 Paiement sécurisé par Stripe · Vos données bancaires sont chiffrées
+        Paiement traité par Stripe : vos données bancaires ne transitent pas par GlamBook.
       </div>
       <button class="btn btn-primary btn-full" id="btn-pay" style="margin-top:20px;">
         Payer et confirmer
@@ -97,8 +97,7 @@
 
     <!-- Étape 3 : Confirmation -->
     <div id="step-confirm" class="card" style="padding:40px;text-align:center;display:none;">
-      <div style="font-size:3rem;margin-bottom:16px;">🎉</div>
-      <h2 style="font-size:1.4rem;font-weight:900;margin-bottom:8px;">Réservation confirmée !</h2>
+            <h2 style="font-size:1.4rem;font-weight:900;margin-bottom:8px;">Réservation confirmée !</h2>
       <p style="color:var(--gris);margin-bottom:24px;">Votre paiement a été accepté. La maquilleuse vous contactera pour confirmer les détails.</p>
       <div style="background:var(--rose-cl);border-radius:10px;padding:16px;margin-bottom:24px;" id="confirm-details"></div>
       <a href="/dashboard/client.html" class="btn btn-primary">Voir mes réservations</a>
@@ -130,7 +129,7 @@
         <span class="summary-total" id="s-total">–</span>
       </div>
       <div style="margin-top:14px;font-size:.75rem;color:var(--gris);line-height:1.5;">
-        Annulation gratuite jusqu'à 48h avant le rendez-vous.
+        Vous pouvez annuler depuis votre espace tant que le rendez-vous n'a pas eu lieu.
       </div>
     </div>
   </div>
@@ -140,7 +139,7 @@
 
 <script type="module">
 import { supabase, getCurrentUser } from '/js/supabase.js';
-import { showToast, dateFR } from '/js/utils.js';
+import { showToast, dateFR, esc } from '/js/utils.js';
 
 const p = new URLSearchParams(location.search);
 const artistId  = p.get('artist');
@@ -151,7 +150,7 @@ const time      = p.get('time');
 
 // Vérifier connexion
 const user = await getCurrentUser();
-if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.href)}`; }
+if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`; await new Promise(() => {}); }
 
 // Pré-remplir email
 if (user) document.getElementById('b-email').value = user.email;
@@ -232,7 +231,7 @@ async function bookWithoutPayment() {
   document.getElementById('step-confirm-dot').classList.add('active');
   document.getElementById('confirm-details').innerHTML = `
     <p style="font-size:.9rem;font-weight:700;color:var(--rose);margin-bottom:4px;">Votre rendez-vous</p>
-    <p style="font-size:.88rem;">${document.getElementById('s-date').textContent} à ${time}</p>`;
+    <p style="font-size:.88rem;">${esc(document.getElementById('s-date').textContent)} à ${esc(time)}</p>`;
 }
 
 // Stripe — clé publique chargée depuis le serveur, jamais en dur
@@ -250,7 +249,7 @@ async function initStripe() {
   }
   const elements = stripe.elements();
   cardElement = elements.create('card', {
-    style: { base: { fontSize:'16px', color:'#1A0A12', '::placeholder':{ color:'#9CA3AF' } } }
+    style: { base: { fontSize:'16px', color:'#F4F2F5', '::placeholder':{ color:'#75707A' } } }
   });
   cardElement.mount('#card-element');
   cardElement.on('change', ({ error }) => {
@@ -324,7 +323,7 @@ document.getElementById('btn-pay').addEventListener('click', async () => {
   document.getElementById('step-confirm-dot').classList.add('active');
   document.getElementById('confirm-details').innerHTML = `
     <p style="font-size:.9rem;font-weight:700;color:var(--rose);margin-bottom:4px;">Votre rendez-vous</p>
-    <p style="font-size:.88rem;">${document.getElementById('s-date').textContent} à ${time}</p>`;
+    <p style="font-size:.88rem;">${esc(document.getElementById('s-date').textContent)} à ${esc(time)}</p>`;
 });
 
 function showPayError(msg) {

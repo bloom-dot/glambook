@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mot de passe oublié — GlamBook</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#0E0E10"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+</head>
+<body class="auth">
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+  </div>
+</nav>
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <h1 class="auth-title">Mot de passe oublié</h1>
+    <p class="auth-sub">Indiquez l'adresse de votre compte : vous recevrez un lien pour en choisir un nouveau.</p>
+
+    <div class="form-msg err" id="error-msg" role="alert"></div>
+    <div class="form-msg ok" id="success-msg" role="status"></div>
+
+    <form id="forgot-form">
+      <div class="field">
+        <label for="email">Adresse email</label>
+        <input type="email" id="email" placeholder="vous@exemple.fr" required autocomplete="email"/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="btn-send">Recevoir le lien</button>
+    </form>
+
+    <div class="auth-footer"><a href="/auth/login.html">← Retour à la connexion</a></div>
+  </div>
+</main>
+
+<script type="module">
+import { supabase } from '/js/supabase.js';
+
+const $ = (id) => document.getElementById(id);
+$('email').value = new URLSearchParams(location.search).get('email') || '';
+
+$('forgot-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('btn-send');
+  const email = $('email').value.trim();
+  $('error-msg').classList.remove('show');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Envoi…';
+
+  let error = null;
+  try {
+    ({ error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/auth/reset.html' }));
+  } catch (err) { error = err; }
+
+  if (error && /rate limit|security purposes/i.test(error.message || '')) {
+    $('error-msg').textContent = 'Un lien vient déjà d’être envoyé. Patientez une minute avant de réessayer.';
+    $('error-msg').classList.add('show');
+    btn.disabled = false; btn.textContent = 'Recevoir le lien';
+    return;
+  }
+  if (error) console.warn('reset', error.message);
+
+  // Même message que l'adresse existe ou non : on ne révèle pas qui a un compte.
+  $('forgot-form').hidden = true;
+  $('success-msg').textContent = `Si un compte existe pour ${email}, un email vient de partir. Le lien est valable une heure ; pensez à regarder dans les courriers indésirables.`;
+  $('success-msg').classList.add('show');
+});
+</script>
+</body>
+</html>

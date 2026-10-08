@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Nouveau mot de passe — GlamBook</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#0E0E10"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+</head>
+<body class="auth">
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+  </div>
+</nav>
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <h1 class="auth-title">Nouveau mot de passe</h1>
+    <p class="auth-sub" id="sub">Vérification du lien…</p>
+
+    <div class="form-msg err" id="error-msg" role="alert"></div>
+    <div class="form-msg ok" id="success-msg" role="status"></div>
+
+    <form id="reset-form" hidden>
+      <div class="field">
+        <label for="password">Nouveau mot de passe</label>
+        <div class="pw-wrap">
+          <input type="password" id="password" required minlength="8" autocomplete="new-password"/>
+          <button type="button" class="pw-toggle" id="toggle-password" aria-label="Afficher le mot de passe" aria-pressed="false"></button>
+        </div>
+        <div class="hint">8 caractères minimum</div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="btn-save">Enregistrer</button>
+    </form>
+
+    <div class="auth-footer" id="footer" hidden><a href="/auth/forgot.html">Demander un nouveau lien</a></div>
+  </div>
+</main>
+
+<script type="module">
+import { supabase } from '/js/supabase.js';
+import { ICON } from '/js/utils.js';
+
+const $ = (id) => document.getElementById(id);
+const showForm = () => { $('sub').textContent = 'Choisissez un nouveau mot de passe pour votre compte.'; $('reset-form').hidden = false; $('footer').hidden = true; };
+const showExpired = () => {
+  if (!$('reset-form').hidden) return;
+  $('sub').textContent = '';
+  $('error-msg').textContent = 'Ce lien n’est plus valable (il a expiré ou a déjà servi).';
+  $('error-msg').classList.add('show'); $('footer').hidden = false;
+};
+
+// Le client Supabase lit le jeton présent dans l'URL et ouvre une session temporaire.
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session && (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) showForm();
+});
+const linkError = /error(_code|_description)?=/.test(location.hash + location.search);
+if (linkError) showExpired();
+else {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) showForm(); else setTimeout(showExpired, 4000);
+}
+
+const toggle = $('toggle-password');
+toggle.innerHTML = ICON.eye;
+toggle.addEventListener('click', () => {
+  const input = $('password'); const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  toggle.innerHTML = show ? ICON.eyeOff : ICON.eye;
+  toggle.setAttribute('aria-pressed', String(show));
+});
+
+$('reset-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('btn-save');
+  $('error-msg').classList.remove('show');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Enregistrement…';
+  const { data, error } = await supabase.auth.updateUser({ password: $('password').value });
+  if (error) {
+    const m = error.message || '';
+    $('error-msg').textContent = /different from the old/i.test(m) ? 'Choisissez un mot de passe différent de l’ancien.'
+      : /at least|weak/i.test(m) ? 'Le mot de passe doit contenir au moins 8 caractères.'
+      : 'Enregistrement impossible. Demandez un nouveau lien et réessayez.';
+    $('error-msg').classList.add('show');
+    btn.disabled = false; btn.textContent = 'Enregistrer';
+    return;
+  }
+  $('reset-form').hidden = true;
+  $('success-msg').textContent = 'Mot de passe modifié. Redirection…';
+  $('success-msg').classList.add('show');
+  let role = null;
+  try { role = (await supabase.from('profiles').select('role').eq('user_id', data.user.id).maybeSingle()).data?.role; } catch (_) {}
+  setTimeout(() => { location.href = role === 'artist' ? '/dashboard/artist.html' : '/mes-devis.html'; }, 1000);
+});
+</script>
+</body>
+</html>

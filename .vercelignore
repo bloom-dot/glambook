@@ -1,0 +1,13 @@
+# Fichiers de travail : dans le dépôt, mais pas servis par le site.
+# Sans cette liste, Vercel publiait les notes internes et les schémas SQL
+# à des adresses comme /ETAT_PROJET_GLAMBOOK.md ou /supabase-schema.sql.
+*.md
+*.sql
+*.bat
+.claude
+ui-kit-nextjs
+images
+Claude outputs
+generate-icons.js
+icons/generate-icons.html
+.fuse_hidden*

@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Mon tableau de bord — GlamBook</title>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#E8547A"/>
+  <meta name="theme-color" content="#0E0E10"/>
+  <meta name="robots" content="noindex"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
   <style>
@@ -15,47 +16,56 @@
 
     /* Sidebar */
     .sidebar {
-      background: linear-gradient(180deg, #0F0610 0%, #1A0A12 100%);
-      color: #fff; padding: 24px 0;
+      background: var(--gb-surface);
+      color: var(--gb-ink); padding: 24px 0;
       position: sticky; top: 0; height: 100vh; overflow-y: auto;
-      border-right: 1px solid rgba(255,255,255,.05);
+      border-right: 1px solid var(--gb-line);
     }
     .sidebar::-webkit-scrollbar { width: 4px; }
     .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
-    .sidebar-logo { padding: 0 24px 24px; border-bottom: 1px solid rgba(255,255,255,.06); margin-bottom: 12px; }
-    .sidebar-logo a { font-size: 1.2rem; font-weight: 900; color: var(--rose); text-decoration: none; letter-spacing: -.03em; }
-    .sidebar-logo a span { color: var(--or); }
-    .sidebar-user { padding: 14px 24px 18px; border-bottom: 1px solid rgba(255,255,255,.06); margin-bottom: 8px; }
+    .sidebar-logo { padding: 0 24px 24px; border-bottom: 1px solid var(--gb-line); margin-bottom: 12px; }
+    .sidebar-logo a { font-size: 1.7rem; font-weight: 800; font-stretch: var(--gb-condensed); text-transform: uppercase; color: var(--gb-ink); text-decoration: none; letter-spacing: .03em; }
+    .sidebar-logo a span { color: var(--gb-gold); }
+    .sidebar-user { padding: 14px 24px 18px; border-bottom: 1px solid var(--gb-line); margin-bottom: 8px; }
     .sidebar-user .name { font-weight: 700; font-size: .9rem; }
-    .sidebar-user .sub  { font-size: .72rem; color: rgba(255,255,255,.35); margin-top: 2px; }
+    .sidebar-user .sub  { font-size: .72rem; color: var(--gb-ink-3); margin-top: 2px; }
     .nav-item {
       display: flex; align-items: center; gap: 12px; padding: 11px 24px;
-      font-size: .85rem; font-weight: 600; cursor: pointer; color: rgba(255,255,255,.55);
+      font-size: .85rem; font-weight: 600; cursor: pointer; color: var(--gb-ink-2);
       border-left: 3px solid transparent; transition: all var(--transition); text-decoration: none;
       margin: 1px 0;
     }
-    .nav-item:hover { background: rgba(255,255,255,.04); color: rgba(255,255,255,.9); }
-    .nav-item.active { background: rgba(232,84,122,.1); color: var(--rose); border-left-color: var(--rose); }
-    .nav-badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; margin-left:auto; background:var(--rose); color:#fff; font-size:.65rem; font-weight:800; border-radius:9px; }
-    .nav-section { font-size: .65rem; font-weight: 700; letter-spacing: .1em; color: rgba(255,255,255,.2); padding: 18px 24px 6px; text-transform: uppercase; }
+    .nav-item .gb-ico { width: 18px; height: 18px; }
+    .nav-item:hover { background: var(--gb-surface-2); color: var(--gb-ink); }
+    .nav-item.active { background: var(--gb-gold-tint); color: var(--gb-champagne); border-left-color: var(--gb-gold); }
+    .nav-badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; margin-left:auto; background:var(--gb-gold); color:var(--gb-cta-ink); font-size:.65rem; font-weight:800; border-radius:9px; }
+    .nav-section { font-size: .65rem; font-weight: 700; letter-spacing: .1em; color: var(--gb-ink-3); padding: 18px 24px 6px; text-transform: uppercase; }
 
     /* Mobile nav */
     .mobile-nav {
       display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(255,255,255,.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(0,0,0,.06); padding: 6px 0 env(safe-area-inset-bottom, 4px);
-      box-shadow: 0 -2px 12px rgba(0,0,0,.06);
+      background: var(--nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--gb-line); padding: 6px 0 env(safe-area-inset-bottom, 4px);
     }
     .mobile-nav-inner {
       display: flex; justify-content: space-around; max-width: 500px; margin: 0 auto;
     }
     .mobile-nav-item {
       display: flex; flex-direction: column; align-items: center; gap: 2px;
-      padding: 6px 12px; font-size: .65rem; font-weight: 600; color: var(--gris);
+      padding: 6px 10px; font-size: .65rem; font-weight: 600; color: var(--gris); position: relative;
       text-decoration: none; cursor: pointer; transition: color var(--transition);
+      background: none; border: none; font-family: inherit; min-width: 56px;
     }
-    .mobile-nav-item .mn-icon { font-size: 1.2rem; }
-    .mobile-nav-item.active { color: var(--rose); }
+    .mobile-nav-item .gb-ico { width: 22px; height: 22px; margin-bottom: 1px; }
+    .mobile-nav-item.active { color: var(--gb-champagne); }
+    .mobile-nav-item .nav-badge { position: absolute; top: 0; right: 6px; margin: 0; }
+    /* Feuille « Plus » : tout ce qui ne tient pas dans la barre du bas */
+    .more-sheet { position: fixed; inset: 0; z-index: 150; display: none; background: rgba(0,0,0,.55); }
+    .more-sheet.open { display: block; }
+    .more-sheet .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--gb-surface); border-top: 1px solid var(--gb-line-strong);
+      border-radius: 18px 18px 0 0; padding: 10px 0 calc(16px + env(safe-area-inset-bottom, 0px)); max-height: 80vh; overflow-y: auto; }
+    .more-sheet .nav-item { padding: 14px 24px; border-left: none; }
+    .more-sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--gb-line-strong); margin: 4px auto 10px; }
     @media(max-width:768px){
       .sidebar { display: none; }
       .mobile-nav { display: block; }
@@ -71,11 +81,9 @@
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 28px; }
     .stat-card {
       background: var(--blanc); border-radius: var(--radius); padding: 20px;
-      box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,.04);
-      transition: all var(--transition);
+      border: 1px solid var(--gb-line);
     }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-    .stat-card .num { font-size: 1.7rem; font-weight: 900; color: var(--rose); letter-spacing: -.02em; }
+    .stat-card .num { font-size: 1.7rem; font-weight: 800; color: var(--gb-ink); letter-spacing: -.02em; }
     .stat-card .lbl { font-size: .72rem; color: var(--gris); font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
 
     /* Tabs */
@@ -91,9 +99,8 @@
     .booking-row {
       background: var(--blanc); border-radius: var(--radius); padding: 16px 18px;
       display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
-      border: 1px solid rgba(0,0,0,.04); transition: all var(--transition);
+      border: 1px solid var(--gb-line);
     }
-    .booking-row:hover { box-shadow: var(--shadow-md); }
     .booking-date { background: var(--rose-cl); color: var(--rose); border-radius: var(--radius-sm); padding: 10px 14px; text-align: center; flex-shrink: 0; min-width: 54px; }
     .booking-date .day { font-size: 1.2rem; font-weight: 900; line-height: 1; }
     .booking-date .mon { font-size: .6rem; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
@@ -101,9 +108,10 @@
     .booking-info .client-name { font-weight: 700; font-size: .9rem; }
     .booking-info .booking-meta { font-size: .75rem; color: var(--gris); margin-top: 3px; }
     .booking-status { padding: 4px 12px; border-radius: 20px; font-size: .7rem; font-weight: 700; }
-    .status-confirmed { background: #ECFDF5; color: #065F46; }
-    .status-pending   { background: #FFFBEB; color: #92400E; }
-    .status-cancelled { background: #FEF2F2; color: #991B1B; }
+    .status-confirmed { background: var(--gb-ok-tint);   color: var(--gb-ok); }
+    .status-pending   { background: var(--gb-warn-tint); color: var(--gb-warn); }
+    .status-cancelled { background: var(--gb-bad-tint);  color: var(--gb-bad); }
+    .status-neutral   { background: var(--gb-info-tint); color: var(--gb-ink-2); }
     .chip-d { display:inline-block; background:var(--blanc); border:1px solid var(--bord); border-radius:8px; padding:4px 10px; font-size:.78rem; margin:0 6px 6px 0; }
     /* Récurrence hebdomadaire */
     .wk-row { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--gris-cl); flex-wrap:wrap; }
@@ -112,10 +120,10 @@
     .wk-slots { display:flex; flex-wrap:wrap; gap:5px; flex:1; align-items:center; }
     .wk-chip { font-size:.74rem; padding:4px 9px; border-radius:999px; border:1.5px solid var(--bord); background:var(--blanc); color:var(--gris); cursor:pointer; transition:all .15s; }
     .wk-chip:hover { border-color:var(--rose); }
-    .wk-chip.on { background:var(--rose); border-color:var(--rose); color:#fff; }
+    .wk-chip.on { background:var(--gb-gold-tint); border-color:var(--gb-gold); color:var(--gb-champagne); }
     .wk-quick { font-size:.7rem; color:var(--gris); cursor:pointer; background:none; border:none; text-decoration:underline; padding:2px 4px; }
     .wk-quick:hover { color:var(--rose); }
-    .wk-off { font-size:.72rem; color:#B45309; font-style:italic; }
+    .wk-off { font-size:.72rem; color:var(--gb-ink-3); font-style:italic; }
 
     /* Calendrier dispo */
     .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 16px; }
@@ -125,12 +133,13 @@
       border: 1.5px solid var(--bord); background: var(--blanc); transition: all var(--transition);
     }
     .cal-day:hover:not(.past) { border-color: var(--rose); background: var(--rose-cl); }
-    .cal-day.available { background: #ECFDF5; border-color: #34D399; color: #065F46; }
+    .cal-day.available { background: var(--gb-ok-tint); border-color: var(--gb-ok); color: var(--gb-ok); }
+    .cal-day.selected { outline: 2px solid var(--gb-champagne); outline-offset: 1px; }
     .cal-day.today { border-color: var(--rose); color: var(--rose); background: var(--rose-cl); font-weight: 800; }
     .cal-day.past { opacity: .3; pointer-events: none; }
 
     /* Profil form */
-    .profile-form { background: var(--blanc); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,.04); }
+    .profile-form { background: var(--blanc); border-radius: var(--radius); padding: 28px; border: 1px solid var(--gb-line); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     @media(max-width:500px){ .form-row { grid-template-columns: 1fr; } }
 
@@ -140,20 +149,19 @@
       border-radius:12px; padding:14px 8px; text-align:center; cursor:pointer;
       border:3px solid transparent; transition:all .2s; position:relative;
     }
-    .palette-chip.selected { border-color:#1A0A12; transform:scale(1.05); }
+    .palette-chip.selected { border-color:var(--gb-champagne); }
     .palette-chip .chip-dot { width:32px; height:32px; border-radius:50%; margin:0 auto 6px; }
     .palette-chip .chip-name { font-size:.68rem; font-weight:700; }
     .section-toggle {
       display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px; background:var(--blanc); border-radius:10px; margin-bottom:8px;
-      box-shadow:0 1px 4px rgba(0,0,0,.06);
+      padding:14px 16px; background:var(--gb-surface-2); border-radius:10px; margin-bottom:8px;
     }
     .section-toggle .toggle-label { font-size:.9rem; font-weight:600; }
     .section-toggle .toggle-desc  { font-size:.75rem; color:var(--gris); }
     .switch { position:relative; display:inline-block; width:42px; height:24px; }
     .switch input { opacity:0; width:0; height:0; }
-    .slider { position:absolute; cursor:pointer; inset:0; background:#ccc; border-radius:24px; transition:.3s; }
-    .slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:var(--blanc); border-radius:50%; transition:.3s; }
+    .slider { position:absolute; cursor:pointer; inset:0; background:var(--gb-line-strong); border-radius:24px; transition:.3s; }
+    .slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:var(--gb-ink); border-radius:50%; transition:.3s; }
     input:checked + .slider { background:var(--rose); }
     input:checked + .slider:before { transform:translateX(18px); }
 
@@ -162,10 +170,10 @@
       margin-bottom:24px; border:2px solid var(--bord);
     }
     .preview-cover { height:80px; display:flex; align-items:flex-end; padding:8px 12px; }
-    .preview-avatar { width:40px; height:40px; border-radius:50%; border:2px solid #fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.9rem; color:#fff; margin-top:20px; }
+    .preview-avatar { width:40px; height:40px; border-radius:50%; border:2px solid var(--gb-surface); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.9rem; color:var(--gb-cta-ink); margin-top:20px; }
     .preview-body { background:var(--blanc); padding:10px 12px; }
     .preview-name { font-weight:800; font-size:.85rem; margin-bottom:2px; }
-    .preview-btn { display:inline-block; padding:6px 14px; border-radius:8px; font-size:.72rem; font-weight:700; color:#fff; margin-top:8px; }
+    .preview-btn { display:inline-block; padding:6px 14px; border-radius:8px; font-size:.72rem; font-weight:700; color:var(--gb-cta-ink); background:var(--gb-cta); margin-top:8px; }
 
     /* Upload photo */
     .upload-zone {
@@ -175,7 +183,14 @@
     .upload-zone:hover { border-color: var(--rose); background: var(--rose-cl); }
     .upload-zone input { display: none; }
     .photos-preview { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 12px; }
-    .photos-preview img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+    .photos-preview .ph { position: relative; }
+    .photos-preview img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; display: block; background: var(--gb-surface-2); }
+    .photos-preview .ph-del { position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; border-radius: 8px; border: none; cursor: pointer;
+      background: rgba(14,14,16,.78); color: var(--gb-ink); display: flex; align-items: center; justify-content: center; }
+    .photos-preview .ph-del:hover { color: var(--gb-bad); }
+    @media (max-width: 520px) { .photos-preview { grid-template-columns: repeat(3,1fr); } .palette-grid { grid-template-columns: repeat(2,1fr); } }
+    .panel-d { background: var(--blanc); border: 1px solid var(--gb-line); border-radius: var(--radius); padding: 22px; }
+    .dash-main select, .dash-main input[type=text]#cta-text { background: var(--gb-surface); color: var(--gb-ink); border: 1.5px solid var(--bord); border-radius: 8px; font-family: inherit; }
   </style>
 </head>
 <body>
@@ -186,25 +201,25 @@
     <div class="sidebar-logo"><a href="/">Glam<span>Book</span></a></div>
     <div class="sidebar-user">
       <div class="name" id="sb-name">Chargement...</div>
-      <div class="sub">Makeup Artist</div>
+      <div class="sub">Maquilleuse</div>
     </div>
-    <div class="nav-section">Principal</div>
-    <a class="nav-item" onclick="showTab('reservations',this)">📅 Réservations</a>
-    <a class="nav-item active" onclick="showTab('disponibilites',this)">🗓️ Disponibilités</a>
-    <a class="nav-item" onclick="showTab('avis',this)">⭐ Avis clients</a>
-    <a class="nav-item" id="nav-msg" href="/messages.html">💬 Messages</a>
-    <a class="nav-item" href="/dashboard/diagnostic.html">🔬 Diagnostic</a>
-    <a class="nav-item" id="nav-dem" onclick="showTab('demandes',this)">📥 Demandes</a>
-    <a class="nav-item" onclick="showTab('devis',this)">🧾 Devis</a>
-    <div class="nav-section">Profil</div>
-    <a class="nav-item" onclick="showTab('profil',this)">✏️ Mon profil</a>
-    <a class="nav-item" onclick="showTab('photos',this)">📸 Portfolio</a>
-    <a class="nav-item" onclick="showTab('services',this)">💰 Prestations & Tarifs</a>
-    <a class="nav-item" onclick="showTab('espace',this)">🎨 Mon espace</a>
+    <div class="nav-section">Activité</div>
+    <a class="nav-item" id="nav-dem" data-tab="demandes"><span data-ico="inbox"></span> Demandes</a>
+    <a class="nav-item" data-tab="devis"><span data-ico="doc"></span> Devis</a>
+    <a class="nav-item" id="nav-msg" href="/messages.html"><span data-ico="chat"></span> Messages</a>
+    <a class="nav-item" data-tab="reservations"><span data-ico="check"></span> Réservations</a>
+    <a class="nav-item" data-tab="disponibilites"><span data-ico="calendar"></span> Disponibilités</a>
+    <a class="nav-item" data-tab="avis"><span data-ico="star"></span> Avis clientes</a>
+    <a class="nav-item" id="nav-diag" href="/dashboard/diagnostic.html" hidden><span data-ico="scan"></span> Diagnostic visage</a>
+    <div class="nav-section">Profil public</div>
+    <a class="nav-item" data-tab="profil"><span data-ico="user"></span> Mon profil</a>
+    <a class="nav-item" data-tab="photos"><span data-ico="image"></span> Portfolio</a>
+    <a class="nav-item" data-tab="services"><span data-ico="tag"></span> Prestations &amp; tarifs</a>
+    <a class="nav-item" data-tab="espace"><span data-ico="palette"></span> Apparence</a>
     <div class="nav-section">Compte</div>
-    <a class="nav-item" id="link-public-profile" href="/artists.html" target="_blank">👁️ Voir mon profil public</a>
-    <a class="nav-item" id="nav-admin" href="/dashboard/admin.html" style="display:none;">🛡️ Administration</a>
-    <a class="nav-item" id="btn-logout" style="color:rgba(255,100,100,.7);">⬅️ Déconnexion</a>
+    <a class="nav-item" id="link-public-profile" href="/artists.html" target="_blank" rel="noopener"><span data-ico="eye"></span> Voir mon profil public</a>
+    <a class="nav-item" id="nav-admin" href="/dashboard/admin.html" style="display:none;"><span data-ico="shield"></span> Administration</a>
+    <a class="nav-item" id="btn-logout" href="#"><span data-ico="logout"></span> Déconnexion</a>
   </aside>
 
   <!-- MAIN -->
@@ -216,7 +231,7 @@
         <p class="dash-sub" id="dash-date"></p>
       </div>
       <div style="display:flex;gap:8px;">
-        <span class="badge" id="active-badge">⬤ Profil inactif</span>
+        <span class="badge is-info" id="active-badge">Profil hors ligne</span>
         <button class="btn btn-primary btn-sm" id="btn-toggle-active">Activer mon profil</button>
       </div>
     </div>
@@ -226,7 +241,7 @@
       <div class="stat-card"><div class="num" id="stat-reservations">–</div><div class="lbl">Réservations ce mois</div></div>
       <div class="stat-card"><div class="num" id="stat-revenue">–</div><div class="lbl">Revenus ce mois</div></div>
       <div class="stat-card"><div class="num" id="stat-rating">–</div><div class="lbl">Note moyenne</div></div>
-      <div class="stat-card"><div class="num" id="stat-views">–</div><div class="lbl">Vues profil</div></div>
+      <div class="stat-card"><div class="num" id="stat-requests">–</div><div class="lbl">Demandes en attente</div></div>
     </div>
 
     <!-- ═══ ONGLET RÉSERVATIONS ═══ -->
@@ -241,13 +256,14 @@
     </div>
 
     <!-- ═══ ONGLET DISPONIBILITÉS ═══ -->
-    <div id="tab-disponibilites">
+    <div id="tab-disponibilites" style="display:none;">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Gérer mes disponibilités</h2>
 
       <!-- Récurrence hebdomadaire -->
-      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
+      <p style="font-size:.84rem;color:var(--gris);margin:-8px 0 16px;">Facultatif : sans agenda, vos clientes vous envoient une demande de devis et vous convenez de la date ensemble. Avec un agenda <em>et</em> des prestations tarifées, elles peuvent réserver un créneau directement.</p>
+      <div class="panel-d" style="margin-bottom:16px;">
         <div style="margin-bottom:10px;">
-          <strong style="font-size:.95rem;">🔁 Récurrence hebdomadaire</strong>
+          <strong style="font-size:.95rem;">Semaine type</strong>
           <div style="font-size:.8rem;color:var(--gris);margin-top:2px;">Définissez vos créneaux type pour chaque jour, puis appliquez-les sur plusieurs semaines d'un coup.</div>
         </div>
         <div id="wk-template"></div>
@@ -255,7 +271,7 @@
           <button class="btn btn-secondary btn-sm" id="btn-save-template">Enregistrer le modèle</button>
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-size:.82rem;color:var(--gris);">Appliquer sur</span>
-            <select id="wk-weeks" style="padding:7px 9px;border:1.5px solid var(--bord);border-radius:8px;font-size:.85rem;">
+            <select id="wk-weeks" style="padding:7px 9px;font-size:.85rem;">
               <option value="4">4 semaines</option>
               <option value="8" selected>8 semaines</option>
               <option value="12">12 semaines</option>
@@ -263,15 +279,15 @@
           </div>
           <button class="btn btn-primary btn-sm" id="btn-apply-template">Appliquer</button>
         </div>
-        <p style="font-size:.74rem;color:var(--gris);margin-top:10px;">💡 Laissez un jour sans créneau pour être indisponible ce jour-là (ex. tous les dimanches). Les créneaux déjà réservés ne sont jamais supprimés.</p>
+        <p style="font-size:.74rem;color:var(--gris);margin-top:10px;">Laissez un jour sans créneau pour être indisponible ce jour-là (ex. tous les dimanches). Les créneaux déjà réservés ne sont jamais supprimés.</p>
       </div>
 
-      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
+      <div class="panel-d">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <strong id="cal-month-label"></strong>
+          <strong id="cal-month-label" style="text-transform:capitalize;"></strong>
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)">‹</button>
-            <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)">›</button>
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)" aria-label="Mois précédent">‹</button>
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)" aria-label="Mois suivant">›</button>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;">
@@ -285,7 +301,7 @@
         </div>
         <div class="cal-grid" id="cal-grid"></div>
         <div style="margin-top:14px;">
-          <p style="font-size:.8rem;color:var(--gris);margin-bottom:10px;">Cliquez sur un jour pour définir vos créneaux horaires</p>
+          <p style="font-size:.8rem;color:var(--gris);margin-bottom:10px;">Cliquez sur un jour pour définir ses créneaux. En vert : les jours où vous avez ouvert des créneaux.</p>
           <div id="slots-editor" style="display:none;background:var(--rose-cl);border-radius:10px;padding:14px;">
             <p style="font-weight:700;font-size:.88rem;color:var(--rose);margin-bottom:10px;">Créneaux pour le <span id="slot-date-label"></span></p>
             <div id="slots-checkboxes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
@@ -304,8 +320,8 @@
     <!-- ═══ ONGLET DEMANDES ═══ -->
     <div id="tab-demandes" style="display:none;">
       <div style="margin-bottom:16px;">
-        <h2 style="font-size:1.1rem;font-weight:800;">Demandes de réservation</h2>
-        <p style="font-size:.82rem;color:var(--gris);">Consultez la fiche diagnostic de la cliente, ajustez le déplacement, puis validez le devis.</p>
+        <h2 style="font-size:1.1rem;font-weight:800;">Demandes reçues</h2>
+        <p style="font-size:.82rem;color:var(--gris);">Lisez le besoin de la cliente, puis répondez-lui par un devis.</p>
       </div>
       <div id="demandes-list"><div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div></div>
     </div>
@@ -356,10 +372,10 @@
         <button class="btn btn-primary" id="btn-save-profile">Enregistrer le profil</button>
       </div>
 
-      <div style="margin-top:24px;border:1px solid #FECACA;background:#FEF2F2;border-radius:var(--radius);padding:18px;">
-        <p style="color:#991B1B;font-weight:800;font-size:.9rem;margin-bottom:6px;">Supprimer mon compte</p>
-        <p style="font-size:.8rem;color:#7F1D1D;margin-bottom:12px;">Action définitive : profil, prestations, disponibilités, devis, demandes, messages et diagnostics seront supprimés (droit à l'effacement — RGPD).</p>
-        <button class="btn btn-sm" style="background:#DC2626;color:#fff;" id="btn-delete-account">Supprimer définitivement mon compte</button>
+      <div class="danger-zone" style="margin-top:24px;">
+        <p class="dz-title">Supprimer mon compte</p>
+        <p>Action définitive : profil, prestations, disponibilités, devis, demandes, messages et diagnostics seront supprimés (droit à l'effacement — RGPD).</p>
+        <button class="btn btn-sm btn-danger" id="btn-delete-account">Supprimer définitivement mon compte</button>
       </div>
     </div>
 
@@ -367,10 +383,10 @@
     <div id="tab-photos" style="display:none;">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Mon portfolio</h2>
       <label class="upload-zone" for="photo-input">
-        <input type="file" id="photo-input" accept="image/*" multiple/>
-        <div style="font-size:2rem;margin-bottom:8px;">📸</div>
+        <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp" multiple/>
+        <div style="font-size:1.8rem;line-height:0;margin-bottom:12px;color:var(--gb-ink-2);" data-ico="image"></div>
         <p style="font-weight:700;margin-bottom:4px;">Ajouter des photos</p>
-        <p style="font-size:.8rem;color:var(--gris);">JPG, PNG — max 5 Mo par photo</p>
+        <p style="font-size:.8rem;color:var(--gris);">JPG, PNG ou WebP — 5 Mo maximum par photo. La première sert de couverture dans les résultats de recherche.</p>
       </label>
       <div class="photos-preview" id="photos-preview"></div>
     </div>
@@ -379,14 +395,15 @@
     <div id="tab-services" style="display:none;">
       <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px;">Mes prestations</h2>
       <div id="services-list-dash"></div>
-      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-top:16px;">
-        <p style="font-weight:800;margin-bottom:14px;">Ajouter une prestation</p>
+      <div class="panel-d" style="margin-top:16px;">
+        <p style="font-weight:800;margin-bottom:4px;">Ajouter une prestation</p>
+        <p style="font-size:.8rem;color:var(--gris);margin-bottom:14px;">Sans prestation tarifée, votre profil affiche « Sur devis » et vos clientes vous décrivent leur besoin.</p>
         <div class="form-row">
           <div class="field"><label>Nom</label><input type="text" id="svc-name" placeholder="Maquillage mariée"/></div>
-          <div class="field"><label>Prix (€)</label><input type="number" id="svc-price" placeholder="150" min="0"/></div>
+          <div class="field"><label>Prix (€)</label><input type="number" id="svc-price" placeholder="150" min="1" step="1" inputmode="decimal"/></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Durée (min)</label><input type="number" id="svc-duration" placeholder="90" min="15" step="15"/></div>
+          <div class="field"><label>Durée (min)</label><input type="number" id="svc-duration" value="60" min="15" step="15" inputmode="numeric"/></div>
           <div class="field"><label>Catégorie</label>
             <select id="svc-category">
               <option value="mariage">Mariage</option><option value="soiree">Soirée</option>
@@ -401,7 +418,7 @@
     </div>
     <!-- ═══ ONGLET MON ESPACE ═══ -->
     <div id="tab-espace" style="display:none;">
-      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Mon espace</h2>
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">Apparence de mon profil</h2>
       <p style="font-size:.85rem;color:var(--gris);margin-bottom:24px;">Personnalisez l'apparence de votre profil public</p>
 
       <!-- Aperçu live -->
@@ -411,88 +428,91 @@
         </div>
         <div class="preview-body">
           <div class="preview-name" id="prev-name">Votre nom</div>
-          <div style="font-size:.72rem;color:#888;margin-bottom:4px;">📍 Votre ville</div>
-          <div style="font-size:.7rem;color:#888;">★★★★★ · Maquillage mariée · Soirée</div>
+          <div style="font-size:.72rem;color:var(--gris);margin-bottom:4px;">Votre ville</div>
+          <div style="font-size:.7rem;color:var(--gris);">Mariage · Soirée</div>
           <div class="preview-btn" id="prev-btn">Réserver ce créneau</div>
         </div>
       </div>
 
       <!-- Palette -->
-      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
-        <p style="font-weight:800;margin-bottom:14px;">🎨 Palette de couleurs</p>
+      <div class="panel-d" style="margin-bottom:16px;">
+        <p style="font-weight:800;margin-bottom:14px;">Couleur d'accent</p>
         <div class="palette-grid" id="palette-grid"></div>
       </div>
 
       <!-- Photo de couverture -->
-      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
-        <p style="font-weight:800;margin-bottom:6px;">🖼️ Photo de couverture</p>
+      <div class="panel-d" style="margin-bottom:16px;">
+        <p style="font-weight:800;margin-bottom:6px;">Photo de couverture</p>
         <p style="font-size:.8rem;color:var(--gris);margin-bottom:14px;">La grande bannière en haut de votre profil</p>
         <label class="upload-zone" for="cover-input" style="padding:20px;">
           <input type="file" id="cover-input" accept="image/*"/>
-          <div style="font-size:1.5rem;margin-bottom:6px;">📷</div>
+          <div style="font-size:1.5rem;line-height:0;margin-bottom:10px;color:var(--gb-ink-2);" data-ico="camera"></div>
           <p style="font-weight:700;font-size:.85rem;margin-bottom:2px;">Choisir une photo de couverture</p>
           <p style="font-size:.75rem;color:var(--gris);">JPG, PNG — max 5 Mo</p>
         </label>
         <div id="cover-preview-wrap" style="display:none;margin-top:12px;position:relative;">
           <img id="cover-preview-img" src="" style="width:100%;height:120px;object-fit:cover;border-radius:10px;" alt=""/>
-          <button onclick="removeCover()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:.75rem;cursor:pointer;">✕ Supprimer</button>
+          <button type="button" onclick="removeCover()" style="position:absolute;top:6px;right:6px;background:rgba(14,14,16,.78);color:var(--gb-ink);border:none;border-radius:6px;padding:4px 8px;font-size:.75rem;cursor:pointer;">Retirer</button>
         </div>
       </div>
 
       <!-- Sections visibles -->
-      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:16px;">
-        <p style="font-weight:800;margin-bottom:14px;">📋 Sections affichées</p>
+      <div class="panel-d" style="margin-bottom:16px;">
+        <p style="font-weight:800;margin-bottom:14px;">Sections affichées</p>
         <div class="section-toggle">
-          <div><div class="toggle-label">📸 Portfolio photos</div><div class="toggle-desc">Galerie de vos réalisations</div></div>
+          <div><div class="toggle-label">Portfolio photos</div><div class="toggle-desc">Galerie de vos réalisations</div></div>
           <label class="switch"><input type="checkbox" id="sec-portfolio" checked/><span class="slider"></span></label>
         </div>
         <div class="section-toggle">
-          <div><div class="toggle-label">💰 Prestations & Tarifs</div><div class="toggle-desc">Liste de vos services avec prix</div></div>
+          <div><div class="toggle-label">Prestations &amp; tarifs</div><div class="toggle-desc">Masqué : votre profil affiche « Sur devis »</div></div>
           <label class="switch"><input type="checkbox" id="sec-services" checked/><span class="slider"></span></label>
         </div>
         <div class="section-toggle">
-          <div><div class="toggle-label">⭐ Avis clients</div><div class="toggle-desc">Les évaluations de vos clientes</div></div>
+          <div><div class="toggle-label">Avis clientes</div><div class="toggle-desc">Les évaluations de vos clientes</div></div>
           <label class="switch"><input type="checkbox" id="sec-avis" checked/><span class="slider"></span></label>
         </div>
         <div class="section-toggle">
-          <div><div class="toggle-label">🔗 Réseaux sociaux</div><div class="toggle-desc">Instagram, TikTok, YouTube...</div></div>
+          <div><div class="toggle-label">Réseaux sociaux</div><div class="toggle-desc">Instagram, TikTok, YouTube...</div></div>
           <label class="switch"><input type="checkbox" id="sec-social" checked/><span class="slider"></span></label>
         </div>
       </div>
 
       <!-- CTA personnalisé -->
-      <div style="background:var(--blanc);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:20px;">
-        <p style="font-weight:800;margin-bottom:6px;">✏️ Texte du bouton de réservation</p>
+      <div class="panel-d" style="margin-bottom:20px;">
+        <p style="font-weight:800;margin-bottom:6px;">Texte du bouton de réservation</p>
         <p style="font-size:.8rem;color:var(--gris);margin-bottom:12px;">Ce que voient vos clientes sur le bouton principal</p>
-        <input type="text" id="cta-text" placeholder="Réserver ce créneau" maxlength="40" style="width:100%;padding:10px 12px;border:1.5px solid var(--bord);border-radius:8px;font-size:.9rem;"/>
+        <input type="text" id="cta-text" placeholder="Réserver ce créneau" maxlength="40" style="width:100%;padding:10px 12px;font-size:.9rem;"/>
         <div style="font-size:.72rem;color:var(--gris);margin-top:4px;text-align:right;" id="cta-counter">0/40</div>
       </div>
 
-      <button class="btn btn-primary" id="btn-save-espace">Enregistrer mon espace</button>
+      <button class="btn btn-primary" id="btn-save-espace">Enregistrer l'apparence</button>
       <a id="btn-public-profile" href="/artists.html" target="_blank" class="btn btn-ghost" style="margin-left:10px;">Voir mon profil public →</a>
     </div>
 
   </main>
 </div>
 
-<!-- Mobile bottom nav -->
-<div class="mobile-nav">
+<!-- Barre du bas (mobile) -->
+<nav class="mobile-nav" aria-label="Navigation">
   <div class="mobile-nav-inner">
-    <div class="mobile-nav-item active" onclick="showTab('disponibilites',this);document.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
-      <span class="mn-icon">📅</span>Dispo
-    </div>
-    <div class="mobile-nav-item" onclick="showTab('reservations',this);document.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
-      <span class="mn-icon">📋</span>Réservations
-    </div>
-    <div class="mobile-nav-item" onclick="showTab('profil',this);document.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
-      <span class="mn-icon">✏️</span>Profil
-    </div>
-    <div class="mobile-nav-item" onclick="showTab('photos',this);document.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
-      <span class="mn-icon">🖼️</span>Photos
-    </div>
-    <div class="mobile-nav-item" onclick="showTab('services',this);document.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
-      <span class="mn-icon">💰</span>Tarifs
-    </div>
+    <button type="button" class="mobile-nav-item" id="mnav-dem" data-tab="demandes"><span data-ico="inbox"></span>Demandes</button>
+    <button type="button" class="mobile-nav-item" data-tab="devis"><span data-ico="doc"></span>Devis</button>
+    <a class="mobile-nav-item" id="mnav-msg" href="/messages.html"><span data-ico="chat"></span>Messages</a>
+    <button type="button" class="mobile-nav-item" data-tab="profil"><span data-ico="user"></span>Profil</button>
+    <button type="button" class="mobile-nav-item" id="mnav-more" aria-haspopup="true"><span data-ico="more"></span>Plus</button>
+  </div>
+</nav>
+<div class="more-sheet" id="more-sheet">
+  <div class="sheet" role="menu">
+    <div class="grab"></div>
+    <a class="nav-item" data-tab="reservations"><span data-ico="check"></span> Réservations</a>
+    <a class="nav-item" data-tab="disponibilites"><span data-ico="calendar"></span> Disponibilités</a>
+    <a class="nav-item" data-tab="avis"><span data-ico="star"></span> Avis clientes</a>
+    <a class="nav-item" data-tab="photos"><span data-ico="image"></span> Portfolio</a>
+    <a class="nav-item" data-tab="services"><span data-ico="tag"></span> Prestations &amp; tarifs</a>
+    <a class="nav-item" data-tab="espace"><span data-ico="palette"></span> Apparence</a>
+    <a class="nav-item" id="m-link-public" href="/artists.html" target="_blank" rel="noopener"><span data-ico="eye"></span> Voir mon profil public</a>
+    <a class="nav-item" id="m-logout" href="#"><span data-ico="logout"></span> Déconnexion</a>
   </div>
 </div>
 
@@ -504,10 +524,13 @@ import { listMyQuotes, getShareToken, signatureUrl, deleteQuote } from '/js/devi
 import { euros } from '/js/devis/model.js';
 import { listArtistRequests, validateRequestToQuote, declineRequest } from '/js/booking/store.js';
 import { myConversations } from '/js/chat/store.js';
+import { ICON, localISODate, parseLocalDate, safeUrl } from '/js/utils.js';
+
+document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ICON[el.dataset.ico] || ''; });
 
 // Auth check
 const user = await getCurrentUser();
-if (!user) { location.href = '/auth/login.html'; }
+if (!user) { location.href = '/auth/login.html?redirect=' + encodeURIComponent(location.pathname); await new Promise(() => {}); }
 
 let artistData = null, profileData = null;
 let calDate = new Date(); calDate.setDate(1);
@@ -530,6 +553,9 @@ async function init() {
   const profile = profileRes.data;
   const artist = artistRes.data;
 
+  // Une cliente qui arrive ici par erreur n'a rien à y faire : on ne lui crée pas de fiche artiste.
+  if (!artist && profile?.role === 'client') { location.replace('/mes-devis.html'); return; }
+
   // Auto-créer profil si absent (INSERT seulement, pas upsert)
   if (!profile) {
     const name = user.user_metadata?.full_name || user.email.split('@')[0];
@@ -545,25 +571,26 @@ async function init() {
 
   // Auto-créer artiste si absent (INSERT seulement, jamais écraser is_active)
   if (!artist) {
-    await supabase.from('artists').insert({ user_id: user.id, display_name: profile?.full_name || user.email.split('@')[0], is_active: false, is_verified: false, rating_avg: 5, review_count: 0 });
+    const wanted = user.user_metadata?.display_name || profile?.full_name || user.email.split('@')[0];
+    await supabase.from('artists').insert({ user_id: user.id, display_name: wanted, is_active: false });
     const { data: newArtist } = await supabase.from('artists').select('*').eq('user_id', user.id).maybeSingle();
     artistData = newArtist;
   } else {
     artistData = artist;
   }
-  if (artist?.id) {
-    const url = artist.slug ? `/artiste/${encodeURIComponent(artist.slug)}` : `/artist.html?id=${artist.id}`;
-    const link = document.getElementById('link-public-profile');
-    if (link) link.href = url;
-    const btn = document.getElementById('btn-public-profile');
-    if (btn) btn.href = url;
+  if (!artistData?.id) {
+    document.querySelector('.dash-main').innerHTML = '<div class="state-msg"><h2>Tableau de bord indisponible</h2><p>Votre fiche n’a pas pu être chargée. Rechargez la page dans un instant.</p><a class="btn btn-primary" href="/dashboard/artist.html">Recharger</a></div>';
+    return;
+  }
+  {
+    const a = artistData;
+    const url = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : `/artist.html?id=${a.id}`;
+    ['link-public-profile', 'btn-public-profile', 'm-link-public'].forEach(id => { const el = document.getElementById(id); if (el) el.href = url; });
+    const n = parseInt(a.review_count) || 0;
+    document.getElementById('stat-rating').textContent = n ? (Number(a.rating_avg) || 5).toFixed(1).replace('.', ',') + ' ★' : '–';
+    renderActive(a.is_active);
   }
   if (artist) {
-    document.getElementById('stat-rating').textContent = (artist.rating_avg||5).toFixed(1)+'★';
-    document.getElementById('btn-toggle-active').textContent = artist.is_active ? 'Désactiver' : 'Activer mon profil';
-    document.getElementById('active-badge').textContent = artist.is_active ? '⬤ Profil actif' : '⬤ Profil inactif';
-    document.getElementById('active-badge').style.background = artist.is_active ? '#D1FAE5' : '#FEE2E2';
-    document.getElementById('active-badge').style.color = artist.is_active ? '#065F46' : '#991B1B';
     document.getElementById('p-display-name').value = artist.display_name || '';
     document.getElementById('p-bio').value       = artist.bio || '';
     document.getElementById('p-instagram').value = artist.instagram || '';
@@ -575,12 +602,39 @@ async function init() {
     });
   }
   loadBookings('all');
+  loadStats();
   renderCalendar();
   loadTemplate();
   loadReviews();
   loadPhotos();
   loadServices();
+  // Premier écran : les demandes — c'est là que le travail arrive
+  showTab('demandes');
   updateNavBadges();
+  // Le diagnostic visage n'apparaît dans le menu que s'il est réellement branché côté serveur
+  fetch('/api/config').then(r => r.json()).then(c => { if (c.diagnosticEnabled) document.getElementById('nav-diag').hidden = false; }).catch(() => {});
+}
+
+function renderActive(on) {
+  const badge = document.getElementById('active-badge');
+  badge.textContent = on ? 'Profil en ligne' : 'Profil hors ligne';
+  badge.className = 'badge ' + (on ? 'is-ok' : 'is-info');
+  const btn = document.getElementById('btn-toggle-active');
+  btn.textContent = on ? 'Mettre hors ligne' : 'Mettre mon profil en ligne';
+  btn.className = 'btn btn-sm ' + (on ? 'btn-ghost' : 'btn-primary');
+}
+
+// Chiffres du mois : calculés à part, pour ne pas dépendre du filtre affiché dans la liste
+async function loadStats() {
+  const now = new Date();
+  const first = localISODate(new Date(now.getFullYear(), now.getMonth(), 1));
+  const next  = localISODate(new Date(now.getFullYear(), now.getMonth() + 1, 1));
+  const { data } = await supabase.from('bookings').select('status, services(price_cents)')
+    .eq('artist_id', artistData.id).gte('date', first).lt('date', next).in('status', ['pending', 'confirmed', 'done']);
+  const rows = data || [];
+  const paid = rows.filter(b => b.status !== 'pending');
+  document.getElementById('stat-reservations').textContent = rows.length;
+  document.getElementById('stat-revenue').textContent = Math.round(paid.reduce((s, b) => s + (b.services?.price_cents || 0), 0) / 100).toLocaleString('fr-FR') + ' €';
 }
 
 // Badges de non-lus dans la navigation
@@ -591,8 +645,12 @@ function setBadge(id, n) {
   else if (b) b.remove();
 }
 async function updateNavBadges() {
-  try { const c = await myConversations(); setBadge('nav-msg', (c||[]).reduce((s,x)=>s+(Number(x.unread)||0),0)); } catch {}
-  try { const r = await listArtistRequests('pending'); setBadge('nav-dem', (r||[]).length); } catch {}
+  try { const c = await myConversations(); const n = (c||[]).reduce((s,x)=>s+(Number(x.unread)||0),0); setBadge('nav-msg', n); setBadge('mnav-msg', n); } catch {}
+  try {
+    const r = (await listArtistRequests('pending')).filter(x => x.artistId === artistData.id);
+    setBadge('nav-dem', r.length); setBadge('mnav-dem', r.length);
+    document.getElementById('stat-requests').textContent = r.length;
+  } catch {}
 }
 
 // Suppression de compte
@@ -619,23 +677,17 @@ async function loadBookings(filter) {
   const { data } = await q;
   const list = document.getElementById('bookings-list');
   if (!data || data.length === 0) {
-    list.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Aucune réservation</p>';
-    document.getElementById('stat-reservations').textContent = '0';
-    document.getElementById('stat-revenue').textContent      = '0€';
+    list.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Aucune réservation' + (filter === 'all' ? ' pour le moment. Elles arrivent ici quand une cliente réserve un créneau sur votre agenda.' : ' dans cette catégorie.') + '</p>';
     return;
   }
-  const thisMonth = new Date().getMonth();
-  const monthBookings = data.filter(b => new Date(b.date).getMonth() === thisMonth);
-  document.getElementById('stat-reservations').textContent = monthBookings.length;
-  document.getElementById('stat-revenue').textContent = monthBookings.reduce((s,b) => s + (b.services?.price_cents||0), 0)/100 + '€';
-  const statusLabel = {confirmed:'Confirmée',pending:'En attente',cancelled:'Annulée'};
+  const statusLabel = {confirmed:'Confirmée',pending:'En attente',cancelled:'Annulée',done:'Terminée'};
   list.innerHTML = data.map(b => {
-    const d = new Date(b.date);
-    const st = ['confirmed','pending','cancelled'].includes(b.status) ? b.status : 'pending';
+    const d = parseLocalDate(b.date);
+    const st = ['confirmed','pending','cancelled'].includes(b.status) ? b.status : (b.status === 'done' ? 'confirmed' : 'pending');
     const actions = st === 'pending'
       ? `<div style="display:flex;gap:6px;flex-shrink:0;">
-           <button class="btn btn-primary btn-sm" data-bid="${esc(b.id)}" onclick="confirmBooking(this.dataset.bid)">✓ Confirmer</button>
-           <button class="btn btn-ghost btn-sm" style="color:#991B1B;" data-bid="${esc(b.id)}" onclick="refuseBooking(this.dataset.bid)">Refuser</button>
+           <button class="btn btn-primary btn-sm" data-bid="${esc(b.id)}" onclick="confirmBooking(this.dataset.bid)">Confirmer</button>
+           <button class="btn btn-ghost btn-sm" data-bid="${esc(b.id)}" onclick="refuseBooking(this.dataset.bid)">Refuser</button>
          </div>`
       : '';
     return `<div class="booking-row">
@@ -644,7 +696,7 @@ async function loadBookings(filter) {
         <div class="client-name">${esc(b.client_name || 'Cliente')}</div>
         <div class="booking-meta">${esc(b.services?.name || '–')} · ${esc(b.time_slot)} · ${esc(b.client_phone||'')}</div>
       </div>
-      <span class="booking-status status-${st}">${statusLabel[st]}</span>
+      <span class="booking-status status-${st}">${statusLabel[b.status] || statusLabel[st]}</span>
       ${actions}
     </div>`;
   }).join('');
@@ -652,25 +704,35 @@ async function loadBookings(filter) {
 window.confirmBooking = async function(id) {
   const { error } = await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', id);
   if (error) { showToast('Erreur lors de la confirmation'); return; }
-  showToast('Réservation confirmée !');
-  loadBookings(currentBookingFilter);
+  showToast('Réservation confirmée');
+  loadBookings(currentBookingFilter); loadStats();
 };
 window.refuseBooking = async function(id) {
   if (!confirm('Refuser cette réservation ? Le créneau sera libéré.')) return;
   const { error } = await supabase.rpc('cancel_booking', { p_booking_id: id });
   if (error) { showToast('Erreur lors du refus'); return; }
   showToast('Réservation refusée, créneau libéré');
-  loadBookings(currentBookingFilter);
+  loadBookings(currentBookingFilter); loadStats();
 };
 window.filterBookings = function(f, el) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   loadBookings(f);
 };
 
 // Calendrier
-function renderCalendar() {
+// Toutes les dates passent par localISODate() : date.toISOString() renvoie la veille en France
+// (minuit heure de Paris = 22 h ou 23 h UTC), ce qui ouvrait le 14 quand on cliquait sur le 15
+// et posait les créneaux du lundi sur le dimanche.
+async function renderCalendar() {
   const year = calDate.getFullYear(), month = calDate.getMonth();
+  let open = new Set();
+  try {
+    const { data } = await supabase.from('availabilities').select('date')
+      .eq('artist_id', artistData.id)
+      .gte('date', localISODate(new Date(year, month, 1))).lte('date', localISODate(new Date(year, month + 1, 0)));
+    open = new Set((data || []).map(r => r.date));
+  } catch (_) {}
   document.getElementById('cal-month-label').textContent = calDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
   const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month+1, 0).getDate();
@@ -680,14 +742,16 @@ function renderCalendar() {
     const date = new Date(year, month, d);
     const isPast = date < today;
     const isToday = date.getTime() === today.getTime();
-    html += `<div class="cal-day ${isPast?'past':''} ${isToday?'today':''}" onclick="openSlots('${date.toISOString().split('T')[0]}')">${d}</div>`;
+    const iso = localISODate(date);
+    html += `<div class="cal-day ${isPast?'past':''} ${isToday?'today':''} ${open.has(iso)?'available':''} ${iso===selectedCalDay?'selected':''}" data-date="${iso}" onclick="openSlots('${iso}')">${d}</div>`;
   }
   document.getElementById('cal-grid').innerHTML = html;
 }
 window.changeMonth = (dir) => { calDate.setMonth(calDate.getMonth()+dir); renderCalendar(); };
 window.openSlots = async function(dateStr) {
   selectedCalDay = dateStr;
-  document.getElementById('slot-date-label').textContent = new Date(dateStr).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  document.querySelectorAll('.cal-day').forEach(c => c.classList.toggle('selected', c.dataset.date === dateStr));
+  document.getElementById('slot-date-label').textContent = parseLocalDate(dateStr).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
   const { data } = await supabase.from('availabilities').select('time_slot,is_booked').eq('artist_id',artistData?.id).eq('date',dateStr);
   const booked = (data||[]).filter(s=>s.is_booked).map(s=>s.time_slot);
   const available = (data||[]).map(s=>s.time_slot);
@@ -699,11 +763,14 @@ window.openSlots = async function(dateStr) {
 };
 window.saveSlots = async function() {
   const checked = [...document.querySelectorAll('#slots-checkboxes input:checked')].map(c=>c.value);
-  await supabase.from('availabilities').delete().eq('artist_id',artistData?.id).eq('date',selectedCalDay).eq('is_booked',false);
-  if (checked.length) {
-    await supabase.from('availabilities').insert(checked.map(t=>({ artist_id:artistData?.id, date:selectedCalDay, time_slot:t, is_available:true, is_booked:false })));
+  const del = await supabase.from('availabilities').delete().eq('artist_id',artistData?.id).eq('date',selectedCalDay).eq('is_booked',false);
+  let ins = { error: null };
+  if (!del.error && checked.length) {
+    ins = await supabase.from('availabilities').insert(checked.map(t=>({ artist_id:artistData?.id, date:selectedCalDay, time_slot:t, is_available:true, is_booked:false })));
   }
-  showToast('Créneaux enregistrés !');
+  if (del.error || ins.error) { console.error(del.error || ins.error); showToast('Les créneaux n’ont pas pu être enregistrés.', 'error'); return; }
+  showToast('Créneaux enregistrés');
+  renderCalendar();
 };
 
 // ── Récurrence hebdomadaire ──
@@ -756,7 +823,7 @@ async function saveTemplate() {
   const rows = WEEKDAYS.map((_, wd) => ({ artist_id: artistData?.id, weekday: wd, slots: templateSlots[wd], updated_at: new Date().toISOString() }));
   const { error } = await supabase.from('availability_templates').upsert(rows, { onConflict: 'artist_id,weekday' });
   if (error) { console.error(error); showToast('Erreur lors de l\'enregistrement du modèle.'); return; }
-  showToast('Modèle enregistré ✅');
+  showToast('Semaine type enregistrée');
 }
 
 async function applyTemplate() {
@@ -764,11 +831,12 @@ async function applyTemplate() {
   if (!confirm(`Appliquer votre modèle sur les ${weeks} prochaines semaines ?\nLes créneaux non réservés de cette période seront remplacés par le modèle.`)) return;
   const start = new Date(); start.setHours(0,0,0,0);
   const end = new Date(start); end.setDate(end.getDate() + weeks*7);
-  const iso = (d) => d.toISOString().split('T')[0];
+  const iso = localISODate;
   // 1) supprimer les créneaux NON réservés de la période
-  await supabase.from('availabilities').delete()
+  const del = await supabase.from('availabilities').delete()
     .eq('artist_id', artistData?.id).eq('is_booked', false)
-    .gte('date', iso(start)).lte('date', iso(end));
+    .gte('date', iso(start)).lt('date', iso(end));
+  if (del.error) { console.error(del.error); showToast('Erreur lors de l\'application.', 'error'); return; }
   // 2) générer les créneaux du modèle (upsert en ignorant les doublons = créneaux réservés préservés)
   const rows = [];
   for (let d = new Date(start); d < end; d.setDate(d.getDate()+1)) {
@@ -779,7 +847,7 @@ async function applyTemplate() {
     const { error } = await supabase.from('availabilities').upsert(rows, { onConflict: 'artist_id,date,time_slot', ignoreDuplicates: true });
     if (error) { console.error(error); showToast('Erreur lors de l\'application.'); return; }
   }
-  showToast(`Modèle appliqué sur ${weeks} semaines ✅`);
+  showToast(`Semaine type appliquée sur ${weeks} semaines`);
   renderCalendar();
 }
 
@@ -790,12 +858,12 @@ document.getElementById('btn-apply-template')?.addEventListener('click', applyTe
 async function loadReviews() {
   const { data } = await supabase.from('reviews_public').select('*').eq('artist_id',artistData?.id).order('created_at',{ascending:false});
   const el = document.getElementById('reviews-dash');
-  if (!data||data.length===0) { el.innerHTML='<p style="color:var(--gris);text-align:center;padding:40px;">Aucun avis pour l\'instant.</p>'; return; }
+  if (!data||data.length===0) { el.innerHTML='<p style="color:var(--gris);text-align:center;padding:40px;">Aucun avis pour l\'instant. Vos clientes peuvent en laisser un après une prestation réservée sur GlamBook.</p>'; return; }
   el.innerHTML = data.map(r=>`
-    <div style="background:var(--blanc);border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <div style="background:var(--blanc);border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--gb-line);">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
         <strong style="font-size:.9rem;">${esc(r.reviewer_name||'Cliente')}</strong>
-        <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+        <span class="stars">${'★'.repeat(Math.max(0, Math.min(5, r.rating|0)))}${'☆'.repeat(5 - Math.max(0, Math.min(5, r.rating|0)))}</span>
       </div>
       <p style="font-size:.85rem;color:var(--gris);">${esc(r.comment||'')}</p>
       <p style="font-size:.72rem;color:var(--gris);margin-top:6px;">${new Date(r.created_at).toLocaleDateString('fr-FR')}</p>
@@ -804,22 +872,45 @@ async function loadReviews() {
 
 // Photos
 async function loadPhotos() {
-  const { data } = await supabase.from('artist_photos').select('*').eq('artist_id',artistData?.id).order('created_at',{ascending:false});
+  const { data } = await supabase.from('artist_photos').select('*').eq('artist_id',artistData?.id).order('created_at',{ascending:true});
   const prev = document.getElementById('photos-preview');
-  prev.innerHTML = (data||[]).map(ph=>`<img src="${ph.url}" alt="" loading="lazy">`).join('');
+  prev.innerHTML = (data||[]).filter(ph => safeUrl(ph.url)).map(ph=>`<div class="ph"><img src="${esc(ph.url)}" alt="" loading="lazy"><button type="button" class="ph-del" data-pid="${esc(ph.id)}" data-url="${esc(ph.url)}" aria-label="Retirer cette photo">${ICON.trash}</button></div>`).join('');
+  prev.querySelectorAll('.ph-del').forEach(btn => btn.addEventListener('click', async () => {
+    if (!confirm('Retirer cette photo de votre portfolio ?')) return;
+    const { error } = await supabase.from('artist_photos').delete().eq('id', btn.dataset.pid);
+    if (error) { console.error(error); showToast('La photo n’a pas pu être retirée.', 'error'); return; }
+    // Le fichier lui-même : on retrouve son chemin dans l'URL publique (…/portfolio/<chemin>)
+    const m = /\/portfolio\/(.+)$/.exec(btn.dataset.url || '');
+    if (m) supabase.storage.from('portfolio').remove([decodeURIComponent(m[1].split('?')[0])]).catch(() => {});
+    loadPhotos(); showToast('Photo retirée');
+  }));
+}
+const IMG_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const IMG_MAX = 5 * 1024 * 1024;
+function checkImage(file) {
+  if (!IMG_TYPES.includes(file.type)) return 'format non accepté (JPG, PNG ou WebP)';
+  if (file.size > IMG_MAX) return 'plus de 5 Mo';
+  return null;
 }
 document.getElementById('photo-input').addEventListener('change', async (e) => {
   const files = [...e.target.files];
-  for (const file of files) {
-    const ext  = file.name.split('.').pop();
-    const path = `${artistData?.id}/${Date.now()}.${ext}`;
-    const { data: up } = await supabase.storage.from('portfolio').upload(path, file, { upsert: true });
-    if (up) {
-      const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
-      await supabase.from('artist_photos').insert({ artist_id: artistData?.id, url: publicUrl });
-    }
+  let ok = 0; const refused = [];
+  for (const [i, file] of files.entries()) {
+    const why = checkImage(file);
+    if (why) { refused.push(`${file.name} : ${why}`); continue; }
+    const ext  = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[file.type];
+    const path = `${artistData?.id}/${Date.now()}-${i}.${ext}`;
+    const { data: up, error: upErr } = await supabase.storage.from('portfolio').upload(path, file, { upsert: false, contentType: file.type });
+    if (upErr || !up) { console.error(upErr); refused.push(`${file.name} : envoi impossible`); continue; }
+    const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
+    const { error: insErr } = await supabase.from('artist_photos').insert({ artist_id: artistData?.id, url: publicUrl });
+    if (insErr) { console.error(insErr); refused.push(`${file.name} : enregistrement impossible`); continue; }
+    ok++;
   }
-  loadPhotos(); showToast('Photos ajoutées !');
+  e.target.value = '';
+  loadPhotos();
+  if (refused.length) showToast((ok ? `${ok} photo${ok > 1 ? 's' : ''} ajoutée${ok > 1 ? 's' : ''}. ` : '') + 'Non ajoutée' + (refused.length > 1 ? 's' : '') + ' — ' + refused.join(' ; '), 'error');
+  else if (ok) showToast(ok > 1 ? `${ok} photos ajoutées` : 'Photo ajoutée');
 });
 
 // Services
@@ -827,33 +918,46 @@ async function loadServices() {
   const { data } = await supabase.from('services').select('*').eq('artist_id',artistData?.id).order('price_cents');
   const el = document.getElementById('services-list-dash');
   el.innerHTML = (data||[]).map(s=>`
-    <div style="background:var(--blanc);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <div style="background:var(--blanc);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--gb-line);">
       <div>
         <span style="font-weight:700;font-size:.92rem;">${esc(s.name)}</span>
         <span style="font-size:.78rem;color:var(--gris);margin-left:10px;">${esc(String(s.duration_min))} min</span>
         <p style="font-size:.78rem;color:var(--gris);margin-top:2px;">${esc(s.description||'')}</p>
       </div>
       <div style="display:flex;align-items:center;gap:12px;">
-        <strong style="color:var(--rose);">${(s.price_cents/100).toFixed(0)}€</strong>
-        <button class="btn btn-ghost btn-sm" data-sid="${esc(s.id)}" onclick="deleteService(this.dataset.sid)">✕</button>
+        <strong>${(s.price_cents/100).toLocaleString('fr-FR')} €</strong>
+        <button class="btn btn-ghost btn-sm" data-sid="${esc(s.id)}" onclick="deleteService(this.dataset.sid)" aria-label="Supprimer ${esc(s.name)}">${ICON.trash}</button>
       </div>
-    </div>`).join('') || '<p style="color:var(--gris);font-size:.85rem;padding:8px 0;">Aucune prestation définie</p>';
+    </div>`).join('') || '<p style="color:var(--gris);font-size:.85rem;padding:8px 0;">Aucune prestation tarifée : votre profil affiche « Sur devis ».</p>';
+  // Le « à partir de » du profil suit toujours la prestation la moins chère (y compris après une suppression)
+  const min = (data && data.length) ? Math.min(...data.map(s => s.price_cents)) / 100 : null;
+  if ((artistData.price_from ?? null) !== min && !(artistData.price_from != null && min != null && Number(artistData.price_from) === min)) {
+    const { error } = await supabase.from('artists').update({ price_from: min }).eq('id', artistData.id);
+    if (!error) artistData.price_from = min;
+  }
 }
 document.getElementById('btn-add-service').addEventListener('click', async () => {
-  const name     = document.getElementById('svc-name').value;
-  const price    = parseFloat(document.getElementById('svc-price').value) * 100;
-  const duration = parseInt(document.getElementById('svc-duration').value);
+  const name     = document.getElementById('svc-name').value.trim();
+  // Centimes entiers : 49,99 × 100 donne 4998,999… en virgule flottante, que la base refusait sans rien dire
+  const price    = Math.round(parseFloat(String(document.getElementById('svc-price').value).replace(',', '.')) * 100);
+  const duration = parseInt(document.getElementById('svc-duration').value) || 60;
   const category = document.getElementById('svc-category').value;
-  const desc     = document.getElementById('svc-desc').value;
-  if (!name || !price) { showToast('Remplissez le nom et le prix'); return; }
-  await supabase.from('services').insert({ artist_id: artistData?.id, name, price_cents: price, duration_min: duration, category, description: desc });
-  ['svc-name','svc-price','svc-duration','svc-desc'].forEach(id => document.getElementById(id).value='');
-  loadServices(); showToast('Prestation ajoutée !');
-  if (!artistData.price_from || price/100 < artistData.price_from) {
-    await supabase.from('artists').update({ price_from: price/100 }).eq('id', artistData.id);
-  }
+  const desc     = document.getElementById('svc-desc').value.trim();
+  if (!name) { showToast('Donnez un nom à la prestation.', 'error'); return; }
+  if (!Number.isFinite(price) || price < 100) { showToast('Indiquez un prix d’au moins 1 €.', 'error'); return; }
+  const { error } = await supabase.from('services').insert({ artist_id: artistData?.id, name, price_cents: price, duration_min: duration, category, description: desc || null });
+  if (error) { console.error(error); showToast('La prestation n’a pas pu être enregistrée.', 'error'); return; }
+  ['svc-name','svc-price','svc-desc'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('svc-duration').value = '60';
+  await loadServices(); showToast('Prestation ajoutée');
 });
-window.deleteService = async (id) => { await supabase.from('services').delete().eq('id',id); loadServices(); };
+window.deleteService = async (id) => {
+  if (!confirm('Supprimer cette prestation ?')) return;
+  const { error } = await supabase.from('services').delete().eq('id',id);
+  // Une prestation déjà réservée ne peut pas être supprimée (elle figure sur des réservations)
+  if (error) { console.error(error); showToast('Suppression impossible : cette prestation figure sur des réservations.', 'error'); return; }
+  loadServices();
+};
 
 // Save profil
 // Géocodage d'une ville française via la Base Adresse Nationale (gratuit, sans clé)
@@ -868,27 +972,40 @@ async function geocodeCity(city) {
 }
 
 document.getElementById('btn-save-profile').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-save-profile');
+  const val = (id) => document.getElementById(id).value.trim();
+  // Liens : seuls ceux en https:// sont affichés sur le profil. On complète ou on signale, plutôt que de les perdre en silence.
+  const links = {};
+  for (const k of ['instagram', 'tiktok', 'youtube', 'website']) {
+    let v = val('p-' + k);
+    if (v && !/^https?:\/\//i.test(v)) v = 'https://' + v.replace(/^\/+/, '');
+    v = v.replace(/^http:\/\//i, 'https://');
+    if (v && !safeUrl(v)) { showToast('Le lien « ' + k + ' » n’est pas une adresse valide.', 'error'); return; }
+    links[k] = v || null;
+    document.getElementById('p-' + k).value = v;
+  }
+  const fullName = val('p-name');
+  if (!fullName) { showToast('Indiquez votre prénom et votre nom.', 'error'); return; }
+  btn.disabled = true;
   const specialties = [...document.querySelectorAll('.spec-cb:checked')].map(c=>c.value);
-  const city = document.getElementById('p-city').value.trim();
+  const city = val('p-city');
   const coords = await geocodeCity(city);
-  await supabase.from('profiles').update({
-    full_name: document.getElementById('p-name').value,
+  const r1 = await supabase.from('profiles').update({
+    full_name: fullName,
     city,
     lat: coords ? coords.lat : null,
     lng: coords ? coords.lng : null,
   }).eq('user_id', user.id);
-  const displayName = document.getElementById('p-display-name').value.trim();
-  await supabase.from('artists').update({
-    bio:          document.getElementById('p-bio').value,
-    display_name: displayName || document.getElementById('p-name').value,
-    instagram:    document.getElementById('p-instagram').value,
-    tiktok:       document.getElementById('p-tiktok').value,
-    youtube:      document.getElementById('p-youtube').value,
-    website:      document.getElementById('p-website').value,
+  const r2 = await supabase.from('artists').update({
+    bio:          val('p-bio'),
+    display_name: val('p-display-name') || fullName,
+    ...links,
     specialties
   }).eq('user_id', user.id);
-  showToast('Profil enregistré !');
-  setTimeout(() => showTab('disponibilites', document.querySelector('[onclick*="disponibilites"]')), 1200);
+  btn.disabled = false;
+  if (r1.error || r2.error) { console.error(r1.error || r2.error); showToast('Le profil n’a pas pu être enregistré.', 'error'); return; }
+  if (profileData) { profileData.full_name = fullName; profileData.city = city; }
+  showToast(city && !coords ? 'Profil enregistré. Ville non reconnue : vous n’apparaîtrez pas dans la recherche par distance.' : 'Profil enregistré');
 });
 
 // Toggle actif
@@ -898,28 +1015,27 @@ document.getElementById('btn-toggle-active').addEventListener('click', async () 
   const { error } = await supabase.from('artists').update({ is_active: newVal }).eq('id', artistData.id);
   if (error) { showToast('Erreur : ' + error.message); return; }
   artistData.is_active = newVal;
-  document.getElementById('btn-toggle-active').textContent = newVal ? 'Désactiver' : 'Activer mon profil';
-  document.getElementById('active-badge').textContent = newVal ? '⬤ Profil actif' : '⬤ Profil inactif';
-  document.getElementById('active-badge').style.background = newVal ? '#D1FAE5' : '#FEE2E2';
-  document.getElementById('active-badge').style.color = newVal ? '#065F46' : '#991B1B';
-  showToast(newVal ? 'Profil activé — vous êtes visible !' : 'Profil désactivé');
+  renderActive(newVal);
+  showToast(newVal ? 'Votre profil est en ligne' : 'Votre profil n’est plus visible');
 });
 
 // Logout
-document.getElementById('btn-logout').addEventListener('click', async () => {
-  await supabase.auth.signOut(); location.href = '/';
-});
+['btn-logout', 'm-logout'].forEach(id => document.getElementById(id)?.addEventListener('click', async (e) => {
+  e.preventDefault();
+  try { await supabase.auth.signOut(); } catch (_) {}
+  location.href = '/';
+}));
 
 // ═══ MON ESPACE ═══
 const PALETTES = [
-  { id:'rose',      name:'Rose Signature', accent:'#E8547A', light:'#FDE8EF', cover:'linear-gradient(135deg,#3D0A20,#1A0A12)' },
-  { id:'or_noir',   name:'Noir & Or',      accent:'#D4AF37', light:'#FDF8E7', cover:'linear-gradient(135deg,#0D0D0D,#2a2a2a)' },
-  { id:'nude',      name:'Nude Beige',     accent:'#C8956C', light:'#FAF0E6', cover:'linear-gradient(135deg,#5C3D2E,#C8956C)' },
-  { id:'bordeaux',  name:'Bordeaux',       accent:'#8B1A2A', light:'#F9E8EA', cover:'linear-gradient(135deg,#8B1A2A,#2D0A0E)' },
-  { id:'bleu_nuit', name:'Bleu Nuit',      accent:'#4A6FA5', light:'#E8F0FA', cover:'linear-gradient(135deg,#0D1B2A,#1B3A6B)' },
-  { id:'emeraude',  name:'Émeraude',       accent:'#2E8B57', light:'#E8F5EE', cover:'linear-gradient(135deg,#0D2B1E,#1E5C3A)' },
-  { id:'violet',    name:'Violet',         accent:'#7B2D8B', light:'#F4E8FA', cover:'linear-gradient(135deg,#1A0A20,#4A1A5C)' },
-  { id:'corail',    name:'Corail',         accent:'#E8614A', light:'#FFE8E4', cover:'linear-gradient(135deg,#C0392B,#E8614A)' },
+  { id:'rose',      name:'Rose GlamBook', accent:'#E8547A', cover:'linear-gradient(135deg,#3D0A20,#1A0A12)' },
+  { id:'or_noir',   name:'Noir & or',     accent:'#D4AF37', cover:'linear-gradient(135deg,#0D0D0D,#2a2a2a)' },
+  { id:'nude',      name:'Nude',          accent:'#D9A982', cover:'linear-gradient(135deg,#5C3D2E,#C8956C)' },
+  { id:'bordeaux',  name:'Bordeaux',      accent:'#D9728A', cover:'linear-gradient(135deg,#8B1A2A,#2D0A0E)' },
+  { id:'bleu_nuit', name:'Bleu nuit',     accent:'#8FB0E0', cover:'linear-gradient(135deg,#0D1B2A,#1B3A6B)' },
+  { id:'emeraude',  name:'Émeraude',      accent:'#6FC29A', cover:'linear-gradient(135deg,#0D2B1E,#1E5C3A)' },
+  { id:'violet',    name:'Violet',        accent:'#C08AD0', cover:'linear-gradient(135deg,#1A0A20,#4A1A5C)' },
+  { id:'corail',    name:'Corail',        accent:'#F08A75', cover:'linear-gradient(135deg,#C0392B,#E8614A)' },
 ];
 
 let currentPalette = PALETTES[0];
@@ -930,8 +1046,8 @@ function initEspace() {
   // Render palette chips
   const grid = document.getElementById('palette-grid');
   grid.innerHTML = PALETTES.map(p => `
-    <div class="palette-chip ${p.id === currentPalette.id ? 'selected' : ''}"
-         style="background:${p.light};" onclick="selectPalette('${p.id}')">
+    <div class="palette-chip ${p.id === currentPalette.id ? 'selected' : ''}" data-pid="${p.id}"
+         style="background:var(--gb-surface-2);" onclick="selectPalette('${p.id}')">
       <div class="chip-dot" style="background:${p.accent};"></div>
       <div class="chip-name" style="color:${p.accent};">${p.name}</div>
     </div>`).join('');
@@ -975,8 +1091,7 @@ window.selectPalette = function(id) {
 
 function refreshPaletteGrid() {
   document.querySelectorAll('.palette-chip').forEach(chip => {
-    const id = chip.getAttribute('onclick').match(/'(\w+)'/)[1];
-    chip.classList.toggle('selected', id === currentPalette.id);
+    chip.classList.toggle('selected', chip.dataset.pid === currentPalette.id);
   });
 }
 
@@ -987,13 +1102,12 @@ function updateLivePreview() {
   const avatar = document.getElementById('prev-avatar');
 
   if (currentCoverUrl) {
-    cover.style.cssText = `height:80px;display:flex;align-items:flex-end;padding:8px 12px;background:url(${currentCoverUrl}) center/cover;`;
+    cover.style.cssText = `height:80px;display:flex;align-items:flex-end;padding:8px 12px;background:url("${encodeURI(currentCoverUrl)}") center/cover;`;
   } else {
     cover.style.cssText = `height:80px;display:flex;align-items:flex-end;padding:8px 12px;${p.cover.includes('gradient') ? 'background:' + p.cover : 'background:' + p.cover};`;
     cover.style.background = p.cover;
   }
   avatar.style.background = p.accent;
-  btn.style.background    = p.accent;
 
   const name = profileData?.full_name || 'Votre nom';
   document.getElementById('prev-name').textContent = name.split(' ')[0] + ' ' + (name.split(' ')[1]?.[0] || '') + '.';
@@ -1017,14 +1131,16 @@ window.removeCover = function() {
 document.getElementById('cover-input').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  const ext  = file.name.split('.').pop();
-  const path = `${artistData?.id}/cover.${ext}`;
-  const { data: up } = await supabase.storage.from('portfolio').upload(path, file, { upsert: true });
-  if (up) {
-    const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
-    showCoverPreview(publicUrl);
-    showToast('Photo de couverture uploadée !');
-  }
+  const why = checkImage(file);
+  if (why) { showToast('Photo refusée : ' + why, 'error'); e.target.value = ''; return; }
+  const ext  = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[file.type];
+  // Nom unique : avec un nom fixe, l'ancienne image restait affichée (cache) après remplacement
+  const path = `${artistData?.id}/cover-${Date.now()}.${ext}`;
+  const { data: up, error } = await supabase.storage.from('portfolio').upload(path, file, { upsert: false, contentType: file.type });
+  if (error || !up) { console.error(error); showToast('La photo n’a pas pu être envoyée.', 'error'); return; }
+  const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
+  showCoverPreview(publicUrl);
+  showToast('Photo prête — pensez à enregistrer l’apparence');
 });
 
 document.getElementById('btn-save-espace').addEventListener('click', async () => {
@@ -1042,36 +1158,45 @@ document.getElementById('btn-save-espace').addEventListener('click', async () =>
   const { error } = await supabase.from('artists').update({ profile_settings: settings }).eq('user_id', user.id);
   if (error) { showToast('Erreur lors de la sauvegarde', 'error'); return; }
   artistData.profile_settings = settings;
-  showToast('Votre espace a été enregistré !');
+  showToast('Apparence enregistrée');
 });
 
 // Navigation onglets
-window.showTab = function(name, triggerEl) {
-  ['reservations','disponibilites','avis','demandes','devis','profil','photos','services','espace'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
-  });
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  if (triggerEl) triggerEl.classList.add('active');
+const TABS = ['reservations','disponibilites','avis','demandes','devis','profil','photos','services','espace'];
+function showTab(name) {
+  if (!TABS.includes(name)) return;
+  TABS.forEach(t => { document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none'; });
+  // Même état actif dans la barre latérale, la barre du bas et la feuille « Plus »
+  document.querySelectorAll('[data-tab]').forEach(el => el.classList.toggle('active', el.dataset.tab === name));
+  const inBar = !!document.querySelector(`.mobile-nav-inner [data-tab="${name}"]`);
+  document.getElementById('mnav-more').classList.toggle('active', !inBar);
+  document.getElementById('more-sheet').classList.remove('open');
   if (name === 'espace') initEspace();
   if (name === 'devis') loadDevis();
   if (name === 'demandes') loadDemandes();
-};
+  if (name === 'disponibilites') renderCalendar();
+  window.scrollTo({ top: 0 });
+}
+window.showTab = showTab;
+document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showTab(el.dataset.tab); }));
+document.getElementById('mnav-more').addEventListener('click', () => document.getElementById('more-sheet').classList.add('open'));
+document.getElementById('more-sheet').addEventListener('click', (e) => { if (e.target.id === 'more-sheet') e.currentTarget.classList.remove('open'); });
 
 // ── Demandes de réservation (avec diagnostic visage) ──
 let _requests = [];
 
 function diagnosticHtml(d) {
-  if (!d) return `<p style="font-size:.82rem;color:var(--gris);margin:8px 0;">Pas de diagnostic visage fourni.</p>`;
+  if (!d) return '';
   const chips = (arr) => (arr && arr.length) ? arr.map(x => `<span class="chip-d">${esc(x)}</span>`).join('') : '<span style="color:var(--gris);font-size:.8rem;">—</span>';
   return `<div style="background:var(--rose-cl);border-radius:10px;padding:12px 14px;margin:10px 0;">
-    <div style="font-weight:800;font-size:.8rem;color:var(--rose-f);margin-bottom:8px;">💄 Fiche diagnostic visage</div>
+    <div style="font-weight:800;font-size:.8rem;color:var(--gb-champagne);margin-bottom:8px;">Fiche diagnostic visage</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
       <span class="chip-d"><b>Sous-ton :</b> ${esc(d.sous_ton || '—')}</span>
       <span class="chip-d"><b>Peau :</b> ${esc(d.type_de_peau || '—')}</span>
     </div>
     <div style="font-size:.72rem;font-weight:700;color:var(--gris);margin:6px 0 4px;">Sensibilités / imperfections</div>${chips(d.sensibilite_ou_imperfections)}
     <div style="font-size:.72rem;font-weight:700;color:var(--gris);margin:8px 0 4px;">Recommandations produits</div>${chips(d.recommandations_produits)}
-    ${(d.produits_a_prevoir && d.produits_a_prevoir.length) ? `<div style="font-size:.72rem;font-weight:700;color:#8a6d1a;margin:8px 0 4px;">🧳 Produits à emporter</div>${chips(d.produits_a_prevoir)}` : ''}
+    ${(d.produits_a_prevoir && d.produits_a_prevoir.length) ? `<div style="font-size:.72rem;font-weight:700;color:var(--gb-champagne);margin:8px 0 4px;">Produits à emporter</div>${chips(d.produits_a_prevoir)}` : ''}
   </div>`;
 }
 
@@ -1084,40 +1209,46 @@ function reqPreviewTotal(r, km, rateEuros) {
 async function loadDemandes() {
   const box = document.getElementById('demandes-list');
   box.innerHTML = `<div style="color:var(--gris);text-align:center;padding:40px;">Chargement...</div>`;
-  try { _requests = await listArtistRequests('pending'); }
+  try { _requests = (await listArtistRequests('pending')).filter(r => r.artistId === artistData.id); }
   catch (e) { console.error(e); box.innerHTML = `<div style="color:var(--gris);text-align:center;padding:40px;">Impossible de charger les demandes.</div>`; return; }
 
   if (!_requests.length) {
-    box.innerHTML = `<div style="background:var(--blanc);border-radius:var(--radius);padding:40px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:2rem;margin-bottom:8px;">📭</div>
+    box.innerHTML = `<div class="panel-d" style="padding:40px;text-align:center;">
+      <div style="font-size:2rem;line-height:0;margin-bottom:16px;color:var(--gb-ink-3);">${ICON.inbox}</div>
       <p style="font-weight:700;">Aucune demande en attente</p>
-      <p style="font-size:.85rem;color:var(--gris);">Les nouvelles demandes de réservation apparaîtront ici.</p>
+      <p style="font-size:.85rem;color:var(--gris);max-width:44ch;margin:6px auto 0;">${artistData.is_active
+        ? 'Les demandes de devis de vos clientes arrivent ici. Un profil avec photos et présentation en reçoit davantage.'
+        : 'Votre profil est hors ligne : les clientes ne peuvent pas encore vous trouver. Complétez-le, puis mettez-le en ligne.'}</p>
     </div>`;
     return;
   }
 
   box.innerHTML = _requests.map(r => {
-    const dt = r.eventDate ? new Date(r.eventDate).toLocaleString('fr-FR', { dateStyle:'long', timeStyle:'short' }) : '—';
+    const dt = r.eventDate ? new Date(r.eventDate).toLocaleString('fr-FR', { dateStyle:'long', timeStyle:'short' }) : 'Date à préciser';
+    const priced = (r.services || []).length > 0;
     const p = reqPreviewTotal(r, 0, 0.5);
+    const received = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR', { day:'numeric', month:'long' }) : '';
     return `<div class="booking-row" style="display:block;padding:18px;" data-id="${esc(r.id)}">
       <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
         <div class="client-name" style="font-size:1rem;">${esc(r.clientName || 'Cliente')}</div>
-        <div style="font-size:.78rem;color:var(--gris);">${esc(r.clientEmail)} · ${esc(r.clientPhone || '—')}</div>
+        <div style="font-size:.78rem;color:var(--gris);">${received ? 'Reçue le ' + esc(received) : ''}</div>
       </div>
-      <div class="booking-meta" style="margin-bottom:8px;">📅 ${esc(dt)} — 📍 ${esc(r.eventAddress || '—')}</div>
+      <div class="booking-meta" style="margin-bottom:10px;display:flex;gap:6px 16px;flex-wrap:wrap;">
+        <span>${ICON.calendar} ${esc(dt)}</span>
+        <span>${ICON.pin} ${esc(r.eventAddress || 'Adresse à préciser')}</span>
+        <span>${ICON.mail} ${esc(r.clientEmail || '—')}${r.clientPhone ? ' · ' + esc(r.clientPhone) : ''}</span>
+      </div>
 
-      <div style="font-size:.72rem;font-weight:700;color:var(--gris);margin-bottom:4px;">Prestations demandées</div>
-      ${(r.services||[]).length
-        ? (r.services||[]).map(s => `<div style="display:flex;justify-content:space-between;font-size:.86rem;padding:3px 0;"><span>${esc(s.name)}</span><b>${esc(euros(s.price_cents))}</b></div>`).join('')
-        : `<div style="font-size:.86rem;color:var(--gris);padding:3px 0;">Aucune prestation au catalogue — devis à chiffrer librement.</div>`}
+      ${priced ? `<div style="font-size:.72rem;font-weight:700;color:var(--gris);margin-bottom:4px;">Prestations demandées</div>
+        ${r.services.map(s => `<div style="display:flex;justify-content:space-between;font-size:.86rem;padding:3px 0;"><span>${esc(s.name)}</span><b>${esc(euros(s.price_cents))}</b></div>`).join('')}` : ''}
       ${r.note ? `<div style="background:var(--surface-2);border-radius:10px;padding:10px 12px;margin-top:8px;">
-        <div style="font-weight:800;font-size:.75rem;color:var(--gris);margin-bottom:4px;">Message de la cliente</div>
+        <div style="font-weight:800;font-size:.75rem;color:var(--gris);margin-bottom:4px;">${priced ? 'Message de la cliente' : 'Son besoin'}</div>
         <div style="font-size:.86rem;white-space:pre-wrap;">${esc(r.note)}</div>
       </div>` : ''}
 
       ${diagnosticHtml(r.diagnostic)}
 
-      <div style="background:var(--surface-2);border-radius:10px;padding:12px 14px;margin-top:8px;">
+      ${priced ? `<div style="background:var(--surface-2);border-radius:10px;padding:12px 14px;margin-top:8px;">
         <div style="font-weight:800;font-size:.8rem;margin-bottom:10px;">Aperçu du devis</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:10px;">
           <div class="field" style="flex:1;min-width:120px;"><label>Déplacement (km)</label><input type="number" min="0" step="1" value="0" data-km="${esc(r.id)}"/></div>
@@ -1125,15 +1256,19 @@ async function loadDemandes() {
         </div>
         <div style="display:flex;justify-content:space-between;font-size:.86rem;"><span>Prestations</span><b>${esc(euros(p.svc))}</b></div>
         <div style="display:flex;justify-content:space-between;font-size:.86rem;"><span>Déplacement</span><b data-travel="${esc(r.id)}">${esc(euros(0))}</b></div>
-        <div style="display:flex;justify-content:space-between;font-size:1.05rem;font-weight:800;border-top:2px solid var(--rose);margin-top:6px;padding-top:8px;"><span>Total estimé</span><span style="color:var(--rose-f)" data-total="${esc(r.id)}">${esc(euros(p.svc))}</span></div>
-      </div>
+        <div style="display:flex;justify-content:space-between;font-size:1.05rem;font-weight:800;border-top:2px solid var(--rose);margin-top:6px;padding-top:8px;"><span>Total estimé</span><span data-total="${esc(r.id)}">${esc(euros(p.svc))}</span></div>
+      </div>` : ''}
 
-      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:flex-end;">
-        <button class="btn btn-ghost btn-sm" data-decline="${esc(r.id)}">Refuser</button>
-        <button class="btn btn-primary btn-sm" data-validate="${esc(r.id)}">Valider et envoyer le devis</button>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:flex-end;">
+        <button class="btn btn-quiet btn-sm" data-decline="${esc(r.id)}">Refuser</button>
+        ${priced
+          ? `<button class="btn btn-ghost btn-sm" data-edit="${esc(r.id)}">Ajuster le devis</button>
+             <button class="btn btn-primary btn-sm" data-validate="${esc(r.id)}">Envoyer le devis</button>`
+          : `<a class="btn btn-primary btn-sm" href="/dashboard/devis.html?request=${encodeURIComponent(r.id)}">Préparer le devis</a>`}
       </div>
     </div>`;
   }).join('');
+  box.querySelectorAll('button[data-edit]').forEach(btn => { btn.onclick = () => { location.href = '/dashboard/devis.html?request=' + encodeURIComponent(btn.getAttribute('data-edit')); }; });
 
   // Recalcul live du total par carte
   box.querySelectorAll('input[data-km], input[data-rate]').forEach(inp => {
@@ -1152,7 +1287,7 @@ async function loadDemandes() {
   box.querySelectorAll('button[data-decline]').forEach(btn => {
     btn.onclick = async () => {
       if (!confirm('Refuser cette demande ?')) return;
-      try { await declineRequest(btn.getAttribute('data-decline')); showToast('Demande refusée.'); loadDemandes(); }
+      try { await declineRequest(btn.getAttribute('data-decline')); showToast('Demande refusée.'); loadDemandes(); updateNavBadges(); }
       catch (e) { console.error(e); showToast('Action impossible.'); }
     };
   });
@@ -1172,11 +1307,11 @@ async function loadDemandes() {
           travelRateCents: Math.round((Number(rate) || 0) * 100),
           vatExempt: true,
         });
-        showToast(res.emailed ? 'Devis envoyé à la cliente par email ✅' : 'Devis créé — lien de signature prêt.');
-        loadDemandes();
+        showToast(res.emailed ? 'Devis envoyé à la cliente par email' : 'Devis créé. La cliente le retrouve dans son espace ; le lien de signature est dans l’onglet Devis.');
+        loadDemandes(); updateNavBadges();
       } catch (e) {
-        console.error(e); showToast(e.message || "Erreur lors de l'envoi.");
-        btn.disabled = false; btn.textContent = 'Valider et envoyer le devis';
+        console.error(e); showToast(e.message || "Erreur lors de l'envoi.", 'error');
+        btn.disabled = false; btn.textContent = 'Envoyer le devis';
       }
     };
   });
@@ -1184,9 +1319,9 @@ async function loadDemandes() {
 
 // ── Devis ──
 const DEVIS_STATUS = {
-  draft:    { label: 'Brouillon', cls: 'status-pending'   },
+  draft:    { label: 'Brouillon', cls: 'status-neutral'   },
   sent:     { label: 'Envoyé',    cls: 'status-pending'   },
-  signed:   { label: '✓ Signé',   cls: 'status-confirmed' },
+  signed:   { label: 'Signé',     cls: 'status-confirmed' },
   declined: { label: 'Refusé',    cls: 'status-cancelled' },
   expired:  { label: 'Expiré',    cls: 'status-cancelled' },
 };
@@ -1199,8 +1334,8 @@ async function loadDevis() {
   catch (e) { console.error(e); box.innerHTML = `<div style="color:var(--gris);text-align:center;padding:40px;">Impossible de charger les devis.</div>`; return; }
 
   if (!quotes.length) {
-    box.innerHTML = `<div style="background:var(--blanc);border-radius:var(--radius);padding:40px;text-align:center;box-shadow:var(--shadow);">
-      <div style="font-size:2rem;margin-bottom:8px;">🧾</div>
+    box.innerHTML = `<div class="panel-d" style="padding:40px;text-align:center;">
+      <div style="font-size:2rem;line-height:0;margin-bottom:16px;color:var(--gb-ink-3);">${ICON.doc}</div>
       <p style="font-weight:700;margin-bottom:4px;">Aucun devis pour le moment</p>
       <p style="font-size:.85rem;color:var(--gris);margin-bottom:16px;">Créez votre premier devis en quelques clics.</p>
       <a href="/dashboard/devis.html" class="btn btn-primary btn-sm">+ Nouveau devis</a>
@@ -1221,7 +1356,7 @@ async function loadDevis() {
         ${q.status !== 'signed' ? `<a class="btn btn-ghost btn-sm" href="/dashboard/devis.html?id=${esc(q.id)}">Éditer</a>` : ''}
         <button class="btn btn-ghost btn-sm" data-act="pdf"  data-id="${esc(q.id)}">PDF</button>
         ${q.status === 'sent' ? `<button class="btn btn-ghost btn-sm" data-act="link" data-id="${esc(q.id)}">Lien</button>` : ''}
-        <button class="btn btn-ghost btn-sm" data-act="del" data-id="${esc(q.id)}" title="Supprimer">🗑</button>
+        <button class="btn btn-ghost btn-sm" data-act="del" data-id="${esc(q.id)}" aria-label="Supprimer le devis">${ICON.trash}</button>
       </div>
     </div>`;
   }).join('');
@@ -1251,10 +1386,12 @@ async function loadDevis() {
   });
 }
 
-function showToast(msg) {
+function showToast(msg, type) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  t.textContent = msg; t.className = 'toast show' + (type === 'error' ? ' error' : '');
+  clearTimeout(showToast._t);
+  // Les messages longs (ou d'erreur) restent plus longtemps
+  showToast._t = setTimeout(() => t.classList.remove('show'), type === 'error' || msg.length > 60 ? 6000 : 2600);
 }
 
 init().catch(err => {

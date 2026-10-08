@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
   <title>Signer votre devis — GlamBook</title>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#E8547A"/>
+  <meta name="theme-color" content="#0E0E10"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
   <style>
     body { background: var(--gris-cl); }
     .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
-    .brand { text-align:center; font-size:1.3rem; font-weight:900; color:var(--rose); letter-spacing:-.03em; margin-bottom:16px; }
-    .brand span { color:var(--or); }
+    .brand { text-align:center; font-size:2rem; font-weight:800; font-stretch:var(--gb-condensed); text-transform:uppercase; color:var(--gb-ink); letter-spacing:.03em; margin-bottom:16px; }
+    .brand span { color:var(--gb-gold); }
 
     .card2 { background:var(--blanc); border:1px solid var(--bord); border-radius:var(--radius); box-shadow:var(--shadow); padding:22px; margin-bottom:16px; }
     .status-pill { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:700; padding:5px 12px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
-    .pill-sent   { background:var(--or-cl); color:#8a6d1a; }
-    .pill-signed { background:#E7F7EE; color:#1B8A4B; }
+    .pill-sent   { background:var(--gb-warn-tint); color:var(--gb-warn); }
+    .pill-signed { background:var(--gb-ok-tint); color:var(--gb-ok); }
 
     .head-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
     .q-no { font-size:.8rem; color:var(--gris); }
@@ -35,7 +35,7 @@
     table { width:100%; border-collapse:collapse; font-size:.86rem; margin-bottom:8px; }
     th { text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.04em; color:var(--gris); border-bottom:1.5px solid var(--bord); padding:8px 6px; }
     th.r, td.r { text-align:right; } th.c, td.c { text-align:center; }
-    td { padding:9px 6px; border-bottom:1px solid var(--gris-cl); }
+    td { padding:9px 6px; border-bottom:1px solid var(--gb-line); }
     tr:last-child td { border-bottom:none; }
 
     .totals { margin-left:auto; max-width:300px; margin-top:8px; }
@@ -50,14 +50,14 @@
     /* Signature */
     .sig-title { font-weight:800; font-size:1.05rem; margin-bottom:2px; }
     .sig-sub { font-size:.82rem; color:var(--gris); margin-bottom:14px; }
-    .pad-frame { position:relative; border:2px dashed var(--bord); border-radius:var(--radius-sm); background:var(--blanc); touch-action:none; }
+    .pad-frame { position:relative; border:2px dashed var(--gb-line-strong); border-radius:var(--radius-sm); background:var(--gb-paper); touch-action:none; }
     .pad-frame canvas { display:block; width:100%; height:200px; border-radius:var(--radius-sm); }
-    .pad-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#C9CDD4; font-size:.9rem; pointer-events:none; }
+    .pad-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:rgba(23,18,10,.38); font-size:.9rem; pointer-events:none; }
     .pad-hint.hidden { display:none; }
-    .baseline { position:absolute; left:16px; right:16px; bottom:44px; border-bottom:1.5px solid var(--bord); pointer-events:none; }
+    .baseline { position:absolute; left:16px; right:16px; bottom:44px; border-bottom:1.5px solid rgba(23,18,10,.22); pointer-events:none; }
     .name-field { margin:14px 0; }
     .name-field label { font-size:.75rem; font-weight:600; color:var(--gris); display:block; margin-bottom:5px; }
-    .name-field input { width:100%; font-family:inherit; font-size:.95rem; padding:11px 13px; border:1.5px solid var(--bord); border-radius:var(--radius-sm); }
+    .name-field input { width:100%; font-family:inherit; font-size:.95rem; padding:11px 13px; border:1.5px solid var(--bord); border-radius:var(--radius-sm); background:var(--gb-surface); color:var(--gb-ink); }
     .name-field input:focus { outline:none; border-color:var(--rose); }
     .sig-actions { display:flex; gap:10px; margin-top:14px; }
     .sig-actions .btn { flex:1; }
@@ -68,10 +68,6 @@
     .center-state h2 { font-size:1.2rem; font-weight:800; margin-bottom:6px; }
     .center-state p { color:var(--gris); font-size:.9rem; }
     .hide { display:none !important; }
-
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    .toast.error { background:var(--rose-f); }
   </style>
 </head>
 <body>
@@ -80,14 +76,12 @@
 
     <!-- Chargement -->
     <div id="loading" class="card2 center-state">
-      <div class="big">✨</div>
       <p>Chargement du devis…</p>
     </div>
 
     <!-- Introuvable -->
     <div id="notfound" class="card2 center-state hide">
-      <div class="big">🔍</div>
-      <h2>Devis introuvable</h2>
+            <h2>Devis introuvable</h2>
       <p>Ce lien n'est plus valide ou a expiré. Contactez votre maquilleuse pour en obtenir un nouveau.</p>
     </div>
 
@@ -150,8 +144,7 @@
 
       <!-- Déjà signé -->
       <div class="card2 center-state hide" id="signedBox">
-        <div class="big">✅</div>
-        <h2>Devis signé</h2>
+                <h2>Devis signé</h2>
         <p id="signedInfo"></p>
         <button class="btn btn-secondary" id="btnDownload" style="margin-top:16px">Télécharger le PDF signé</button>
       </div>
@@ -164,7 +157,6 @@
     import { computeTotals, euros } from '/js/devis/model.js';
     import { getQuoteByToken, signQuoteByToken } from '/js/devis/store.js';
     import { SignaturePad } from '/js/devis/signature-pad.js';
-    import { buildQuotePdf, downloadQuotePdf } from '/js/devis/pdf.js';
     import { showToast, esc } from '/js/utils.js';
 
     const $ = (id) => document.getElementById(id);
@@ -184,7 +176,7 @@
       const signed = quote.status === 'signed';
       const pill = $('statusPill');
       pill.className = 'status-pill ' + (signed ? 'pill-signed' : 'pill-sent');
-      pill.textContent = signed ? '✓ Signé' : 'À signer';
+      pill.textContent = signed ? 'Signé' : 'À signer';
 
       $('muaName').textContent = quote.mua.name;
       $('muaAddr').textContent = quote.mua.address || '';
@@ -270,7 +262,7 @@
         quote.signedAt = new Date().toISOString();
         pad.destroy();
         renderQuote();
-        showToast('Devis signé, merci ! 🎉');
+        showToast('Devis signé, merci.');
       } catch (e) {
         console.error(e);
         showToast("Erreur réseau, réessayez.", 'error');
@@ -278,7 +270,11 @@
       }
     }
 
-    $('btnDownload').onclick = () => { if (quote) downloadQuotePdf(quote); };
+    $('btnDownload').onclick = async () => {
+      if (!quote) return;
+      try { const { downloadQuotePdf } = await import('/js/devis/pdf.js'); downloadQuotePdf(quote); }
+      catch (e) { console.error(e); showToast('Le PDF ne peut pas être généré pour le moment.', 'error'); }
+    };
 
     (async () => {
       if (!token) { hide($('loading')); show($('notfound')); return; }

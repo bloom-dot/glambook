@@ -3,118 +3,105 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Inscription — GlamBook</title>
+  <title>Créer un compte — GlamBook</title>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#E8547A"/>
+  <meta name="theme-color" content="#0E0E10"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"/>
   <link rel="stylesheet" href="/css/main.css"/>
-  <script defer src="/js/theme.js"></script>
   <style>
-    body { background: linear-gradient(160deg, #0F0610 0%, #2D0818 40%, #1A0A12 100%); min-height: 100vh; display: flex; flex-direction: column; }
-    .auth-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-    .auth-card { background: var(--blanc); border-radius: 24px; padding: 44px 36px; width: 100%; max-width: 500px; box-shadow: 0 24px 80px rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.06); }
-    .auth-logo { text-align: center; margin-bottom: 24px; }
-    .auth-logo a { font-size: 1.5rem; font-weight: 900; color: var(--rose); text-decoration: none; letter-spacing: -.03em; }
-    .auth-logo a span { color: var(--or); }
-    .role-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+    .role-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 26px; }
     .role-btn {
-      padding: 16px 12px; border-radius: 14px; border: 2px solid var(--bord);
-      cursor: pointer; text-align: center; transition: all var(--transition); background: var(--blanc);
+      padding: 16px 12px; border-radius: 14px; border: 1.5px solid var(--gb-line-strong); color: var(--gb-ink);
+      cursor: pointer; text-align: center; transition: all var(--transition); background: transparent; font-family: inherit;
     }
-    .role-btn:hover { border-color: rgba(232,84,122,.3); }
-    .role-btn .role-icon { font-size: 1.5rem; margin-bottom: 6px; }
-    .role-btn .role-name { font-size: .88rem; font-weight: 700; }
-    .role-btn .role-desc { font-size: .72rem; color: var(--gris); margin-top: 2px; }
-    .role-btn.active { border-color: var(--rose); background: var(--rose-cl); box-shadow: 0 0 0 3px rgba(232,84,122,.1); }
-    .role-btn.active .role-name { color: var(--rose); }
-    .error-msg { background: #FEF2F2; color: #991B1B; border-radius: var(--radius-sm); padding: 12px 16px; font-size: .85rem; margin-bottom: 16px; display: none; border: 1px solid #FECACA; }
-    .success-msg { background: #ECFDF5; color: #065F46; border-radius: var(--radius-sm); padding: 12px 16px; font-size: .85rem; margin-bottom: 16px; display: none; border: 1px solid #A7F3D0; }
+    .role-btn:hover { border-color: var(--gb-champagne); }
+    .role-btn .role-icon { font-size: 1.5rem; line-height: 0; margin-bottom: 8px; color: var(--gb-ink-2); display: block; }
+    .role-btn .role-name { font-size: .88rem; font-weight: 700; display: block; }
+    .role-btn .role-desc { font-size: .72rem; color: var(--gb-ink-2); margin-top: 2px; display: block; }
+    .role-btn[aria-pressed="true"] { border-color: var(--gb-gold); background: var(--gb-gold-tint); }
+    .role-btn[aria-pressed="true"] .role-name, .role-btn[aria-pressed="true"] .role-icon { color: var(--gb-champagne); }
     .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 420px) { .name-row { grid-template-columns: 1fr; gap: 0; } }
     .artist-fields { display: none; }
     .artist-fields.show { display: block; }
-    .auth-footer { text-align: center; font-size: .85rem; color: var(--gris); margin-top: 20px; }
-    .auth-footer a { color: var(--rose); font-weight: 600; text-decoration: none; transition: opacity .15s; }
-    .auth-footer a:hover { opacity: .75; }
+    .artist-note { background: var(--gb-gold-tint); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: .82rem; color: var(--gb-champagne); }
+    .consent { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: .82rem; color: var(--gb-ink-2); margin-bottom: 18px; }
+    .consent input { margin-top: 3px; accent-color: var(--gb-gold); }
   </style>
 </head>
-<body>
-<nav class="nav" style="background:transparent;border:none;position:absolute;width:100%;">
+<body class="auth">
+<nav class="nav">
   <div class="nav-inner">
-    <a href="/" class="nav-logo" style="color:#fff;">Glam<span>Book</span></a>
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
   </div>
 </nav>
 
-<div class="auth-wrap">
-  <div class="auth-card">
-    <div class="auth-logo"><a href="/">Glam<span>Book</span></a></div>
-    <h1 style="font-size:1.3rem;font-weight:800;text-align:center;margin-bottom:6px;">Créer mon compte</h1>
-    <p style="text-align:center;color:var(--gris);font-size:.88rem;margin-bottom:20px;">Rejoignez la communauté GlamBook</p>
+<main class="auth-wrap">
+  <div class="auth-card wide">
+    <h1 class="auth-title">Créer mon compte</h1>
+    <p class="auth-sub" id="auth-sub">Gratuit, sans carte bancaire</p>
 
     <!-- Rôle -->
-    <div class="role-toggle">
-      <div class="role-btn active" id="role-client" data-role="client">
-        <div class="role-icon">💄</div>
-        <div class="role-name">Je suis cliente</div>
-        <div class="role-desc">Je cherche une maquilleuse</div>
-      </div>
-      <div class="role-btn" id="role-artist" data-role="artist">
-        <div class="role-icon">✨</div>
-        <div class="role-name">Je suis artiste</div>
-        <div class="role-desc">Je propose mes services</div>
-      </div>
+    <div class="role-toggle" role="group" aria-label="Type de compte">
+      <button type="button" class="role-btn" id="role-client" data-role="client" aria-pressed="true">
+        <span class="role-icon" data-ico="user"></span>
+        <span class="role-name">Je suis cliente</span>
+        <span class="role-desc">Je cherche une maquilleuse</span>
+      </button>
+      <button type="button" class="role-btn" id="role-artist" data-role="artist" aria-pressed="false">
+        <span class="role-icon" data-ico="brush"></span>
+        <span class="role-name">Je suis maquilleuse</span>
+        <span class="role-desc">Je propose mes prestations</span>
+      </button>
     </div>
 
-    <div class="error-msg" id="error-msg"></div>
-    <div class="success-msg" id="success-msg"></div>
+    <div class="form-msg err" id="error-msg" role="alert"></div>
+    <div class="form-msg ok" id="success-msg" role="status"></div>
 
     <form id="register-form">
       <div class="name-row">
         <div class="field">
-          <label>Prénom</label>
-          <input type="text" id="firstname" placeholder="Nadia" required/>
+          <label for="firstname">Prénom</label>
+          <input type="text" id="firstname" required autocomplete="given-name"/>
         </div>
         <div class="field">
-          <label>Nom</label>
-          <input type="text" id="lastname" placeholder="Martin" required/>
+          <label for="lastname">Nom</label>
+          <input type="text" id="lastname" required autocomplete="family-name"/>
         </div>
       </div>
       <div class="field">
-        <label>Email</label>
+        <label for="email">Email</label>
         <input type="email" id="email" placeholder="vous@exemple.fr" required autocomplete="email"/>
       </div>
       <div class="field">
-        <label>Ville</label>
-        <input type="text" id="city" placeholder="Paris, Lyon, Marseille..." autocomplete="new-password" name="city_field_x"/>
+        <label for="city">Ville</label>
+        <input type="text" id="city" placeholder="Annecy, Lyon, Genève…" autocomplete="address-level2"/>
       </div>
       <div class="field">
-        <label>Mot de passe</label>
-        <div style="position:relative;">
-          <input type="password" id="password" placeholder="8 caractères minimum" required minlength="8" autocomplete="new-password" style="padding-right:44px;"/>
-          <button type="button" id="toggle-password" aria-label="Afficher le mot de passe"
-            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--gris);font-size:1.1rem;line-height:1;">
-            👁
-          </button>
+        <label for="password">Mot de passe</label>
+        <div class="pw-wrap">
+          <input type="password" id="password" required minlength="8" autocomplete="new-password"/>
+          <button type="button" class="pw-toggle" id="toggle-password" aria-label="Afficher le mot de passe" aria-pressed="false"></button>
         </div>
-        <div class="hint">Au moins 8 caractères</div>
+        <div class="hint">8 caractères minimum</div>
       </div>
 
-      <!-- Champs artiste supplémentaires -->
+      <!-- Champs maquilleuse -->
       <div class="artist-fields" id="artist-fields">
-        <div style="background:var(--rose-cl);border-radius:10px;padding:12px 14px;margin-bottom:16px;">
-          <p style="font-size:.82rem;color:var(--rose);font-weight:600;">✨ Profil artiste — Vous pourrez compléter votre profil (bio, photos, tarifs) depuis votre tableau de bord.</p>
+        <div class="artist-note">Vous compléterez votre profil (présentation, photos, tarifs) depuis votre tableau de bord, puis vous l'activerez quand il sera prêt.</div>
+        <div class="field">
+          <label for="artist-name">Nom professionnel <span style="color:var(--gb-ink-2);font-weight:400;font-size:.8rem;">(facultatif)</span></label>
+          <input type="text" id="artist-name" placeholder="Ex. Nadia Beauty, Studio Glam…" autocomplete="off"/>
+          <div class="hint">Le nom affiché sur votre profil public. Vide = votre prénom et votre nom.</div>
         </div>
         <div class="field">
-          <label>Nom d'artiste <span style="color:var(--gris);font-weight:400;font-size:.8rem;">(nom de scène, pseudo)</span></label>
-          <input type="text" id="artist-name" placeholder="Ex : Nadia Beauty, Studio Glam..." autocomplete="off"/>
-          <div class="hint">Le nom affiché sur votre profil public. Laissez vide pour utiliser votre vrai nom.</div>
+          <label for="phone">Téléphone</label>
+          <input type="tel" id="phone" placeholder="06 00 00 00 00" autocomplete="tel"/>
         </div>
         <div class="field">
-          <label>Téléphone</label>
-          <input type="tel" id="phone" placeholder="+33 6 00 00 00 00"/>
-        </div>
-        <div class="field">
-          <label>Région d'activité</label>
+          <label for="region">Région d'activité</label>
           <select id="region">
-            <option value="">Choisir...</option>
+            <option value="">Choisir…</option>
             <option>Île-de-France</option><option>Auvergne-Rhône-Alpes</option>
             <option>Provence-Alpes-Côte d'Azur</option><option>Nouvelle-Aquitaine</option>
             <option>Occitanie</option><option>Hauts-de-France</option>
@@ -126,46 +113,62 @@
         </div>
       </div>
 
-      <div style="margin-bottom:18px;">
-        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.82rem;color:var(--gris);">
-          <input type="checkbox" id="cgu" required style="margin-top:2px;"/>
-          J'accepte les <a href="/legal/cgu.html" target="_blank" style="color:var(--rose);">CGU</a> et la <a href="/legal/confidentialite.html" target="_blank" style="color:var(--rose);">politique de confidentialité</a>
-        </label>
-      </div>
+      <label class="consent">
+        <input type="checkbox" id="cgu" required/>
+        <span>J'accepte les <a href="/legal/cgu.html" target="_blank" class="auth-link">CGU</a> et la <a href="/legal/confidentialite.html" target="_blank" class="auth-link">politique de confidentialité</a></span>
+      </label>
 
       <button type="submit" class="btn btn-primary btn-full" id="btn-register">Créer mon compte</button>
     </form>
 
     <div class="auth-footer">
-      Déjà un compte ? <a href="/auth/login.html">Se connecter</a>
+      Déjà un compte ? <a href="/auth/login.html" id="link-login">Se connecter</a>
     </div>
   </div>
-</div>
+</main>
 
 <script type="module">
 import { supabase } from '/js/supabase.js';
+import { safeRedirect, ICON } from '/js/utils.js';
 
-let currentRole = new URLSearchParams(location.search).get('role') || 'client';
+const params = new URLSearchParams(location.search);
+// Page d'où vient la visiteuse (fiche artiste, demande de devis…) : on l'y renvoie une fois inscrite
+const redirect = safeRedirect(params.get('redirect'));
+const loginHref = '/auth/login.html' + (redirect ? '?redirect=' + encodeURIComponent(redirect) : '');
+document.getElementById('link-login').href = loginHref;
+if (redirect) document.getElementById('auth-sub').textContent = 'Un compte gratuit suffit pour continuer';
+
+document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ICON[el.dataset.ico] || ''; });
+
+let currentRole = params.get('role') || 'client';
 // Sécurité : n'autoriser que les rôles connus
 if (!['client','artist'].includes(currentRole)) currentRole = 'client';
 
 function setRole(role) {
   currentRole = role;
-  document.getElementById('role-client').classList.toggle('active', role === 'client');
-  document.getElementById('role-artist').classList.toggle('active', role === 'artist');
+  document.getElementById('role-client').setAttribute('aria-pressed', String(role === 'client'));
+  document.getElementById('role-artist').setAttribute('aria-pressed', String(role === 'artist'));
   document.getElementById('artist-fields').classList.toggle('show', role === 'artist');
 }
-
-document.querySelectorAll('.role-btn').forEach(btn => {
-  btn.addEventListener('click', () => setRole(btn.dataset.role));
-});
-
+document.querySelectorAll('.role-btn').forEach(btn => btn.addEventListener('click', () => setRole(btn.dataset.role)));
 setRole(currentRole);
+
+const toggle = document.getElementById('toggle-password');
+toggle.innerHTML = ICON.eye;
+toggle.addEventListener('click', () => {
+  const input = document.getElementById('password');
+  const show  = input.type === 'password';
+  input.type  = show ? 'text' : 'password';
+  toggle.innerHTML = show ? ICON.eyeOff : ICON.eye;
+  toggle.setAttribute('aria-pressed', String(show));
+  toggle.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+});
 
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btn-register');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Création...';
+  const reset = () => { btn.disabled = false; btn.textContent = 'Créer mon compte'; };
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Création…';
   hideMessages();
 
   const email      = document.getElementById('email').value.trim();
@@ -173,92 +176,71 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   const firstName  = document.getElementById('firstname').value.trim();
   const lastName   = document.getElementById('lastname').value.trim();
   const city       = document.getElementById('city').value.trim();
-  const phone      = document.getElementById('phone')?.value.trim() || '';
-  const region     = document.getElementById('region')?.value || '';
-  const artistName = document.getElementById('artist-name')?.value.trim() || '';
-  const displayName = (currentRole === 'artist' && artistName) ? artistName : `${firstName} ${lastName}`;
+  const isArtist   = currentRole === 'artist';
+  const phone      = isArtist ? document.getElementById('phone').value.trim() : '';
+  const region     = isArtist ? document.getElementById('region').value : '';
+  const artistName = isArtist ? document.getElementById('artist-name').value.trim() : '';
+  const fullName   = `${firstName} ${lastName}`.trim();
 
   try {
+    // Le profil (table profiles) est créé côté base à partir de ces métadonnées.
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: {
-        data: {
-          full_name: `${firstName} ${lastName}`,
-          display_name: displayName,
-          role: currentRole,
-          city, phone, region
-        }
-      }
+      options: { data: { full_name: fullName, display_name: artistName || fullName, role: currentRole, city, phone, region } }
     });
 
     if (error) {
-      const msg = (typeof error.message === 'string') ? error.message : '';
-      // Erreur vide {} = rate limit Supabase (trop de tentatives)
-      const isEmpty = !msg && !error.status && !error.name && Object.keys(error).length === 0;
-      const msgs = {
-        'User already registered': 'Cette adresse email est déjà utilisée. <a href="/auth/login.html" style="color:var(--rose);font-weight:700;">Se connecter ?</a>',
-        'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 8 caractères.',
-        'Unable to validate email address: invalid format': 'Adresse email invalide.',
-        'Email rate limit exceeded': 'Trop de tentatives. Attendez 1 heure avant de réessayer.',
-        'over_email_send_rate_limit': 'Trop de tentatives. Attendez 1 heure avant de réessayer.',
-        'For security purposes': 'Trop de tentatives. Attendez quelques minutes avant de réessayer.',
-        'signup_disabled': 'Les inscriptions sont temporairement désactivées.',
-      };
-      const found = Object.entries(msgs).find(([k]) => msg.toLowerCase().includes(k.toLowerCase()));
-      const displayMsg = found ? found[1]
-        : isEmpty ? 'Trop de tentatives d\'inscription. Attendez 1 heure ou utilisez une autre adresse email.'
-        : (msg ? `Erreur : ${msg}` : 'Une erreur est survenue. Veuillez réessayer.');
-      showError(displayMsg);
-      btn.disabled = false; btn.textContent = 'Créer mon compte';
+      const m = (typeof error.message === 'string') ? error.message : '';
+      if (/already registered/i.test(m)) return alreadyRegistered(reset);
+      const msg = /at least \d+ characters|weak/i.test(m) ? 'Le mot de passe doit contenir au moins 8 caractères.'
+        : /invalid format|invalid email/i.test(m) ? 'Adresse email invalide.'
+        : /rate limit|security purposes/i.test(m) ? 'Trop de tentatives. Patientez quelques minutes avant de réessayer.'
+        : /signup.*disabled/i.test(m) ? 'Les inscriptions sont momentanément fermées.'
+        : /captcha/i.test(m) ? 'La vérification anti-robot a échoué. Rechargez la page et réessayez.'
+        : 'Inscription impossible pour le moment. Réessayez dans un instant.';
+      showError(msg); reset(); return;
+    }
+
+    // Email déjà utilisé : selon le réglage du projet, Supabase répond sans erreur
+    // mais avec un utilisateur sans identité.
+    if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) return alreadyRegistered(reset);
+
+    // Confirmation par email exigée : pas de session tant que le lien n'est pas cliqué.
+    // On le dit clairement au lieu d'envoyer vers un espace qui renverrait à la connexion.
+    if (!data?.session) {
+      document.getElementById('register-form').hidden = true;
+      document.querySelector('.role-toggle').hidden = true;
+      showSuccess(`Presque terminé : un email vient d’être envoyé à ${email}. Cliquez sur le lien qu’il contient pour activer votre compte, puis connectez-vous.`);
       return;
     }
 
-    // signUp réussi — data.user peut être null si confirmation email requise
-    const userId = data?.user?.id;
-    if (userId) {
-      const { error: profileErr } = await supabase.from('profiles').upsert({
-        user_id:   userId,
-        full_name: `${firstName} ${lastName}`,
-        role:      currentRole,
-        city, phone, region
-      });
-      if (profileErr) console.warn('Profile upsert:', profileErr.message);
-
-      if (currentRole === 'artist') {
-        const { error: artistErr } = await supabase.from('artists').upsert({
-          user_id:      userId,
-          display_name: artistName || `${firstName} ${lastName}`,
-          is_active:    false,
-          is_verified:  false,
-          rating_avg:   5,
-          review_count: 0
-        });
-        if (artistErr) console.warn('Artist upsert:', artistErr.message);
-      }
+    if (isArtist) {
+      // Fiche artiste inactive ; note et vérification sont fixées côté base, pas ici.
+      const { error: artistErr } = await supabase.from('artists').insert({ user_id: data.user.id, display_name: artistName || fullName, is_active: false });
+      if (artistErr) console.warn('Fiche artiste :', artistErr.message); // le tableau de bord la recrée au besoin
     }
 
-    showSuccess('Compte créé avec succès ! Redirection en cours...');
-    setTimeout(() => {
-      if (currentRole === 'artist') location.href = '/dashboard/artist.html';
-      else location.href = '/dashboard/client.html';
-    }, 1500);
+    showSuccess('Compte créé. Redirection…');
+    const next = redirect || (isArtist ? '/dashboard/artist.html' : '/artists.html');
+    setTimeout(() => { location.href = next; }, 900);
 
   } catch (err) {
+    console.error(err);
     showError('Une erreur inattendue est survenue. Veuillez réessayer.');
-    btn.disabled = false; btn.textContent = 'Créer mon compte';
+    reset();
   }
 });
 
-document.getElementById('toggle-password').addEventListener('click', function() {
-  const input = document.getElementById('password');
-  const show  = input.type === 'password';
-  input.type  = show ? 'text' : 'password';
-  this.textContent = show ? '🙈' : '👁';
-});
-
-function showError(msg) { const el = document.getElementById('error-msg'); el.textContent = msg; el.style.display = 'block'; }
-function showSuccess(msg) { const el = document.getElementById('success-msg'); el.textContent = msg; el.style.display = 'block'; }
-function hideMessages() { document.getElementById('error-msg').style.display = 'none'; document.getElementById('success-msg').style.display = 'none'; }
+function alreadyRegistered(reset) {
+  const el = document.getElementById('error-msg');
+  el.textContent = 'Cette adresse email a déjà un compte. ';
+  const a = document.createElement('a'); a.href = loginHref; a.textContent = 'Se connecter';
+  el.appendChild(a); el.classList.add('show');
+  reset();
+}
+function showError(msg)   { const el = document.getElementById('error-msg');   el.textContent = msg; el.classList.add('show'); }
+function showSuccess(msg) { const el = document.getElementById('success-msg'); el.textContent = msg; el.classList.add('show'); }
+function hideMessages()   { document.getElementById('error-msg').classList.remove('show'); document.getElementById('success-msg').classList.remove('show'); }
 </script>
 </body>
 </html>

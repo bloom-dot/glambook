@@ -1,15 +1,11 @@
 const Stripe = require('stripe');
+const { originAllowed } = require('./_shared');
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 module.exports = async function handler(req, res) {
   // CSRF — vérifier l'origine
-  const origin = req.headers.origin || '';
-  const allowed = [
-    'https://glambook-pi.vercel.app',
-    'http://localhost:3000'
-  ];
-  if (origin && !allowed.some(o => origin.startsWith(o))) {
+  if (!originAllowed(req)) {
     return res.status(403).json({ error: 'Origine non autorisée' });
   }
 
@@ -27,6 +23,10 @@ module.exports = async function handler(req, res) {
   const jwt = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!jwt) return res.status(401).json({ error: 'Authentification requise' });
 
+  // Paiement en ligne non configuré : réponse claire plutôt qu'une erreur 500 brute
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return res.status(503).json({ error: 'Paiement en ligne non configuré' });
+  }
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

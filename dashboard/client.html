@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Mes réservations — GlamBook</title>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#E8547A"/>
+  <meta name="theme-color" content="#0E0E10"/>
+  <meta name="robots" content="noindex"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
   <style>
@@ -19,7 +20,7 @@
     .tab.active { color: var(--noir); background: var(--blanc); box-shadow: var(--shadow); }
     .booking-card {
       background: var(--blanc); border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
-      border: 1px solid rgba(0,0,0,.04); display: flex; gap: 16px; align-items: flex-start;
+      border: 1px solid var(--gb-line); display: flex; gap: 16px; align-items: flex-start;
       transition: all var(--transition);
     }
     .booking-card:hover { box-shadow: var(--shadow-md); }
@@ -33,17 +34,17 @@
     .bk-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
     .bk-price { font-size: 1rem; font-weight: 800; color: var(--rose); }
     .status-badge { padding: 4px 12px; border-radius: 20px; font-size: .7rem; font-weight: 700; }
-    .status-confirmed { background: #ECFDF5; color: #065F46; }
-    .status-pending   { background: #FFFBEB; color: #92400E; }
-    .status-cancelled { background: #FEF2F2; color: #991B1B; }
-    .status-done      { background: #F3F0FF; color: #5B21B6; }
+    .status-confirmed { background: var(--gb-ok-tint);   color: var(--gb-ok); }
+    .status-pending   { background: var(--gb-warn-tint); color: var(--gb-warn); }
+    .status-cancelled { background: var(--gb-bad-tint);  color: var(--gb-bad); }
+    .status-done      { background: var(--gb-info-tint); color: var(--gb-ink-2); }
 
     /* Review modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; display: none; }
     .modal-overlay.show { display: flex; }
     .modal { background: var(--blanc); border-radius: 20px; padding: 32px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); }
     .stars-input { display: flex; gap: 6px; margin: 12px 0; }
-    .star-btn { font-size: 1.8rem; cursor: pointer; color: #D1D5DB; transition: all var(--transition); }
+    .star-btn { font-size: 1.8rem; cursor: pointer; color: var(--gb-line-strong); transition: all var(--transition); }
     .star-btn:hover { transform: scale(1.15); }
     .star-btn.active { color: var(--or); }
     .empty-state { text-align: center; padding: 60px 20px; color: var(--gris); }
@@ -56,7 +57,9 @@
   <div class="nav-inner">
     <a href="/" class="nav-logo">Glam<span>Book</span></a>
     <div class="nav-links" style="display:flex;align-items:center;gap:16px;">
-      <a href="/artists.html">Trouver une artiste</a>
+      <a href="/mes-devis.html">Mes devis</a>
+      <a href="/messages.html">Messages</a>
+      <a href="/artists.html" class="hide-mobile">Trouver une maquilleuse</a>
       <button class="btn btn-ghost btn-sm" id="btn-logout">Déconnexion</button>
     </div>
   </div>
@@ -66,13 +69,13 @@
   <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
     <div style="width:52px;height:52px;border-radius:50%;background:var(--rose-cl);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:var(--rose);" id="avatar-initials">?</div>
     <div>
-      <h1 class="dash-title" id="client-name">Mon espace</h1>
+      <h1 class="dash-title" id="client-name">Mes rendez-vous</h1>
       <p class="dash-sub" style="margin:0;" id="client-email"></p>
     </div>
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="showTab('upcoming',this)">A venir</div>
+    <div class="tab active" onclick="showTab('upcoming',this)">À venir</div>
     <div class="tab" onclick="showTab('past',this)">Historique</div>
     <div class="tab" onclick="showTab('cancelled',this)">Annulées</div>
   </div>
@@ -109,14 +112,13 @@
 import { supabase, getCurrentUser, esc } from '/js/supabase.js';
 
 const user = await getCurrentUser();
-if (!user) { location.href = '/auth/login.html'; }
+if (!user) { location.href = '/auth/login.html?redirect=' + encodeURIComponent(location.pathname); await new Promise(() => {}); }
 
 let reviewBookingId = null, reviewArtistId = null, selectedRating = 0;
 
 async function init() {
   const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
   const name = profile?.full_name || user.email;
-  document.getElementById('client-name').textContent  = name;
   document.getElementById('client-email').textContent = user.email;
   document.getElementById('avatar-initials').textContent = name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
   loadBookings('upcoming');
@@ -127,7 +129,8 @@ let currentFilter = 'upcoming';
 
 async function loadBookings(filter) {
   currentFilter = filter;
-  const now = new Date().toISOString().split('T')[0];
+  const p2 = (n) => String(n).padStart(2, '0'); const t = new Date();
+  const now = `${t.getFullYear()}-${p2(t.getMonth() + 1)}-${p2(t.getDate())}`; // date locale (toISOString donnait la veille après minuit)
   // Pas de FK artists→profiles : display_name vient de la table artists
   let q = supabase.from('bookings')
     .select('*, artists(id, display_name, slug), services(name, price_cents)')
@@ -135,26 +138,27 @@ async function loadBookings(filter) {
     .order('date', { ascending: filter === 'upcoming' });
 
   if (filter === 'upcoming')  q = q.gte('date', now).in('status', ['confirmed','pending']);
-  if (filter === 'past')      q = q.lt('date', now).eq('status','confirmed');
+  if (filter === 'past')      q = q.lt('date', now).in('status', ['confirmed','done']);
   if (filter === 'cancelled') q = q.eq('status', 'cancelled');
 
   const { data, error } = await q;
   const el = document.getElementById('bookings-container');
   if (error) console.warn('loadBookings error:', error.message);
   if (!data || data.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">📅</div>
-      <p style="font-weight:700;margin-bottom:8px;">Aucune réservation</p>
+    el.innerHTML = `<div class="empty-state">
+      <p style="font-weight:700;margin-bottom:8px;">${error ? 'Vos rendez-vous ne peuvent pas être affichés pour le moment' : 'Aucun rendez-vous ici'}</p>
+      <p style="font-size:.85rem;margin-bottom:16px;">Vos demandes de devis se trouvent dans <a href="/mes-devis.html" style="color:var(--gb-champagne);">Mes devis</a>.</p>
       <a href="/artists.html" class="btn btn-primary btn-sm">Trouver une maquilleuse</a></div>`;
     return;
   }
 
   el.innerHTML = data.map(b => {
-    const d = new Date(b.date);
+    const d = new Date(b.date + 'T12:00:00');
     const artistName = b.artists?.display_name || 'Artiste';
     const artistId   = b.artists?.id || '';
     const canCancel  = !isPastDate(b.date, now) && ['pending','confirmed'].includes(b.status);
     const isPast  = b.date < now;
-    const canReview = isPast && b.status === 'confirmed';
+    const canReview = isPast && ['confirmed','done'].includes(b.status);
     const stKey = isPast && b.status === 'confirmed' ? 'done' : b.status;
     const stLabel = {confirmed: isPast?'Terminée':'Confirmée', pending:'En attente', cancelled:'Annulée', done:'Terminée'}[stKey] || b.status;
     const stClass = ['confirmed','pending','cancelled','done'].includes(stKey) ? stKey : 'pending';
@@ -164,8 +168,7 @@ async function loadBookings(filter) {
         <div class="bk-artist">${esc(artistName)}</div>
         <div class="bk-service">${esc(b.services?.name||'–')}</div>
         <div class="bk-meta">
-          <span>🕐 ${esc(b.time_slot)}</span>
-          <span>📍 ${d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</span>
+          <span>${d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})} à ${esc(b.time_slot)}</span>
         </div>
         ${b.note ? `<div style="font-size:.78rem;color:var(--gris);margin-top:6px;font-style:italic;">"${esc(b.note)}"</div>` : ''}
       </div>
@@ -173,8 +176,8 @@ async function loadBookings(filter) {
         <span class="bk-price">${b.services ? (b.services.price_cents/100).toFixed(0)+'€' : '–'}</span>
         <span class="status-badge status-${stClass}">${stLabel}</span>
         ${canReview && !b.reviewed ? `<button class="btn btn-ghost btn-sm" data-bid="${esc(b.id)}" data-aid="${esc(artistId)}" data-aname="${esc(artistName)}" onclick="openReview(this.dataset.bid,this.dataset.aid,this.dataset.aname)">Laisser un avis</button>` : ''}
-        ${b.reviewed ? `<span style="font-size:.75rem;color:var(--gris);">Avis publié ✓</span>` : ''}
-        ${canCancel ? `<button class="btn btn-ghost btn-sm" style="color:#991B1B;" data-bid="${esc(b.id)}" onclick="cancelBooking(this.dataset.bid)">Annuler</button>` : ''}
+        ${b.reviewed ? `<span style="font-size:.75rem;color:var(--gris);">Avis publié</span>` : ''}
+        ${canCancel ? `<button class="btn btn-quiet btn-sm" data-bid="${esc(b.id)}" onclick="cancelBooking(this.dataset.bid)">Annuler</button>` : ''}
       </div>
     </div>`;
   }).join('');

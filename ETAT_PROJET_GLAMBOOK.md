@@ -1,7 +1,7 @@
 # GlamBook — État du projet (passation)
 
 > Fichier de reprise pour continuer le projet dans un nouveau chat.
-> Dernière mise à jour : 26 août 2026 — images catégories publiées (commit 06be25e), puis audit du parcours et corrections (§13).
+> Dernière mise à jour : 7 octobre 2026 — analyse complète et corrections (§16). **Lire le §16 en premier.**
 
 ---
 
@@ -60,7 +60,7 @@ git add -A; git commit -m "message"; git push
 - `api/` — fonctions serverless : `face-diagnostic.js` (OpenAI), `send-quote.js` (Resend), `sitemap.js`. Rate limiting via table `api_usage`.
 - `legal/` — `mentions-legales.html`, `cgu.html`, `cgv.html`, `confidentialite.html`.
 - `img/` — visuels (hero, portrait, bandeau-pro, cat-mariage, cat-soiree…). Filigranes des IA rognés au préalable.
-- `sw.js` — service worker (`CACHE_NAME` actuel **`glambook-v14`**, network-first pour `.js` et `.css`).
+- `sw.js` — service worker (`CACHE_NAME` actuel **`glambook-v16`**, network-first pour `.js` et `.css`).
 - `vercel.json` — routes + en-têtes de sécurité (CSP stricte, HSTS…).
 - `ui-kit-nextjs/` — kit UI Next.js « Sombre Luxe » (composants de référence, non utilisé par l'app vanilla).
 
@@ -230,3 +230,80 @@ Audit du code réel confronté à la base de production. Ce qui a été trouvé 
 5. Éliminer les couleurs en dur des autres pages, en commençant par `dashboard/artist.html` (72 occurrences)
 
 **Vérification de l'étape 3** : rendu local des deux versions de l'accueil comparé pixel à pixel — hauteur identique (4272 px), différence sensible mesurée à 0,0 %. Tous les jetons résolvent (`--gris-cl` → `#0E0E10`, `--blanc` → `#17171A`, `--noir` → `#F4F2F5`), aucune `var()` non résolue dans le rendu.
+
+---
+
+## 15. Contenu de l'accueil — corrections validées (10 septembre 2026)
+
+Trois changements de contenu validés par Fernand, indépendants de la charte :
+
+- **Barre de réassurance** — les compteurs (« 1+ artistes vérifiées », « 0+ réservations », « 4.9★ » sur zéro avis) sont remplacés par trois engagements vrais dès le premier jour : *Sans frais de réservation* / *Devis personnalisé* / *Échange direct*, avec icônes SVG dorées. `loadStats()` est vidée mais conservée : la vue `public_stats` existe toujours, les compteurs pourront revenir quand les chiffres parleront.
+- **Badge du hero** — « LA PLATEFORME N°1 DES MAKEUP ARTISTS » devient « MAQUILLEUSES PROFESSIONNELLES PRÈS DE CHEZ VOUS ». L'ancienne formulation était une allégation invérifiable avec une seule inscrite.
+- **Profils sans avis** — plus de cinq étoiles pleines suivies de « (0) », plus de « À partir de –€ ». Un badge « Nouvelle sur GlamBook » et la mention « Sur devis » les remplacent, sur les trois surfaces concernées : cartes de l'accueil, cartes de `artists.html`, en-tête de `artist.html`.
+
+---
+
+## 16. Analyse complète et corrections (7 octobre 2026)
+
+Tout le code a été relu, confronté à la base réelle, puis **rendu page par page** (36 écrans, ordinateur et mobile, visiteuse / cliente / maquilleuse) avant et après correction.
+
+### À faire par Fernand
+1. **Publier** : double-clic sur `publier.bat`.
+2. **Appliquer `supabase-securite-2026-10.sql`** (Supabase → SQL Editor → coller → Run). Tant que ce n'est pas fait, les failles de droits ci-dessous restent ouvertes.
+3. Dans Supabase → Authentication → URL Configuration, ajouter `https://glambook-pi.vercel.app/auth/reset.html` aux « Redirect URLs » (sans cela le lien « mot de passe oublié » arrive sur l'accueil, qui redirige quand même vers la bonne page).
+
+### Bloquant, corrigé
+| Problème | Où |
+|---|---|
+| **Le lot non publié cassait toutes les fiches artistes** : `reviews` déclaré deux fois → le script de la page ne démarrait plus. | `artist.html` |
+| **CSS affiché en clair + icônes géantes** en production depuis `35af525` : deux règles étaient tombées hors de la balise `<style>`. | `artists.html`, `artist.html` |
+| **Signature invisible** : encre `#111` sur zone de signature sombre. La cliente signait sans voir son trait. | `signature.html` |
+| **« Mot de passe oublié » → page 404** (la page n'avait jamais été créée). Ajout de `auth/forgot.html` et `auth/reset.html`. | `auth/` |
+| **Calendrier décalé d'un jour** (heure de Paris) : cliquer sur le 31 ouvrait le 30 ; la « semaine type » posait les créneaux du lundi sur le dimanche. | `dashboard/artist.html` |
+| **Devis à 0 € envoyé à la cliente** quand la demande ne contenait aucune prestation tarifée (le cas de toutes les demandes aujourd'hui). Le bouton ouvre désormais l'éditeur de devis prérempli. | `dashboard/artist.html`, `dashboard/devis.html` |
+| **Demandes, devis, messages et déconnexion inaccessibles sur mobile** côté maquilleuse. Barre du bas refaite + feuille « Plus ». | `dashboard/artist.html` |
+| **Choisir une date à l'accueil donnait toujours zéro résultat** (le filtre exigeait un agenda en ligne ; personne n'en a). La date devient une information : « Disponible / Complète / Date à confirmer ». | `artists.html` |
+| **Images de couverture cassées** : `<img src="">` quand l'artiste n'a pas de photo. Remplacé par une surface neutre. | `index.html`, `artists.html`, `artist.html` |
+| **« Autour de moi » effaçait le filtre de prestation** et lançait deux recherches (classe CSS partagée avec les pastilles). | `artists.html` |
+| **Masquer une section de son profil faisait planter la fiche** (l'élément était supprimé, puis le script écrivait dedans). | `artist.html` |
+| **Palette choisie par l'artiste illisible** (teintes claires héritées du thème clair sur fond sombre). | `artist.html`, `dashboard/artist.html` |
+| Inscription : message d'erreur affiché avec ses balises HTML ; cas « confirmez votre email » non géré ; `?redirect=` ignoré. | `auth/register.html` |
+| Étape « Diagnostic visage » imposée alors que le service n'est pas branché ; récapitulatif « Sous-total 0,00 € ». | `reservation.html`, `api/config.js` |
+| Webhook Stripe : la config `bodyParser:false` était écrasée (signature invérifiable). Fonctions Stripe en 500 sans clé. | `api/` |
+| Prix d'une prestation non arrondi (49,99 € refusé en silence), « à partir de » jamais recalculé, photos impossibles à retirer, échecs d'envoi silencieux. | `dashboard/artist.html` |
+
+### Sécurité
+- **Failles de droits en base** (une personne connectée pouvait se donner le rôle admin, se déclarer « vérifiée », fixer sa note, confirmer sa réservation sans payer, réécrire les messages de l'autre). Vérifié sur la base réelle dans une transaction annulée. Correctif prêt : `supabase-securite-2026-10.sql` — **à appliquer**.
+- Injection possible via le nom d'artiste, le prénom et le paramètre `time` (insérés sans échappement) : corrigé.
+- Contrôle d'origine des fonctions serveur : `startsWith` acceptait `glambook-pi.vercel.app.autre-site.com`. Comparaison stricte dans `api/_shared.js`.
+- `.vercelignore` : les notes internes (`*.md`) et schémas (`*.sql`) étaient servis publiquement par le site.
+
+### Fond
+- **Mise en veille Supabase** : `api/keepalive.js` + tâche planifiée quotidienne dans `vercel.json` (gratuit). À vérifier dans Vercel → Cron Jobs après publication.
+- **Charte, étape 5 terminée** : plus aucune couleur en dur hors `:root` de `css/main.css` (restent, volontairement : `theme-color`, le logo Google, les palettes d'artiste, le PDF). Jetons d'état ajoutés (`--gb-ok-tint`, `--gb-warn-tint`, `--gb-bad-tint`…), classes `.is-ok/.is-warn/.is-bad/.is-info`, `.danger-zone`, `.cover-ph`, styles des pages de compte.
+- **Plus d'emoji** : icônes au trait centralisées dans `js/utils.js` (`ICON`).
+- `js/nav.js` : la barre reflète la session sur `artists.html` et `artist.html`.
+- `js/utils.js` : `localISODate()` / `parseLocalDate()` — ne plus jamais utiliser `toISOString()` pour une date de calendrier.
+- Un seul point d'entrée cliente : `/mes-devis.html` (devis, demandes, rendez-vous). `dashboard/client.html` garde l'historique, l'annulation et les avis.
+- Le générateur de PDF n'est chargé qu'à la demande (signature, éditeur de devis).
+
+### Reste ouvert
+- **Avis impossibles dans le parcours « sur devis »** : un avis exige une réservation par créneau (`bookings`). Aucune maquilleuse sans agenda ne pourra en recevoir. À traiter avec la refonte (avis après devis signé + date passée).
+- **Deux modèles de réservation** (`bookings` et `booking_requests`) : à unifier.
+- Textes à valider : « Annulation gratuite jusqu'à 48h » (accueil), « Artistes vérifiées — chaque profil est validé » (aucune vérification n'a lieu), « Support réactif », « Devis & paiements intégrés ».
+- Le logo de la maquilleuse dans l'email de devis (stocké en `data:`), `package.json` (dépendance `framer-motion` inutilisée), dossier `ui-kit-nextjs/` inutilisé.
+- Captcha : aucun widget hCaptcha dans les formulaires. S'il est réellement exigé côté Supabase, connexion et inscription échouent — à tester en vrai.
+
+## 17. Charte v3 « Noir éditorial » appliquée (8 octobre 2026)
+
+Direction E choisie par Fernand (mélange de A « Sombre Luxe » et C « Éditorial »). Elle remplace la §14 pour la typographie et les accents ; le fond sombre unique est conservé.
+
+- **Typographie** : titres en Archivo condensé (font-stretch 62 %), capitales, graisse 800 ; un mot d'accent en Cormorant Garamond italique doré (`<em>` dans un `h1`/`h2`, ou `.gb-accent`). Sous-titres et citations en Cormorant italique.
+- **Couleurs** : fond #0E0E10, surface #17171A, filets #2A2A2F / #3B3B42, texte #F4F2F5 / #A8A2AC / #75707A, or #D4AF37 (une seule action dorée par écran), champagne #E7C766. Le rose n'est plus un accent : les alias `--rose`, `--rose-cl`, `--gb-rose-tint` pointent sur le champagne ; `--gb-rose` reste défini mais n'est plus utilisé dans les pages.
+- **Composants** : `.eyebrow` (surtitre), `.rule-head` (titre de section souligné d'un filet, `.lbl` / `.aside` / lien), carte maquilleuse sans cadre (photo, nom en capitales, ville en italique, prix champagne), étiquettes au contour neutre, boutons en capitales espacées, `.btn-secondary` au contour champagne.
+- **Accueil** : photo plein cadre et titre « Votre visage. Leur *métier*. », bandeau de recherche, index numéroté des cinq occasions, trois maquilleuses, « Comment ça marche » en quatre temps, bandeau pro, pied de page. Retirés : le double appel à l'action et le bloc « Pourquoi GlamBook » (promesses non vérifiables : annulation 48 h, artistes vérifiées, support).
+- **Recherche** : grand titre, occasions en onglets, filtres en ligne, même carte que l'accueil.
+- **Fiche maquilleuse** : la couverture (ou, à défaut, la première photo du portfolio) en plein cadre avec le nom en capitales ; présentation en italique ; portfolio en mosaïque ; avis en citations. Sur mobile, barre fixe « Écrire | Demander un devis / Réserver ». La couleur choisie par la maquilleuse ne teinte plus que le surtitre et la sélection (`--artist-accent`).
+- Tableau de bord, messages, inscription, signature : rose remplacé par l'or / le champagne, logos alignés.
+- Cache du service worker : `glambook-v18`.
+- Photos (8 octobre) : cadre gris retiré de `cat-mariage.jpg` et `cat-soiree.jpg` (restes du découpage d'une planche) ; l'accueil se partage avec `hero.jpg` en grand format. `portrait.jpg` et `cat-toutes.jpg` ne sont plus utilisées.

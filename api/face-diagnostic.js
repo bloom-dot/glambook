@@ -10,7 +10,7 @@
 //   OPENAI_MODEL       -> optionnel, défaut "gpt-4o"
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 
-module.exports.config = { api: { bodyParser: { sizeLimit: '6mb' } } };
+const { originAllowed } = require('./_shared');
 
 const SOUS_TONS = ['chaud', 'froid', 'neutre'];
 const TYPES_PEAU = ['seche', 'mixte', 'grasse', 'normale'];
@@ -30,10 +30,8 @@ Réponds STRICTEMENT en JSON valide, sans texte autour, avec exactement ces clé
 Le champ produits_a_prevoir doit être une liste d'articles précis et actionnables que la maquilleuse doit apporter, adaptés au type de peau et au sous-ton détectés.
 Si la photo ne montre pas clairement un visage, renvoie confiance "faible" et des tableaux vides.`;
 
-module.exports = async function handler(req, res) {
-  const origin = req.headers.origin || '';
-  const allowed = ['https://glambook-pi.vercel.app', 'http://localhost:3000'];
-  if (origin && !allowed.some(o => origin.startsWith(o))) {
+async function handler(req, res) {
+  if (!originAllowed(req)) {
     return res.status(403).json({ error: 'Origine non autorisée' });
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -66,7 +64,7 @@ module.exports = async function handler(req, res) {
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    return res.status(501).json({ error: 'Diagnostic IA non configuré (OPENAI_API_KEY manquante)' });
+    return res.status(501).json({ error: 'Diagnostic indisponible' });
   }
 
   try {
@@ -144,3 +142,8 @@ function normalize(p) {
     _disclaimer: "Diagnostic cosmétique généré par IA, à titre indicatif — ne constitue pas un avis médical.",
   };
 }
+
+// La config doit être posée APRÈS l'export du handler (sinon elle est écrasée) :
+// sans elle, la limite par défaut du corps de requête refusait les photos un peu lourdes.
+module.exports = handler;
+module.exports.config = { api: { bodyParser: { sizeLimit: '6mb' } } };

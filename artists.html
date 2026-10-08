@@ -15,131 +15,114 @@
   <meta name="twitter:card" content="summary"/>
   <link rel="preconnect" href="https://lcrrdwlnxmneqfzqediu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#E8547A"/>
+  <meta name="theme-color" content="#0E0E10"/>
   <link rel="stylesheet" href="/css/main.css"/>
   <script defer src="/js/theme.js"></script>
-
-    /* Icones : trait de 1,5 px, jamais de remplissage (charte « Sombre Luxe ») */
-    .gb-ico { width: 1em; height: 1em; flex: 0 0 auto; vertical-align: -.14em; display: inline-block; }
   <style>
-    .page-header {
-      background: linear-gradient(160deg, #0F0610 0%, #2D0818 40%, #1A0A12 100%);
-      color: #fff; padding: 48px 20px 36px; position: relative; overflow: hidden;
-    }
-    .page-header::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 50% 80%, rgba(232,84,122,.12), transparent 60%);
-    }
-    .page-header h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; position: relative; letter-spacing: -.02em; }
-    .page-header p  { font-size: .9rem; color: rgba(255,255,255,.5); position: relative; }
+    /* Recherche « Noir éditorial » — couleurs et polices dans css/main.css */
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+    .page-head { padding: 56px 0 28px; }
+    .page-head h1 { font-size: clamp(3.4rem, 8vw, 6.4rem); line-height: .88; margin: 14px 0 12px; }
+    .page-head p { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.35rem; color: var(--gb-ink-2); margin: 0; }
 
-    .filters-bar {
-      background: var(--nav-bg);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(0,0,0,.06);
-      padding: 14px 20px; position: sticky; top: var(--nav-h); z-index: 50;
-    }
-    .filters-inner {
-      max-width: 1120px; margin: 0 auto;
-      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-    }
-    .filter-pill {
-      padding: 8px 16px; border-radius: 24px; border: 1.5px solid var(--bord);
-      font-size: .8rem; font-weight: 600; cursor: pointer;
-      background: var(--blanc); color: var(--noir); transition: all var(--transition);
-    }
-    .filter-pill:hover { border-color: rgba(232,84,122,.3); background: var(--rose-cl); }
-    .filter-pill.active {
-      border-color: var(--rose); background: var(--rose); color: var(--blanc);
-      box-shadow: 0 2px 8px rgba(232,84,122,.25);
-    }
-    .filter-input {
-      padding: 8px 14px; border: 1.5px solid var(--bord); border-radius: 24px;
-      font-size: .8rem; min-width: 160px; color: var(--noir); font-family: inherit;
-      background: var(--blanc); transition: all var(--transition);
-    }
-    .filter-input::placeholder { color: var(--gris); }
-    .filter-input:focus { outline: none; border-color: var(--rose); box-shadow: 0 0 0 3px rgba(232,84,122,.1); }
+    .filters-bar { position: sticky; top: var(--nav-h); z-index: 50; background: rgba(14,14,16,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--gb-line); border-bottom: 1px solid var(--gb-line); }
+    .filters-inner { display: flex; flex-direction: column; gap: 0; }
+    .occ { display: flex; gap: 26px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--gb-line); }
+    .occ::-webkit-scrollbar { display: none; }
+    .filter-pill { background: none; border: none; border-bottom: 2px solid transparent; padding: 14px 0 12px; color: var(--gb-ink-2); cursor: pointer; white-space: nowrap; font: 800 1.15rem var(--gb-font-body); font-stretch: 75%; letter-spacing: .06em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; transition: color .2s, border-color .2s; }
+    .filter-pill:hover { color: var(--gb-ink); }
+    .filter-pill.active { color: var(--gb-ink); border-bottom-color: var(--gb-gold); }
+    .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 0; }
+    .filter-input, .sort-select, .tool-btn { height: 40px; padding: 0 14px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-md); color: var(--gb-ink); font: 400 .88rem var(--gb-font-body); }
+    .filter-input { min-width: 180px; }
+    .filter-input::placeholder { color: var(--gb-ink-3); }
+    .filter-input:focus, .sort-select:focus { outline: none; border-color: var(--gb-champagne); }
+    .sort-select { cursor: pointer; }
+    .sort-select option { background: var(--gb-surface); }
+    .tool-btn { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gb-champagne); }
+    .tool-btn.active { border-color: var(--gb-gold); background: rgba(212,175,55,.1); }
+    .tools .push { margin-left: auto; }
 
-    .results-meta { color: var(--gris); font-size: .82rem; margin-bottom: 20px; font-weight: 500; }
-    .no-results { text-align: center; padding: 80px 20px; color: var(--gris); }
-    .no-results .icon { font-size: 3rem; margin-bottom: 16px; }
-    .no-results h3 { font-size: 1.1rem; font-weight: 700; color: var(--noir); margin-bottom: 8px; }
+    .avail-badge { font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--gb-r-sm); display: inline-block; margin-top: 10px; }
+    .results-meta { font-size: .72rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--gb-ink-3); margin: 28px 0 20px; }
+    .no-results { text-align: center; padding: 80px 20px; color: var(--gb-ink-2); }
+    .no-results .icon { margin-bottom: 16px; color: var(--gb-champagne); }
+    .no-results .icon .gb-ico { width: 40px; height: 40px; }
+    .no-results h3 { font-size: 2rem; font-stretch: var(--gb-condensed); text-transform: uppercase; color: var(--gb-ink); margin-bottom: 8px; }
+    .artists-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 28px; }
+    .card-note { font-size: .8rem; color: var(--gb-ink-2); margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+    .card-note .st { color: var(--gb-gold); }
 
-    .sort-select {
-      margin-left: auto; padding: 8px 14px; border: 1.5px solid var(--bord);
-      border-radius: 24px; font-size: .8rem; cursor: pointer; font-family: inherit;
-      background: var(--blanc); color: var(--noir); transition: all var(--transition);
-    }
-    .sort-select:focus { outline: none; border-color: var(--rose); }
+    .skel-card .sk-cover { height: 220px; border-radius: var(--gb-r-md); }
+    .skel-card .sk-line { height: 14px; margin-top: 12px; }
 
-    @media (max-width: 640px) {
-      .filters-inner { gap: 6px; }
-      .filter-pill { padding: 6px 12px; font-size: .75rem; }
-      .filter-input { min-width: 120px; }
+    @media (max-width: 900px) { .artists-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) {
+      .wrap { padding: 0 16px; }
+      .page-head { padding: 36px 0 20px; }
+      .artists-grid { grid-template-columns: 1fr; }
+      .filter-input { min-width: 0; flex: 1 1 100%; }
+      .tools .push { margin-left: 0; }
     }
-
-    /* Skeleton loaders */
-    @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
-    .skeleton {
-      background: linear-gradient(90deg, rgba(0,0,0,.05) 25%, rgba(0,0,0,.1) 50%, rgba(0,0,0,.05) 75%);
-      background-size: 800px 100%; animation: shimmer 1.4s infinite linear; border-radius: 8px;
-    }
-    .skel-card { border-radius: 16px; overflow: hidden; background:var(--blanc); border: 1px solid rgba(0,0,0,.06); }
-    .skel-card .sk-cover { height: 200px; border-radius: 0; }
-    .skel-card .sk-body { padding: 16px; }
-    .skel-card .sk-line { height: 14px; margin-bottom: 10px; }
-    @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
   </style>
 </head>
 <body>
+<a href="#main" class="skip-link">Aller au contenu</a>
 
 <nav class="nav">
-  <div class="nav-inner">
+  <div class="nav-inner" style="max-width:1200px;">
     <a href="/" class="nav-logo">Glam<span>Book</span></a>
     <div class="nav-links">
-      <a href="/auth/login.html">Connexion</a>
-      <a href="/auth/register.html" class="btn-nav btn">Inscription</a>
+      <span id="nav-auth">
+        <a href="/auth/login.html">Connexion</a>
+        <a href="/auth/register.html" class="btn-nav btn">Rejoindre</a>
+      </span>
     </div>
   </div>
 </nav>
 
-<div class="page-header">
-  <div class="container">
-    <h1>Maquilleuses professionnelles</h1>
-    <p id="header-sub">Recherche en cours...</p>
+<main id="main">
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Maquilleuses professionnelles</span>
+    <h1 id="page-title">Les <em>maquilleuses</em></h1>
+    <p id="header-sub">Recherche en cours…</p>
   </div>
-</div>
+</header>
 
 <div class="filters-bar">
-  <div class="filters-inner">
-    <input class="filter-input" id="f-city" placeholder="Ville ou région" type="text"/>
-    <button class="filter-pill" id="f-near" title="Rechercher autour de ma position"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> Autour de moi</button>
-    <select class="sort-select" id="f-radius" style="margin-left:0;" title="Rayon de recherche">
-      <option value="0">Partout</option>
-      <option value="5">5 km</option>
-      <option value="10">10 km</option>
-      <option value="20">20 km</option>
-      <option value="50">50 km</option>
-    </select>
-    <input class="filter-input" id="f-date" type="date"/>
-    <button class="filter-pill active" data-service="">Toutes</button>
-    <button class="filter-pill" data-service="mariage">Mariage</button>
-    <button class="filter-pill" data-service="soiree">Soirée</button>
-    <button class="filter-pill" data-service="quotidien">Quotidien</button>
-    <button class="filter-pill" data-service="editorial">Shooting</button>
-    <button class="filter-pill" data-service="scene">Scène</button>
-    <select class="sort-select" id="f-sort">
-      <option value="rating">Mieux notées</option>
-      <option value="price_asc">Prix croissant</option>
-      <option value="price_desc">Prix décroissant</option>
-      <option value="recent">Récentes</option>
-    </select>
+  <div class="wrap filters-inner">
+    <div class="occ" role="group" aria-label="Occasion">
+      <button class="filter-pill active" data-service="">Toutes</button>
+      <button class="filter-pill" data-service="mariage">Mariage</button>
+      <button class="filter-pill" data-service="soiree">Soirée</button>
+      <button class="filter-pill" data-service="editorial">Shooting</button>
+      <button class="filter-pill" data-service="quotidien">Quotidien</button>
+      <button class="filter-pill" data-service="scene">Scène</button>
+    </div>
+    <div class="tools">
+      <input class="filter-input" id="f-city" placeholder="Ville ou région" type="text" aria-label="Ville ou région"/>
+      <button class="tool-btn" id="f-near" type="button" title="Rechercher autour de ma position"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> Autour de moi</button>
+      <select class="sort-select" id="f-radius" title="Rayon de recherche" aria-label="Rayon de recherche">
+        <option value="0">Partout</option>
+        <option value="5">5 km</option>
+        <option value="10">10 km</option>
+        <option value="20">20 km</option>
+        <option value="50">50 km</option>
+      </select>
+      <input class="filter-input" id="f-date" type="date" aria-label="Date de l'événement" style="min-width:150px;"/>
+      <select class="sort-select push" id="f-sort" aria-label="Trier">
+        <option value="rating">Les plus d'avis</option>
+        <option value="price_asc">Prix croissant</option>
+        <option value="price_desc">Prix décroissant</option>
+        <option value="recent">Nouvelles</option>
+      </select>
+    </div>
   </div>
 </div>
 
-<section class="section">
-  <div class="container">
+<section>
+  <div class="wrap">
     <div class="results-meta" id="results-meta"></div>
     <div class="artists-grid" id="artists-grid" aria-live="polite"></div>
     <div style="text-align:center;margin-top:40px;">
@@ -148,11 +131,15 @@
   </div>
 </section>
 
-<div class="toast" id="toast"></div>
+</main>
+
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
 <script type="module">
 import { supabase, esc, safeUrl, specialtyLabel } from '/js/supabase.js';
-import { showToast } from '/js/utils.js';
+import { showToast, localISODate, ICON } from '/js/utils.js';
+import { initNav } from '/js/nav.js';
+initNav();
 
 const params  = new URLSearchParams(location.search);
 let filters   = {
@@ -202,9 +189,10 @@ const PAGE_SIZE = 12;
 // Init filtres depuis URL
 document.getElementById('f-city').value = filters.city;
 document.getElementById('f-date').value = filters.date;
-document.getElementById('f-date').min   = new Date().toISOString().split('T')[0];
+document.getElementById('f-date').min   = localISODate();
+const servicePills = document.querySelectorAll('.filter-pill[data-service]');
 if (filters.service) {
-  document.querySelectorAll('.filter-pill').forEach(p => {
+  servicePills.forEach(p => {
     p.classList.toggle('active', p.dataset.service === filters.service);
   });
 }
@@ -220,6 +208,7 @@ document.getElementById('f-radius').addEventListener('change', () => {
   filters.radius = parseInt(document.getElementById('f-radius').value) || 0;
   reload();
 });
+const NEAR_LABEL = ICON.pin + ' Autour de moi';
 document.getElementById('f-near').addEventListener('click', () => {
   const btn = document.getElementById('f-near');
   if (filters.near) { filters.near = false; filters.center = null; btn.classList.remove('active'); reload(); return; }
@@ -229,16 +218,16 @@ document.getElementById('f-near').addEventListener('click', () => {
     filters.near = true;
     filters.center = { lat: pos.coords.latitude, lng: pos.coords.longitude };
     if (!filters.radius) { filters.radius = 10; document.getElementById('f-radius').value = '10'; }
-    btn.classList.add('active'); btn.innerHTML = '<svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> Autour de moi';
+    btn.classList.add('active'); btn.innerHTML = NEAR_LABEL;
     reload();
   }, (err) => {
-    console.warn(err); btn.innerHTML = '<svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> Autour de moi';
+    console.warn(err); btn.innerHTML = NEAR_LABEL;
     showToast('Position non autorisée. Saisissez une ville et choisissez un rayon.');
   }, { enableHighAccuracy: false, timeout: 8000 });
 });
-document.querySelectorAll('.filter-pill').forEach(p => {
+servicePills.forEach(p => {
   p.addEventListener('click', () => {
-    document.querySelectorAll('.filter-pill').forEach(x => x.classList.remove('active'));
+    servicePills.forEach(x => x.classList.remove('active'));
     p.classList.add('active');
     filters.service = p.dataset.service;
     reload();
@@ -247,7 +236,7 @@ document.querySelectorAll('.filter-pill').forEach(p => {
 document.getElementById('btn-load-more').addEventListener('click', () => loadArtists(false));
 
 function skeletons(n) {
-  return Array(n).fill(`<div class="skel-card"><div class="skeleton sk-cover"></div><div class="sk-body"><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div></div>`).join('');
+  return Array(n).fill(`<div class="skel-card"><div class="skeleton sk-cover"></div><div class="skeleton sk-line" style="width:60%;"></div><div class="skeleton sk-line" style="width:40%;"></div></div>`).join('');
 }
 
 function reload() { page = 0; document.getElementById('artists-grid').innerHTML = skeletons(6); loadArtists(true); }
@@ -276,18 +265,17 @@ async function loadArtists(reset) {
          .range(0, 199);
   } else {
     q = q.range(from, to);
-    if (filters.city) q = q.or(`city.ilike.%${filters.city}%,region.ilike.%${filters.city}%`);
+    const cityTerm = filters.city.replace(/[,()%*\\"]/g, ' ').trim();
+    if (cityTerm) q = q.or(`city.ilike.%${cityTerm}%,region.ilike.%${cityTerm}%`);
   }
 
   if (filters.service) q = q.contains('specialties', [filters.service]);
-  if (filters.date) q = q.in('id',
-    (await supabase.from('availabilities').select('artist_id').eq('date', filters.date).eq('is_available', true).eq('is_booked', false)).data?.map(r => r.artist_id) || []
-  );
 
   if (!geoMode) {
-    if (filters.sort === 'rating')      q = q.order('rating_avg', { ascending: false });
-    if (filters.sort === 'price_asc')   q = q.order('price_from', { ascending: true });
-    if (filters.sort === 'price_desc')  q = q.order('price_from', { ascending: false });
+    // review_count d'abord : une note de 5,00 par défaut ne doit pas passer devant de vrais avis
+    if (filters.sort === 'rating')      q = q.order('review_count', { ascending: false }).order('rating_avg', { ascending: false });
+    if (filters.sort === 'price_asc')   q = q.order('price_from', { ascending: true, nullsFirst: false });
+    if (filters.sort === 'price_desc')  q = q.order('price_from', { ascending: false, nullsFirst: false });
     if (filters.sort === 'recent')      q = q.order('created_at', { ascending: false });
   }
 
@@ -301,15 +289,40 @@ async function loadArtists(reset) {
     count = data.length;
   }
 
+  // Disponibilité à la date choisie : une information, pas un filtre.
+  //   free     → au moins un créneau libre ce jour-là
+  //   full     → la maquilleuse tient un agenda en ligne, mais rien de libre ce jour-là
+  //   (absent) → elle travaille sur devis : la date se confirme avec elle
+  const avail = new Map();
+  if (filters.date && data && data.length) {
+    const ids = data.map(a => a.id);
+    const [dayRes, anyRes] = await Promise.all([
+      supabase.from('availabilities').select('artist_id,is_booked,is_available').in('artist_id', ids).eq('date', filters.date),
+      supabase.from('availabilities').select('artist_id').in('artist_id', ids).gte('date', localISODate()).limit(1000)
+    ]);
+    (anyRes.data || []).forEach(r => avail.set(r.artist_id, 'full'));
+    (dayRes.data || []).forEach(r => { if (r.is_available && !r.is_booked) avail.set(r.artist_id, 'free'); });
+    const rank = (a) => ({ free: 0, full: 2 })[avail.get(a.id)] ?? 1;
+    data = [...data].sort((x, y) => rank(x) - rank(y));
+  }
+
   const grid = document.getElementById('artists-grid');
   if (reset) grid.innerHTML = '';
 
+  if (error) console.error('artists', error);
   if (error || !data || data.length === 0) {
+    if (reset && error) {
+      grid.innerHTML = `<div class="no-results" style="grid-column:1/-1;"><h3>La recherche est momentanément indisponible</h3><p>Réessayez dans un instant.</p></div>`;
+      document.getElementById('btn-load-more').style.display = 'none';
+      document.getElementById('results-meta').textContent = '';
+      document.getElementById('header-sub').textContent = '';
+      return;
+    }
     if (reset) grid.innerHTML = `
       <div class="no-results" style="grid-column:1/-1;">
         <div class="icon"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 2-.9 2-2 0-.6-.2-1-.6-1.4-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h1.6A4.5 4.5 0 0 0 21 9.8C21 6 17 3 12 3Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg></div>
         <h3>Aucune maquilleuse trouvée</h3>
-        <p>Essayez d'élargir votre recherche ou de changer la date.</p>
+        <p>Essayez d'élargir votre recherche : une autre ville, un rayon plus grand ou une autre prestation.</p>
       </div>`;
     document.getElementById('btn-load-more').style.display = 'none';
     document.getElementById('results-meta').textContent = '';
@@ -320,34 +333,43 @@ async function loadArtists(reset) {
   }
 
   data.forEach(a => {
-    const stars = '★'.repeat(Math.round(a.rating_avg || 5)) + '☆'.repeat(5 - Math.round(a.rating_avg || 5));
+    const reviews = parseInt(a.review_count) || 0;
+    const price   = parseInt(a.price_from) || 0;
+    // Pas d'etoiles tant qu'aucune cliente n'a note : cinq etoiles sur zero avis sonne faux
+    const noteHtml = reviews
+      ? `<div class="card-note"><span class="st">★</span> ${String(Number(a.rating_avg || 5).toFixed(1)).replace('.', ',')} · ${reviews} avis</div>`
+      : `<div style="margin-top:8px;"><span class="new-badge">Nouvelle sur GlamBook</span></div>`;
+    const priceHtml = price ? `dès ${price} €` : 'Sur devis';
     const el  = document.createElement('a');
     el.href   = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : `/artist.html?id=${encodeURIComponent(a.id)}`;
     el.className = 'artist-card';
     const name = esc(a.display_name || 'Maquilleuse');
     const city = esc(a.city || a.region || 'France');
     const coverUrl = safeUrl((a.photos||[])[0]?.url) || '';
-    const avatarUrl = safeUrl(a.avatar_url);
+    const specs = (a.specialties || []).slice(0,2).map(s => esc(specialtyLabel(s)).toLowerCase()).join(', ');
+    const dist = a._dist != null ? ` · à ${a._dist < 10 ? a._dist.toFixed(1).replace('.', ',') : Math.round(a._dist)} km` : '';
     el.setAttribute('aria-label', `Voir le profil de ${name}`);
+    const st = avail.get(a.id);
+    const availHtml = !filters.date ? '' : st === 'free'
+      ? '<div><span class="avail-badge is-ok">Disponible à cette date</span></div>'
+      : st === 'full' ? '<div><span class="avail-badge is-info">Complète à cette date</span></div>'
+      : '<div><span class="avail-badge is-info">Date à confirmer avec elle</span></div>';
+    const PH = `<div class="artist-card-cover cover-ph" role="img" aria-label="Pas encore de photo">${ICON.image}</div>`;
     el.innerHTML = `
-      <img class="artist-card-cover" src="${coverUrl}" alt="Réalisations de ${name}" loading="lazy"
-           onerror="this.style.cssText='height:200px;display:flex;background:linear-gradient(135deg,rgba(232,84,122,.14),#27272A)'"/>
+      ${coverUrl
+        ? `<img class="artist-card-cover" src="${esc(coverUrl)}" alt="Réalisations de ${name}" loading="lazy"/>`
+        : PH}
       <div class="artist-card-body">
-        <div class="artist-card-header">
-          <div class="artist-avatar avatar-placeholder" style="width:52px;height:52px;font-size:1.1rem;margin-top:-30px;border:3px solid #fff;flex-shrink:0;overflow:hidden;">
-            ${avatarUrl ? `<img src="${avatarUrl}" alt="" style="width:100%;height:100%;object-fit:cover;"/>` : esc((a.display_name || '?')[0])}
-          </div>
-          <div>
-            <div class="artist-name">${name}</div>
-            <div class="artist-city"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg> ${city}${a._dist != null ? ` · à ${a._dist < 10 ? a._dist.toFixed(1) : Math.round(a._dist)} km` : ''}</div>
-          </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+          <span class="artist-name">${name}</span><span class="artist-price">${priceHtml}</span>
         </div>
-        <div class="tags">${(a.specialties || []).slice(0,3).map(s => `<span class="tag">${esc(specialtyLabel(s))}</span>`).join('')}</div>
-        <div class="artist-card-meta">
-          <div><span class="stars">${stars}</span> <span style="font-size:.8rem;color:var(--gris);">(${parseInt(a.review_count)||0})</span></div>
-          <div class="artist-price">À partir de ${parseInt(a.price_from)||'–'}€</div>
-        </div>
+        <div class="artist-city">${city}${dist}${specs ? ' — ' + specs : ''}</div>
+        ${noteHtml}
+        ${availHtml}
       </div>`;
+    // Une photo qui ne charge pas (fichier supprimé, réseau) laisse la place à la surface neutre
+    const img = el.querySelector('img.artist-card-cover');
+    if (img) img.addEventListener('error', () => { img.outerHTML = PH; }, { once: true });
     grid.appendChild(el);
   });
 
@@ -357,11 +379,11 @@ async function loadArtists(reset) {
   const sub = geoMode
     ? (filters.near ? `Autour de vous · ${filters.radius} km` : `Autour de ${filters.city || 'la ville'} · ${filters.radius} km`)
     : (filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses');
-  document.getElementById('header-sub').textContent = sub + (filters.date ? ` — ${new Date(filters.date).toLocaleDateString('fr-FR')}` : '');
+  document.getElementById('header-sub').textContent = sub + (filters.date ? ` — ${new Date(filters.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}` : '');
   document.getElementById('results-meta').textContent = `${count} maquilleuse${count > 1 ? 's' : ''} trouvée${count > 1 ? 's' : ''}`;
   if (filters.city && !geoMode) {
     document.title = `Maquilleuses à ${filters.city} — GlamBook`;
-    document.querySelector('.page-header h1').textContent = `Maquilleuses professionnelles à ${filters.city}`;
+    document.getElementById('page-title').innerHTML = `Maquilleuses à <em>${esc(filters.city)}</em>`;
   }
 }
 

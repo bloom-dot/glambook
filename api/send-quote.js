@@ -9,6 +9,7 @@
 //   MAIL_FROM               -> ex. "GlamBook <devis@votre-domaine.fr>"
 //   PUBLIC_SITE_URL         -> ex. "https://glambook-pi.vercel.app" (défaut ci-dessous)
 
+const { originAllowed } = require('./_shared');
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SITE = process.env.PUBLIC_SITE_URL || 'https://glambook-pi.vercel.app';
 
@@ -21,9 +22,7 @@ const euros = (cents) => (Math.round(Number(cents) || 0) / 100)
 
 module.exports = async function handler(req, res) {
   // CSRF — vérifier l'origine
-  const origin = req.headers.origin || '';
-  const allowed = ['https://glambook-pi.vercel.app', 'http://localhost:3000'];
-  if (origin && !allowed.some(o => origin.startsWith(o))) {
+  if (!originAllowed(req)) {
     return res.status(403).json({ error: 'Origine non autorisée' });
   }
   if (req.method !== 'POST') {
@@ -178,7 +177,7 @@ function emailHtml({ clientName, muaName, quoteNumber, total, link, logoUrl }) {
             </td></tr>
           </table>
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%"><tr><td align="center">
-            <a href="${esc(link)}" style="display:inline-block;background:#E8547A;color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 30px;border-radius:10px;">
+            <a href="${esc(link)}" style="display:inline-block;background:#C43A60;color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 30px;border-radius:10px;">
               Consulter &amp; signer mon devis
             </a>
           </td></tr></table>

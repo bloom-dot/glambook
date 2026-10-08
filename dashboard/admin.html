@@ -13,7 +13,7 @@
     .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
     .topbar .logo { font-size:1.3rem; font-weight:900; color:var(--rose); text-decoration:none; letter-spacing:-.03em; }
     .topbar .logo span { color:var(--or); }
-    .topbar .badge-admin { background:var(--ink); color:#fff; font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:20px; margin-left:8px; }
+    .topbar .badge-admin { background:var(--gb-surface-2); color:var(--gb-champagne); font-size:.7rem; font-weight:800; padding:4px 10px; border-radius:20px; margin-left:8px; }
     .tabs { display:flex; gap:2px; background:var(--surface-2); border-radius:var(--radius-sm); padding:4px; margin-bottom:22px; max-width:420px; }
     .tab { flex:1; text-align:center; padding:10px 8px; font-size:.85rem; font-weight:600; color:var(--gris); cursor:pointer; border-radius:var(--radius-xs); }
     .tab.active { background:var(--blanc); color:var(--noir); box-shadow:var(--shadow); }
@@ -28,17 +28,15 @@
     .nm { font-weight:700; font-size:.92rem; }
     .meta { font-size:.78rem; color:var(--gris); margin-top:2px; }
     .tag { font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:20px; }
-    .t-yes { background:#ECFDF5; color:#065F46; } .t-no { background:var(--surface-2); color:var(--gris); }
+    .t-yes { background:var(--gb-ok-tint); color:var(--gb-ok); } .t-no { background:var(--surface-2); color:var(--gris); }
     .acts { display:flex; gap:6px; flex-wrap:wrap; }
     .thread { margin-top:10px; border-top:1px solid var(--bord); padding-top:10px; display:flex; flex-direction:column; gap:6px; }
     .m { font-size:.85rem; padding:7px 11px; border-radius:10px; max-width:80%; }
     .m.a { background:var(--rose-cl); align-self:flex-start; } .m.b { background:var(--surface-2); align-self:flex-end; }
-    .reason { background:#FEF3C7; border-radius:8px; padding:6px 10px; font-size:.82rem; margin-top:6px; }
+    .reason { background:var(--gb-warn-tint); border-radius:8px; padding:6px 10px; font-size:.82rem; margin-top:6px; }
     .resolved { opacity:.55; }
     .empty { color:var(--gris); text-align:center; padding:26px; font-size:.86rem; }
     .hide { display:none !important; }
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all .3s; z-index:300; }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     .center { text-align:center; padding:40px; color:var(--gris); }
   </style>
 </head>
@@ -155,7 +153,7 @@
               </div>
             </div>
             ${r.reason?`<div class="reason">Motif : ${esc(r.reason)}</div>`:''}
-            ${r.message_body?`<div class="reason" style="background:#FEE2E2;">Message signalé : « ${esc(r.message_body)} »</div>`:''}
+            ${r.message_body?`<div class="reason" style="background:var(--gb-bad-tint);">Message signalé : « ${esc(r.message_body)} »</div>`:''}
             <div class="thread hide" data-thread></div>
           </div>`).join('') : '<div class="empty">Aucun signalement.</div>';
 
