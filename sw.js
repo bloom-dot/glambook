@@ -1,4 +1,9 @@
-const CACHE_NAME = 'glambook-v24';
+const CACHE_NAME = 'glambook-v26';
+const OFFLINE = '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors connexion — GlamBook</title></head>'
+  + '<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#0E0E10;color:#F4F2F5;font-family:system-ui,sans-serif;text-align:center;padding:24px">'
+  + '<div><p style="font-weight:800;letter-spacing:.06em;font-size:1.4rem;margin:0 0 12px">GLAM<span style="color:#D4AF37">BOOK</span></p>'
+  + '<p style="margin:0 0 20px;color:#A8A2AC">Pas de connexion internet pour le moment.</p>'
+  + '<button onclick="location.reload()" style="background:#D4AF37;color:#17120A;border:0;border-radius:8px;padding:12px 22px;font-weight:700;cursor:pointer">Réessayer</button></div></body></html>';
 const ASSETS = [
   '/',
   '/index.html',
@@ -9,6 +14,7 @@ const ASSETS = [
   '/js/nav.js',
   '/js/select.js',
   '/js/shell.js',
+  '/js/rdv.js',
   '/manifest.json'
 ];
 
@@ -29,6 +35,7 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
 
   // Ne pas intercepter les requêtes externes/non-HTTP
@@ -39,6 +46,7 @@ self.addEventListener('fetch', e => {
       url.hostname.includes('pusher') ||
       url.hostname.includes('googleapis.com') ||
       url.hostname.includes('gstatic.com') ||
+      url.hostname.includes('data.gouv.fr') ||   // recherche d'adresses : toujours en direct, jamais en cache
       url.pathname.startsWith('/api/')) {
     return;
   }
@@ -46,7 +54,8 @@ self.addEventListener('fetch', e => {
   // Network-first pour les pages HTML
   if (e.request.mode === 'navigate') {
     e.respondWith(
-      fetch(e.request).catch(() => caches.match('/index.html'))
+      // Hors connexion : une page simple plutôt que l'accueil (dont les modules échoueraient)
+      fetch(e.request).catch(() => new Response(OFFLINE, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }))
     );
     return;
   }

@@ -81,7 +81,7 @@ export async function getShareToken(id) {
 
 /** Supprime un devis. */
 export async function deleteQuote(id) {
-  const { error } = await supabase.from('quotes').delete().eq('id', id);
+  const { error } = await supabase.from('quotes').delete().eq('id', id).neq('status', 'signed');
   if (error) throw error;
 }
 

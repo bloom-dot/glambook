@@ -97,7 +97,7 @@
       <div class="empty"><div class="ic" data-ico="chat"></div><p style="font-size:.9rem;">Sélectionnez une conversation.</p></div>
     </div>
     <div class="composer" id="composer" style="display:none;">
-      <textarea id="input" rows="1" placeholder="Écrivez votre message…"></textarea>
+      <textarea id="input" rows="1" placeholder="Écrivez votre message…" aria-label="Votre message"></textarea>
       <button class="btn btn-primary" id="sendBtn">Envoyer</button>
     </div>
   </div>
@@ -178,7 +178,11 @@
     $('threadCol').classList.remove('mobile-hidden');
     $('listCol').classList.add('mobile-hidden');
 
-    const msgs = await getMessages(id);
+    let msgs;
+    try { msgs = await getMessages(id); }
+    catch (e) { console.error(e); if (activeConv === c) $('msgs').innerHTML = '<div class="empty"><p style="font-size:.88rem;">Les messages ne peuvent pas être affichés pour le moment.</p></div>'; return; }
+    // Une autre conversation a été ouverte entre-temps : on n'affiche pas l'ancienne réponse
+    if (activeConv !== c) return;
     renderMessages(msgs);
     await markRead(id);
     // Recharger la liste pour remettre à zéro le compteur non-lus

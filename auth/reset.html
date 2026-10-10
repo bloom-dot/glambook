@@ -94,7 +94,7 @@ $('reset-form').addEventListener('submit', async (e) => {
   $('success-msg').classList.add('show');
   let role = null;
   try { role = (await supabase.from('profiles').select('role').eq('user_id', data.user.id).maybeSingle()).data?.role; } catch (_) {}
-  setTimeout(() => { location.href = role === 'artist' ? '/dashboard/artist.html' : '/mes-devis.html'; }, 1000);
+  setTimeout(() => { location.href = role === 'artist' ? '/dashboard/artist.html' : role === 'admin' ? '/dashboard/admin.html' : '/mes-devis.html'; }, 1000);
 });
 </script>
 </body>

@@ -104,6 +104,18 @@
 
     section.block { padding: 72px 0 0; }
 
+    /* ── Aiguillage ── */
+    .pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+    .pick-card { display: grid; grid-template-columns: minmax(0, 1fr) 150px; border: 1px solid var(--gb-line-strong); border-radius: var(--radius); overflow: hidden; background: var(--gb-surface); text-decoration: none; color: var(--gb-ink); transition: border-color .2s; }
+    .pick-card.hot, .pick-card:hover { border-color: var(--gb-gold); }
+    .pick-card img { width: 150px; height: 100%; min-height: 170px; object-fit: cover; }
+    .pick-txt { padding: 22px; display: flex; flex-direction: column; gap: 8px; }
+    .pick-txt b { font-size: 2rem; font-weight: 800; font-stretch: var(--gb-condensed); text-transform: uppercase; line-height: .95; }
+    .pick-txt span { font-size: .88rem; color: var(--gb-ink-2); line-height: 1.5; }
+    .pick-txt em { font-style: normal; font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-champagne); margin-top: auto; }
+    .pick-note { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; font-size: .86rem; color: var(--gb-ink-2); }
+    .pick-note .gb-ico { color: var(--gb-champagne); width: 18px; height: 18px; }
+
     /* ── Index des occasions ── */
     .index a { display: grid; grid-template-columns: 56px minmax(0, 1fr) 220px; align-items: center; gap: 24px; padding: 8px 0; border-bottom: 1px solid var(--gb-line); text-decoration: none; color: var(--gb-ink); }
     .index .n { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.4rem; color: var(--gb-gold); }
@@ -167,6 +179,7 @@
       .search .near { width: auto; height: 52px; border-right: 1px solid var(--gb-line); }
       .search .go { height: 58px; border-radius: 0 0 calc(var(--gb-r-md) - 1px) calc(var(--gb-r-md) - 1px); grid-column: 1 / -1; }
       .steps { grid-template-columns: 1fr 1fr; }
+      .pick-grid { grid-template-columns: 1fr; }
       .grid3 { grid-template-columns: 1fr 1fr; }
       .pro { grid-template-columns: 1fr; }
       .pro img { order: -1; min-height: 220px; max-height: 260px; }
@@ -184,6 +197,10 @@
       .search .f { border-right: none; }
       .search .near { border-right: none; justify-content: flex-start; padding: 0 24px; gap: 10px; width: 100%; font: 600 .78rem var(--gb-font-body); letter-spacing: .12em; text-transform: uppercase; }
       .index a { grid-template-columns: 36px minmax(0, 1fr) 84px; gap: 12px; }
+      .pick-card { grid-template-columns: minmax(0, 1fr) 96px; }
+      .pick-card img { width: 96px; min-height: 150px; }
+      .pick-txt { padding: 16px; }
+      .pick-txt b { font-size: 1.6rem; }
       .index img { width: 84px; height: 48px; }
       .grid3, .steps { grid-template-columns: 1fr; }
       .pro-text { padding: 28px 22px; }
@@ -199,6 +216,7 @@
     <a href="/" class="nav-logo">Glam<span>Book</span></a>
     <div class="nav-links">
       <a href="/artists.html" class="hide-mobile nav-plain">Maquilleuses</a>
+      <a href="/rdv.html" class="hide-mobile nav-plain">Mon rendez-vous</a>
       <a href="/auth/register.html?role=artist" class="hide-mobile nav-plain">Pour les pros</a>
       <span id="nav-auth">
         <a href="/auth/login.html">Connexion</a>
@@ -219,7 +237,7 @@
 </section>
 
 <div class="wrap">
-  <form class="search" onsubmit="doSearch(); return false;" role="search">
+  <form class="search" onsubmit="return false;" role="search">
     <div class="f">
       <label for="search-service">Occasion</label>
       <select id="search-service" class="gb-select">
@@ -247,6 +265,22 @@
     <li><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>Échange direct avec la maquilleuse</li>
     <li><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/></svg>Aucuns frais de réservation</li>
   </ul>
+
+  <!-- Aiguillage : devis pour les grands événements, créneau pour le reste. Sans compte dans les deux cas. -->
+  <section class="block pick" aria-labelledby="pick-t">
+    <div class="rule-head"><span class="lbl" id="pick-t">C’est pour quoi ?</span><a href="/rdv.html">Retrouver mon rendez-vous →</a></div>
+    <div class="pick-grid">
+      <a class="pick-card" href="/artists.html?service=mariage">
+        <span class="pick-txt"><b>Un mariage, un grand événement</b><span>Décrivez-le, recevez un devis par e-mail. Essai, plusieurs personnes, lieu : tout se cale avec elle.</span><em>Demander un devis →</em></span>
+        <img src="/img/cat-mariage.jpg" alt="" loading="lazy"/>
+      </a>
+      <a class="pick-card hot" href="/artists.html?mode=express">
+        <span class="pick-txt"><b>Une soirée, un shooting</b><span>Prix affiché, créneau au choix, réglé sur place.</span><em>Réserver un créneau →</em></span>
+        <img src="/img/cat-soiree.jpg" alt="" loading="lazy"/>
+      </a>
+    </div>
+    <p class="pick-note"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>Aucun compte à créer : un nom, un téléphone et un e-mail suffisent.</p>
+  </section>
 
   <!-- Espace personnel : révélé par le script si une session est active -->
   <section class="home-me" id="home-me" hidden>
@@ -290,7 +324,7 @@
     <div class="steps">
       <div><span class="n">01</span><h3>Choisissez</h3><p>Parcourez les portfolios par ville et par occasion.</p></div>
       <div><span class="n">02</span><h3>Décrivez</h3><p>L'événement, le lieu, le nombre de personnes, le style voulu.</p></div>
-      <div><span class="n">03</span><h3>Signez</h3><p>Elle vous répond par un devis, à lire et signer depuis votre téléphone.</p></div>
+      <div><span class="n">03</span><h3>Signez</h3><p>Elle vous répond par un devis, à lire et signer depuis votre téléphone, sans compte.</p></div>
       <div><span class="n">04</span><h3>Brillez</h3><p>Le jour venu, elle vient à vous avec ce qu'il faut.</p></div>
     </div>
   </section>
@@ -316,6 +350,7 @@
       <a href="/" class="nav-logo" style="font-size:1.6rem;">Glam<span>Book</span></a>
       <nav class="links" aria-label="Liens utiles">
         <a href="/artists.html">Maquilleuses</a>
+        <a href="/rdv.html">Mon rendez-vous</a>
         <a href="/auth/register.html?role=artist">Pour les pros</a>
         <a href="/legal/mentions-legales.html">Mentions légales</a>
         <a href="/legal/cgu.html">CGU</a>
@@ -389,7 +424,7 @@ async function loadMe() {
   try {
     const { data } = await supabase.from('booking_requests')
       .select('id,event_date,services_snapshot,status,artist_id,created_at')
-      .neq('status', 'declined')
+      .in('status', ['pending', 'quoted'])
       .order('created_at', { ascending: false }).limit(10);
     const all = data || [];
     const yesterday = Date.now() - 86400000;
@@ -483,6 +518,7 @@ function buildSearchParams() {
   return p;
 }
 
+document.querySelector('form.search')?.addEventListener('submit', (e) => { e.preventDefault(); window.doSearch(); });
 window.doSearch = function() {
   const btn = document.querySelector('.hsb-go');
   if (btn) { btn.disabled = true; btn.textContent = 'Recherche…'; }

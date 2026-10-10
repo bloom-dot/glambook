@@ -55,6 +55,35 @@ export function parseLocalDate(s) {
   return new Date(y, (m || 1) - 1, d || 1);
 }
 
+// Heures proposées pour les créneaux : une seule liste pour la mise en route et l'agenda,
+// sinon une heure choisie d'un côté devient invisible (et effacée) de l'autre.
+export const SLOT_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+
+// Photos : les téléphones produisent des JPEG de 5 à 12 Mo (et des HEIC sur iPhone).
+// On réduit dans le navigateur avant l'envoi : 2000 px de côté au plus, JPEG qualité 0,85.
+// Renvoie { file } prêt à envoyer, ou { error } en français.
+export async function shrinkImage(file, max = 2000, quality = 0.85) {
+  if (!file || !/^image\//.test(file.type || '') && !/\.(heic|heif|jpe?g|png|webp)$/i.test(file.name || '')) return { error: 'format non accepté' };
+  if (file.size > 30 * 1024 * 1024) return { error: 'fichier trop lourd (30 Mo maximum)' };
+  const small = file.size <= 1.5 * 1024 * 1024 && ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+  let img;
+  try {
+    img = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch (_) {
+    try {
+      img = await new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = URL.createObjectURL(file); });
+    } catch (_) { return small ? { file } : { error: 'format non reconnu (enregistrez la photo en JPEG)' }; }
+  }
+  const w = img.width, h = img.height;
+  if (small && Math.max(w, h) <= max) return { file };
+  const k = Math.min(1, max / Math.max(w, h));
+  const c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', quality));
+  if (!blob) return small ? { file } : { error: 'conversion impossible' };
+  return { file: new File([blob], (file.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }) };
+}
+
 // Redirection après connexion/inscription : chemins internes uniquement (pas d'open redirect).
 // Accepte un chemin (« /artiste/x ») ou une URL complète de ce même site.
 export function safeRedirect(raw) {

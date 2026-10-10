@@ -111,6 +111,7 @@
         <option value="50">50 km</option>
       </select>
       <input class="filter-input" id="f-date" type="date" aria-label="Date de l'événement" style="min-width:150px;"/>
+      <button class="tool-btn" id="f-express" type="button" aria-pressed="false" title="Prix affiché, créneau au choix, réglé sur place"><svg class="gb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg> Réservable en ligne</button>
       <select class="sort-select gb-select" data-gbs-class="gbs-box push" id="f-sort" aria-label="Trier">
         <option value="rating">Les plus d'avis</option>
         <option value="price_asc">Prix croissant</option>
@@ -151,7 +152,8 @@ let filters   = {
   sort:    'rating',
   radius:  0,          // km (0 = partout)
   center:  null,       // { lat, lng }
-  near:    false       // recherche autour de ma position
+  near:    false,      // recherche autour de ma position
+  express: params.get('mode') === 'express'   // seulement les maquilleuses réservables en ligne
 };
 
 // Recherche géolocalisée transmise depuis l'accueil (?lat=..&lng=..&radius=..)
@@ -203,6 +205,17 @@ if (filters.radius) { const fr = document.getElementById('f-radius'); if (fr) fr
 if (filters.near)   { const fn = document.getElementById('f-near');   if (fn) fn.classList.add('active'); }
 
 // Events
+const fx = document.getElementById('f-express');
+const paintExpress = () => {
+  fx.classList.toggle('active', filters.express); fx.setAttribute('aria-pressed', String(filters.express));
+  document.getElementById('page-title').innerHTML = filters.express ? 'Réserver un <em>créneau</em>' : 'Les <em>maquilleuses</em>';
+};
+fx.addEventListener('click', () => {
+  filters.express = !filters.express; paintExpress();
+  const u = new URL(location.href); filters.express ? u.searchParams.set('mode', 'express') : u.searchParams.delete('mode'); history.replaceState(null, '', u);
+  reload();
+});
+paintExpress();
 document.getElementById('f-city').addEventListener('input', debounce(() => { filters.city = document.getElementById('f-city').value; reload(); }, 400));
 document.getElementById('f-date').addEventListener('change', () => { filters.date = document.getElementById('f-date').value; reload(); });
 document.getElementById('f-sort').addEventListener('change', () => { filters.sort = document.getElementById('f-sort').value; reload(); });
@@ -243,7 +256,9 @@ function skeletons(n) {
 
 function reload() { page = 0; document.getElementById('artists-grid').innerHTML = skeletons(6); loadArtists(true); }
 
+let reqSeq = 0; // une réponse plus ancienne que la dernière recherche est ignorée
 async function loadArtists(reset) {
+  const seq = ++reqSeq;
   if (reset) page = 0;
   const from = page * PAGE_SIZE;
   const to   = from + PAGE_SIZE - 1;
@@ -272,6 +287,13 @@ async function loadArtists(reset) {
   }
 
   if (filters.service) q = q.contains('specialties', [filters.service]);
+  // Réservable en ligne : filtré avant la pagination (tarifs + au moins un créneau libre à venir)
+  if (filters.express) {
+    const { data: fr } = await supabase.from('availabilities').select('artist_id')
+      .gte('date', localISODate()).eq('is_available', true).eq('is_booked', false).limit(5000);
+    const ids = [...new Set((fr || []).map(r => r.artist_id))];
+    q = q.in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000']).gt('price_from', 0);
+  }
 
   if (!geoMode) {
     // review_count d'abord : une note de 5,00 par défaut ne doit pas passer devant de vrais avis
@@ -282,6 +304,7 @@ async function loadArtists(reset) {
   }
 
   let { data, count, error } = await q;
+  if (seq !== reqSeq) return;
 
   // Mode géo : distance exacte (Haversine), filtre au rayon, tri par proximité
   if (geoMode && data) {
@@ -309,6 +332,7 @@ async function loadArtists(reset) {
   }
 
   const modes = await bookingModes(supabase, data);
+  if (seq !== reqSeq) return;
   const grid = document.getElementById('artists-grid');
   if (reset) grid.innerHTML = '';
 
@@ -331,7 +355,7 @@ async function loadArtists(reset) {
     document.getElementById('results-meta').textContent = '';
     document.getElementById('header-sub').textContent = geoMode
       ? (filters.near ? `Aucune maquilleuse à moins de ${filters.radius} km de vous` : `Aucune maquilleuse à moins de ${filters.radius} km de ${filters.city || 'cette ville'}`)
-      : (filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses');
+      : (filters.city ? `Maquilleuses à ${filters.city}` : (filters.express ? 'Prix affiché · créneau au choix · réglé sur place' : 'Toutes les maquilleuses'));
     return;
   }
 
@@ -381,7 +405,7 @@ async function loadArtists(reset) {
 
   const sub = geoMode
     ? (filters.near ? `Autour de vous · ${filters.radius} km` : `Autour de ${filters.city || 'la ville'} · ${filters.radius} km`)
-    : (filters.city ? `Maquilleuses à ${filters.city}` : 'Toutes les maquilleuses');
+    : (filters.city ? `Maquilleuses à ${filters.city}` : (filters.express ? 'Prix affiché · créneau au choix · réglé sur place' : 'Toutes les maquilleuses'));
   document.getElementById('header-sub').textContent = sub + (filters.date ? ` — ${new Date(filters.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}` : '');
   document.getElementById('results-meta').textContent = `${count} maquilleuse${count > 1 ? 's' : ''} trouvée${count > 1 ? 's' : ''}`;
   if (filters.city && !geoMode) {

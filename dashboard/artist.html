@@ -332,19 +332,19 @@
       <div class="name" id="sb-name">Chargement...</div>
       <div class="sub">Maquilleuse</div>
     </div>
-    <a class="nav-item" data-tab="accueil"><span data-ico="home"></span> Accueil</a>
+    <a class="nav-item" href="#accueil" data-tab="accueil"><span data-ico="home"></span> Accueil</a>
     <div class="nav-section">Mon activité</div>
-    <a class="nav-item" id="nav-dem" data-tab="demandes"><span data-ico="inbox"></span> Demandes</a>
-    <a class="nav-item" data-tab="devis"><span data-ico="doc"></span> Devis</a>
+    <a class="nav-item" id="nav-dem" href="#demandes" data-tab="demandes"><span data-ico="inbox"></span> Demandes</a>
+    <a class="nav-item" href="#devis" data-tab="devis"><span data-ico="doc"></span> Devis</a>
     <a class="nav-item" id="nav-msg" href="/messages.html"><span data-ico="chat"></span> Messages</a>
-    <a class="nav-item" data-tab="reservations" data-group="agenda"><span data-ico="calendar"></span> Agenda</a>
-    <a class="nav-item" data-tab="avis"><span data-ico="star"></span> Avis</a>
+    <a class="nav-item" href="#reservations" data-tab="reservations" data-group="agenda"><span data-ico="calendar"></span> Agenda</a>
+    <a class="nav-item" href="#avis" data-tab="avis"><span data-ico="star"></span> Avis</a>
     <a class="nav-item" id="nav-diag" href="/dashboard/diagnostic.html" hidden><span data-ico="scan"></span> Diagnostic visage</a>
     <div class="nav-section">Ma vitrine</div>
-    <a class="nav-item" data-tab="profil"><span data-ico="user"></span> Présentation</a>
-    <a class="nav-item" data-tab="photos"><span data-ico="image"></span> Photos</a>
-    <a class="nav-item" data-tab="services"><span data-ico="tag"></span> Tarifs</a>
-    <a class="nav-item" data-tab="espace"><span data-ico="palette"></span> Apparence</a>
+    <a class="nav-item" href="#profil" data-tab="profil"><span data-ico="user"></span> Présentation</a>
+    <a class="nav-item" href="#photos" data-tab="photos"><span data-ico="image"></span> Photos</a>
+    <a class="nav-item" href="#services" data-tab="services"><span data-ico="tag"></span> Tarifs</a>
+    <a class="nav-item" href="#espace" data-tab="espace"><span data-ico="palette"></span> Apparence</a>
     <a class="nav-item" id="link-public-profile" href="/artists.html" target="_blank" rel="noopener"><span data-ico="eye"></span> Voir ma fiche</a>
     <div class="sb-foot">
       <a class="nav-item" id="nav-admin" href="/dashboard/admin.html" style="display:none;"><span data-ico="shield"></span> Administration</a>
@@ -379,6 +379,7 @@
         <p>Les clientes choisissent sur photos : une fiche complète apparaît mieux dans la recherche et reçoit plus de demandes.</p>
         <div class="starter-bar" aria-hidden="true"><span id="starter-fill"></span></div>
         <ol class="starter-list" id="starter-list"></ol>
+        <a class="btn btn-primary" href="/dashboard/bienvenue.html" style="margin-top:14px;">Reprendre la mise en route guidée</a>
       </section>
 
       <section class="blk">
@@ -430,7 +431,7 @@
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px;">
           <button class="btn btn-secondary btn-sm" id="btn-save-template">Enregistrer le modèle</button>
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:.82rem;color:var(--gris);">Appliquer sur</span>
+            <label for="wk-weeks" style="font-size:.82rem;color:var(--gris);">Appliquer sur</label>
             <select id="wk-weeks" style="padding:7px 9px;font-size:.85rem;">
               <option value="4">4 semaines</option>
               <option value="8" selected>8 semaines</option>
@@ -563,12 +564,12 @@
         <p style="font-weight:800;margin-bottom:4px;">Ajouter une prestation</p>
         <p style="font-size:.8rem;color:var(--gris);margin-bottom:14px;">Sans prestation tarifée, votre profil affiche « Sur devis » et vos clientes vous décrivent leur besoin.</p>
         <div class="form-row">
-          <div class="field"><label>Nom</label><input type="text" id="svc-name" placeholder="Maquillage mariée"/></div>
-          <div class="field"><label>Prix (€)</label><input type="number" id="svc-price" placeholder="150" min="1" step="1" inputmode="decimal"/></div>
+          <div class="field"><label for="svc-name">Nom</label><input type="text" id="svc-name" placeholder="Maquillage mariée"/></div>
+          <div class="field"><label for="svc-price">Prix (€)</label><input type="number" id="svc-price" placeholder="150" min="1" step="1" inputmode="decimal"/></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Durée (min)</label><input type="number" id="svc-duration" value="60" min="15" step="15" inputmode="numeric"/></div>
-          <div class="field"><label>Catégorie</label>
+          <div class="field"><label for="svc-duration">Durée (min)</label><input type="number" id="svc-duration" value="60" min="15" step="15" inputmode="numeric"/></div>
+          <div class="field"><label for="svc-category">Catégorie</label>
             <select id="svc-category">
               <option value="mariage">Mariage</option><option value="soiree">Soirée</option>
               <option value="quotidien">Quotidien</option><option value="editorial">Éditorial</option>
@@ -576,7 +577,7 @@
             </select>
           </div>
         </div>
-        <div class="field"><label>Description</label><textarea id="svc-desc" rows="2" placeholder="Ce qui est inclus..."></textarea></div>
+        <div class="field"><label for="svc-desc">Description</label><textarea id="svc-desc" rows="2" placeholder="Ce qui est inclus..."></textarea></div>
         <button class="btn btn-primary btn-sm" id="btn-add-service">Ajouter</button>
       </div>
     </div>
@@ -643,7 +644,7 @@
       <div class="panel-d" style="margin-bottom:20px;">
         <p style="font-weight:800;margin-bottom:6px;">Texte du bouton de réservation</p>
         <p style="font-size:.8rem;color:var(--gris);margin-bottom:12px;">Ce que voient vos clientes sur le bouton principal</p>
-        <input type="text" id="cta-text" placeholder="Réserver ce créneau" maxlength="40" style="width:100%;padding:10px 12px;font-size:.9rem;"/>
+        <input type="text" id="cta-text" aria-label="Texte du bouton de réservation" placeholder="Choisir un créneau" maxlength="40" style="width:100%;padding:10px 12px;font-size:.9rem;"/>
         <div style="font-size:.72rem;color:var(--gris);margin-top:4px;text-align:right;" id="cta-counter">0/40</div>
       </div>
 
@@ -668,13 +669,13 @@
   <div class="sheet" role="menu">
     <div class="grab"></div>
     <div class="nav-section">Mon activité</div>
-    <a class="nav-item" data-tab="reservations" data-group="agenda"><span data-ico="calendar"></span> Agenda</a>
-    <a class="nav-item" data-tab="avis"><span data-ico="star"></span> Avis</a>
+    <a class="nav-item" href="#reservations" data-tab="reservations" data-group="agenda"><span data-ico="calendar"></span> Agenda</a>
+    <a class="nav-item" href="#avis" data-tab="avis"><span data-ico="star"></span> Avis</a>
     <div class="nav-section">Ma vitrine</div>
-    <a class="nav-item" data-tab="profil"><span data-ico="user"></span> Présentation</a>
-    <a class="nav-item" data-tab="photos"><span data-ico="image"></span> Photos</a>
-    <a class="nav-item" data-tab="services"><span data-ico="tag"></span> Tarifs</a>
-    <a class="nav-item" data-tab="espace"><span data-ico="palette"></span> Apparence</a>
+    <a class="nav-item" href="#profil" data-tab="profil"><span data-ico="user"></span> Présentation</a>
+    <a class="nav-item" href="#photos" data-tab="photos"><span data-ico="image"></span> Photos</a>
+    <a class="nav-item" href="#services" data-tab="services"><span data-ico="tag"></span> Tarifs</a>
+    <a class="nav-item" href="#espace" data-tab="espace"><span data-ico="palette"></span> Apparence</a>
     <a class="nav-item" id="m-link-public" href="/artists.html" target="_blank" rel="noopener"><span data-ico="eye"></span> Voir ma fiche</a>
     <a class="nav-item" id="m-logout" href="#"><span data-ico="logout"></span> Déconnexion</a>
   </div>
@@ -688,7 +689,7 @@ import { listMyQuotes, getShareToken, signatureUrl, deleteQuote } from '/js/devi
 import { euros } from '/js/devis/model.js';
 import { listArtistRequests, validateRequestToQuote, declineRequest } from '/js/booking/store.js';
 import { myConversations } from '/js/chat/store.js';
-import { ICON, localISODate, parseLocalDate, safeUrl } from '/js/utils.js';
+import { ICON, localISODate, parseLocalDate, safeUrl, SLOT_HOURS, shrinkImage } from '/js/utils.js';
 
 document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ICON[el.dataset.ico] || ''; });
 
@@ -700,7 +701,7 @@ let artistData = null, profileData = null, greetName = '';
 let calDate = new Date(); calDate.setDate(1);
 let selectedCalDay = null, slotsToSave = [];
 
-const ALL_SLOTS = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
+const ALL_SLOTS = SLOT_HOURS;
 
 // Init
 async function init() {
@@ -717,8 +718,8 @@ async function init() {
   const profile = profileRes.data;
   const artist = artistRes.data;
 
-  // Une cliente qui arrive ici par erreur n'a rien à y faire : on ne lui crée pas de fiche artiste.
-  if (!artist && profile?.role === 'client') { location.replace('/mes-devis.html'); return; }
+  // Compte cliente : la mise en route lui propose de passer en compte maquilleuse (ou de rester cliente)
+  if (!artist && profile?.role === 'client') { location.replace('/dashboard/bienvenue.html'); return; }
 
   // Auto-créer profil si absent (INSERT seulement, pas upsert)
   if (!profile) {
@@ -741,6 +742,12 @@ async function init() {
     artistData = newArtist;
   } else {
     artistData = artist;
+  }
+  // Toute nouvelle maquilleuse passe d'abord par la mise en route guidée (une seule fois)
+  {
+    let seen = false; try { seen = !!localStorage.getItem('gb_onb_seen'); } catch (_) { seen = true; }
+    const a = artistData;
+    if (a?.id && !seen && !a.is_active && !(a.bio || '').trim() && !(a.specialties || []).length) { location.replace('/dashboard/bienvenue.html'); return; }
   }
   if (!artistData?.id) {
     document.querySelector('.dash-main').innerHTML = '<div class="state-msg"><h2>Tableau de bord indisponible</h2><p>Votre fiche n’a pas pu être chargée. Rechargez la page dans un instant.</p><a class="btn btn-primary" href="/dashboard/artist.html">Recharger</a></div>';
@@ -886,7 +893,7 @@ let currentBookingFilter = 'all';
 async function loadBookings(filter) {
   currentBookingFilter = filter;
   // Pas de FK bookings→profiles : le nom client vient de bookings.client_name
-  let q = supabase.from('bookings').select('*, services(name, price_cents)')
+  let q = supabase.from('bookings').select('id,date,time_slot,status,client_name,client_phone,client_email,address,note,service_id, services(name, price_cents)')
     .eq('artist_id', artistData?.id).order('date', { ascending: false });
   if (filter !== 'all') q = q.eq('status', filter);
   const { data } = await q;
@@ -909,24 +916,44 @@ async function loadBookings(filter) {
       <div class="booking-date"><div class="day">${d.getDate()}</div><div class="mon">${d.toLocaleDateString('fr-FR',{month:'short'})}</div></div>
       <div class="booking-info">
         <div class="client-name">${esc(b.client_name || 'Cliente')}</div>
-        <div class="booking-meta">${esc(b.services?.name || '–')} · ${esc(b.time_slot)} · ${esc(b.client_phone||'')}</div>
+        <div class="booking-meta">${esc(b.services?.name || '–')} · ${esc(b.time_slot)}${b.client_phone ? ` · <a href="tel:${esc(b.client_phone)}" style="color:inherit;">${esc(b.client_phone)}</a>` : ''}</div>
+        ${b.address ? `<div class="booking-meta">${esc(b.address)}</div>` : ''}${b.note ? `<div class="booking-meta" style="font-style:italic;">« ${esc(b.note)} »</div>` : ''}
       </div>
       <span class="booking-status status-${st}">${statusLabel[b.status] || statusLabel[st]}</span>
       ${actions}
     </div>`;
   }).join('');
 }
+// Un double clic envoyait deux fois la même action (et deux e-mails) : une action à la fois par rendez-vous
+const inFlight = new Set();
+function lockRow(id, on) {
+  on ? inFlight.add(id) : inFlight.delete(id);
+  document.querySelectorAll(`[data-bid="${CSS.escape(id)}"]`).forEach(b => { b.disabled = on; });
+}
 window.confirmBooking = async function(id) {
-  const { error } = await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', id);
+  if (inFlight.has(id)) return; lockRow(id, true);
+  const { error } = await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', id).eq('status', 'pending');
+  lockRow(id, false);
   if (error) { showToast('Erreur lors de la confirmation'); return; }
   showToast('Réservation confirmée');
+  notifyClient(id);
   loadBookings(currentBookingFilter); loadStats();
 };
+// La cliente reçoit la réponse par e-mail (si l'envoi d'e-mails est branché)
+async function notifyClient(id) {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) fetch('/api/notify-booking', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token }, body: JSON.stringify({ bookingId: id }) }).catch(() => {});
+  } catch (_) {}
+}
 window.refuseBooking = async function(id) {
-  if (!confirm('Refuser cette réservation ? Le créneau sera libéré.')) return;
+  if (inFlight.has(id) || !confirm('Refuser cette réservation ? Le créneau sera libéré.')) return;
+  lockRow(id, true);
   const { error } = await supabase.rpc('cancel_booking', { p_booking_id: id });
+  lockRow(id, false);
   if (error) { showToast('Erreur lors du refus'); return; }
   showToast('Réservation refusée, créneau libéré');
+  notifyClient(id);
   loadBookings(currentBookingFilter); loadStats();
 };
 window.filterBookings = function(f, el) {
@@ -970,18 +997,21 @@ window.openSlots = async function(dateStr) {
   const { data } = await supabase.from('availabilities').select('time_slot,is_booked').eq('artist_id',artistData?.id).eq('date',dateStr);
   const booked = (data||[]).filter(s=>s.is_booked).map(s=>s.time_slot);
   const available = (data||[]).map(s=>s.time_slot);
-  document.getElementById('slots-checkboxes').innerHTML = ALL_SLOTS.map(s =>
+  // Une heure présente en base mais absente de la liste reste affichée : sinon l'enregistrement l'effaçait
+  const hours = [...new Set([...ALL_SLOTS, ...available])].sort();
+  document.getElementById('slots-checkboxes').innerHTML = hours.map(s =>
     `<label style="display:flex;align-items:center;gap:5px;font-size:.82rem;cursor:pointer;${booked.includes(s)?'opacity:.5;pointer-events:none;':''}" title="${booked.includes(s)?'Déjà réservé':''}">
       <input type="checkbox" value="${s}" ${available.includes(s)?'checked':''} ${booked.includes(s)?'disabled':''}/> ${s}
      </label>`).join('');
   document.getElementById('slots-editor').style.display = 'block';
 };
 window.saveSlots = async function() {
-  const checked = [...document.querySelectorAll('#slots-checkboxes input:checked')].map(c=>c.value);
+  // Les créneaux réservés restent cochés mais grisés : on ne les renvoie pas (ils existent déjà)
+  const checked = [...document.querySelectorAll('#slots-checkboxes input:checked:not(:disabled)')].map(c=>c.value);
   const del = await supabase.from('availabilities').delete().eq('artist_id',artistData?.id).eq('date',selectedCalDay).eq('is_booked',false);
   let ins = { error: null };
   if (!del.error && checked.length) {
-    ins = await supabase.from('availabilities').insert(checked.map(t=>({ artist_id:artistData?.id, date:selectedCalDay, time_slot:t, is_available:true, is_booked:false })));
+    ins = await supabase.from('availabilities').upsert(checked.map(t=>({ artist_id:artistData?.id, date:selectedCalDay, time_slot:t, is_available:true, is_booked:false })), { onConflict: 'artist_id,date,time_slot', ignoreDuplicates: true });
   }
   if (del.error || ins.error) { console.error(del.error || ins.error); showToast('Les créneaux n’ont pas pu être enregistrés.', 'error'); return; }
   showToast('Créneaux enregistrés');
@@ -1101,20 +1131,16 @@ async function loadPhotos() {
     loadPhotos(); showToast('Photo retirée');
   }));
 }
-const IMG_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const IMG_MAX = 5 * 1024 * 1024;
-function checkImage(file) {
-  if (!IMG_TYPES.includes(file.type)) return 'format non accepté (JPG, PNG ou WebP)';
-  if (file.size > IMG_MAX) return 'plus de 5 Mo';
-  return null;
-}
+// Les photos sont réduites dans le navigateur (2000 px, JPEG) : plus de refus « plus de 5 Mo » depuis un téléphone
+const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
 document.getElementById('photo-input').addEventListener('change', async (e) => {
   const files = [...e.target.files];
   let ok = 0; const refused = [];
-  for (const [i, file] of files.entries()) {
-    const why = checkImage(file);
-    if (why) { refused.push(`${file.name} : ${why}`); continue; }
-    const ext  = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[file.type];
+  if (files.length) showToast(files.length > 1 ? `Envoi de ${files.length} photos…` : 'Envoi de la photo…');
+  for (const [i, raw] of files.entries()) {
+    const out = await shrinkImage(raw);
+    if (out.error) { refused.push(`${raw.name} : ${out.error}`); continue; }
+    const file = out.file, ext = EXT[file.type] || 'jpg';
     const path = `${artistData?.id}/${Date.now()}-${i}.${ext}`;
     const { data: up, error: upErr } = await supabase.storage.from('portfolio').upload(path, file, { upsert: false, contentType: file.type });
     if (upErr || !up) { console.error(upErr); refused.push(`${file.name} : envoi impossible`); continue; }
@@ -1162,7 +1188,10 @@ document.getElementById('btn-add-service').addEventListener('click', async () =>
   const desc     = document.getElementById('svc-desc').value.trim();
   if (!name) { showToast('Donnez un nom à la prestation.', 'error'); return; }
   if (!Number.isFinite(price) || price < 100) { showToast('Indiquez un prix d’au moins 1 €.', 'error'); return; }
+  const addBtn = document.getElementById('btn-add-service');
+  if (addBtn.disabled) return; addBtn.disabled = true;
   const { error } = await supabase.from('services').insert({ artist_id: artistData?.id, name, price_cents: price, duration_min: duration, category, description: desc || null });
+  addBtn.disabled = false;
   if (error) { console.error(error); showToast('La prestation n’a pas pu être enregistrée.', 'error'); return; }
   ['svc-name','svc-price','svc-desc'].forEach(id => document.getElementById(id).value='');
   document.getElementById('svc-duration').value = '60';
@@ -1183,8 +1212,9 @@ async function geocodeCity(city) {
   try {
     const r = await fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(city.trim()) + '&type=municipality&limit=1');
     const j = await r.json();
-    const c = j.features?.[0]?.geometry?.coordinates;
-    return c ? { lng: c[0], lat: c[1] } : null;
+    const ft = j.features?.[0], c = ft?.geometry?.coordinates;
+    const ctx = (ft?.properties?.context || '').split(',').map(s => s.trim());
+    return c ? { lng: c[0], lat: c[1], region: ctx[2] || ctx[1] || null } : null;
   } catch (e) { console.warn('Géocodage impossible', e); return null; }
 }
 
@@ -1212,6 +1242,7 @@ document.getElementById('btn-save-profile').addEventListener('click', async () =
     city,
     lat: coords ? coords.lat : null,
     lng: coords ? coords.lng : null,
+    ...(coords?.region ? { region: coords.region } : {}),
   }).eq('user_id', user.id);
   const r2 = await supabase.from('artists').update({
     bio:          val('p-bio'),
@@ -1230,6 +1261,15 @@ document.getElementById('btn-save-profile').addEventListener('click', async () =
 document.getElementById('btn-toggle-active').addEventListener('click', async () => {
   if (!artistData?.id) { showToast('Profil artiste introuvable'); return; }
   const newVal = !artistData.is_active;
+  // Pas de carte vide dans la recherche : nom, ville et au moins une photo avant la mise en ligne
+  if (newVal) {
+    const [{ count: nPh }, { data: pr }] = await Promise.all([
+      supabase.from('artist_photos').select('id', { count: 'exact', head: true }).eq('artist_id', artistData.id),
+      supabase.from('profiles').select('city').eq('user_id', user.id).maybeSingle(),
+    ]);
+    if (!pr?.city) { showToast('Indiquez votre ville avant de passer en ligne.', 'error'); showTab('profil'); return; }
+    if (!nPh) { showToast('Ajoutez au moins une photo avant de passer en ligne : c’est elle qui apparaît dans la recherche.', 'error'); showTab('photos'); return; }
+  }
   const { error } = await supabase.from('artists').update({ is_active: newVal }).eq('id', artistData.id);
   if (error) { showToast('Erreur : ' + error.message); return; }
   artistData.is_active = newVal;
@@ -1344,26 +1384,36 @@ function showCoverPreview(url) {
   updateLivePreview();
 }
 
-window.removeCover = function() {
+// La couverture s'enregistre tout de suite (avant, elle se perdait sans « Enregistrer l'apparence »)
+async function saveCover(url) {
+  const settings = { ...(artistData?.profile_settings || {}), cover_url: url || null };
+  const { error } = await supabase.from('artists').update({ profile_settings: settings }).eq('id', artistData.id);
+  if (error) { console.error(error); return false; }
+  artistData.profile_settings = settings;
+  return true;
+}
+window.removeCover = async function() {
   currentCoverUrl = null;
   document.getElementById('cover-preview-wrap').style.display = 'none';
   document.getElementById('cover-preview-img').src = '';
   updateLivePreview();
+  if (await saveCover(null)) showToast('Couverture retirée : votre première photo la remplace');
 };
 
 document.getElementById('cover-input').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const why = checkImage(file);
-  if (why) { showToast('Photo refusée : ' + why, 'error'); e.target.value = ''; return; }
-  const ext  = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[file.type];
+  const raw = e.target.files[0];
+  if (!raw) return;
+  const out = await shrinkImage(raw, 2400);
+  e.target.value = '';
+  if (out.error) { showToast('Photo refusée : ' + out.error, 'error'); return; }
+  const file = out.file, ext = EXT[file.type] || 'jpg';
   // Nom unique : avec un nom fixe, l'ancienne image restait affichée (cache) après remplacement
   const path = `${artistData?.id}/cover-${Date.now()}.${ext}`;
   const { data: up, error } = await supabase.storage.from('portfolio').upload(path, file, { upsert: false, contentType: file.type });
   if (error || !up) { console.error(error); showToast('La photo n’a pas pu être envoyée.', 'error'); return; }
   const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
   showCoverPreview(publicUrl);
-  showToast('Photo prête — pensez à enregistrer l’apparence');
+  showToast(await saveCover(publicUrl) ? 'Couverture enregistrée' : 'Photo envoyée, mais pas enregistrée : cliquez sur « Enregistrer l’apparence »', 'success');
 });
 
 document.getElementById('btn-save-espace').addEventListener('click', async () => {
@@ -1376,10 +1426,11 @@ document.getElementById('btn-save-espace').addEventListener('click', async () =>
       avis:      document.getElementById('sec-avis').checked,
       social:    document.getElementById('sec-social').checked,
     },
-    cta_text: document.getElementById('cta-text').value || 'Réserver ce créneau',
+    cta_text: document.getElementById('cta-text').value.trim() || null,
   };
   const { error } = await supabase.from('artists').update({ profile_settings: settings }).eq('user_id', user.id);
   if (error) { showToast('Erreur lors de la sauvegarde', 'error'); return; }
+  if (artistData) artistData.profile_settings = settings;
   artistData.profile_settings = settings;
   showToast('Apparence enregistrée');
 });
@@ -1428,7 +1479,7 @@ async function loadAccueil() {
   const [reqs, quotes, bks, convs] = await Promise.all([
     listArtistRequests('pending').then(r => r.filter(x => x.artistId === artistData.id)).catch(() => []),
     listMyQuotes().catch(() => []),
-    supabase.from('bookings').select('id,date,time_slot,status,client_name, services(name)').eq('artist_id', artistData.id)
+    supabase.from('bookings').select('id,date,time_slot,status,client_name,address, services(name)').eq('artist_id', artistData.id)
       .gte('date', today).in('status', ['pending', 'confirmed']).order('date').then(r => r.data || []).catch(() => []),
     myConversations().catch(() => []),
   ]);
@@ -1451,9 +1502,9 @@ async function loadAccueil() {
     : `<p class="quiet">Rien d’urgent pour l’instant.${artistData.is_active ? ' C’est le bon moment pour ajouter des photos à votre portfolio.' : ' Mettez votre fiche en ligne pour recevoir vos premières demandes.'}</p>`;
   // Prochaines prestations : devis signés à venir + créneaux réservés
   const upcoming = [
-    ...quotes.filter(q => q.status === 'signed' && q.eventDate && q.eventDate.slice(0, 10) >= today)
+    ...quotes.filter(q => q.status === 'signed' && q.eventDate && localISODate(new Date(q.eventDate)) >= today)
       .map(q => ({ d: new Date(q.eventDate), who: q.client.name || 'Cliente', what: q.client.eventAddress || 'Devis ' + (q.quoteNumber || ''), tag: 'Devis signé', amt: euros(q.totalCents) })),
-    ...bks.filter(b => b.status === 'confirmed').map(b => ({ d: new Date(b.date + 'T' + (b.time_slot || '12:00')), who: b.client_name || 'Cliente', what: b.services?.name || 'Rendez-vous', tag: 'Réservé en ligne', amt: '' })),
+    ...bks.filter(b => b.status === 'confirmed').map(b => ({ d: new Date(b.date + 'T' + (b.time_slot || '12:00')), who: b.client_name || 'Cliente', what: (b.services?.name || 'Rendez-vous') + (b.address ? ' · ' + b.address : ''), tag: 'Réservé en ligne', amt: '' })),
   ].sort((x, y) => x.d - y.d).slice(0, 4);
   next.innerHTML = upcoming.length ? upcoming.map(u => `<div class="nx">
       <div class="dt"><span class="d">${u.d.getDate()}</span><span class="m">${u.d.toLocaleDateString('fr-FR', { month: 'short' })}</span></div>
@@ -1587,7 +1638,7 @@ async function loadDemandes() {
       const rate = box.querySelector(`input[data-rate="${id}"]`).value;
       btn.disabled = true; btn.textContent = 'Envoi…';
       try {
-        const mua = { name: profileData?.full_name || user.email, email: user.email, phone: profileData?.phone || '' };
+        const mua = { name: artistData?.display_name || profileData?.full_name || user.email, email: user.email, phone: profileData?.phone || '' };
         const res = await validateRequestToQuote(r, mua, {
           travelDistanceKm: Number(km) || 0,
           travelRateCents: Math.round((Number(rate) || 0) * 100),
@@ -1644,7 +1695,7 @@ async function loadDevis() {
         ${q.status === 'sent' ? `<button class="btn btn-ghost btn-sm" data-act="link" data-id="${esc(q.id)}">Copier le lien</button>` : ''}
         ${q.status !== 'signed' ? `<a class="btn btn-ghost btn-sm" href="/dashboard/devis.html?id=${esc(q.id)}">${q.status === 'draft' ? 'Reprendre' : 'Modifier'}</a>` : ''}
         <button class="btn btn-ghost btn-sm" data-act="pdf"  data-id="${esc(q.id)}">PDF</button>
-        <button class="btn btn-quiet btn-sm" data-act="del" data-id="${esc(q.id)}" aria-label="Supprimer le devis ${esc(q.quoteNumber || '')}">${ICON.trash}</button>
+        ${q.status !== 'signed' ? `<button class="btn btn-quiet btn-sm" data-act="del" data-id="${esc(q.id)}" aria-label="Supprimer le devis ${esc(q.quoteNumber || '')}">${ICON.trash}</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1666,9 +1717,10 @@ async function loadDevis() {
           showToast('Lien de signature copié !');
         } catch { showToast('Impossible de copier le lien.'); }
       } else if (act === 'del') {
-        if (!confirm('Supprimer ce devis ? Cette action est définitive.')) return;
+        if (btn.disabled || quote?.status === 'signed' || !confirm('Supprimer ce devis ? Cette action est définitive.')) return;
+        btn.disabled = true;
         try { await deleteQuote(id); showToast('Devis supprimé.'); loadDevis(); }
-        catch (e) { console.error(e); showToast('Suppression impossible.'); }
+        catch (e) { console.error(e); btn.disabled = false; showToast('Suppression impossible.'); }
       }
     };
   });

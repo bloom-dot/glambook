@@ -334,3 +334,57 @@ Fernand garde la charte E. Objectif : un tableau de bord facile à comprendre et
 - **Présentation** en quatre sections (Qui vous êtes, Votre présentation avec compteur, Vos spécialités en pastilles, Vos réseaux), bouton Enregistrer toujours visible en bas ; suppression du compte repliée.
 - Listes en lignes à filets (devis : nom de la cliente en grand, montant, état, « Copier le lien »), compteurs du mois en rangée.
 - Ancienne version conservée hors du site. Cache : `glambook-v24`.
+
+## 20. Maquilleuses de démonstration (9 octobre 2026)
+
+Six fiches « (démo) » créées dans la base de production pour tester le parcours cliente (script : `supabase-demo-maquilleuses.sql`, déjà exécuté) : Léa Moreau (Annecy, tarifs + créneaux → réservation en ligne), Inès Kaci (Ferney-Voltaire, sur devis), Camille Rey (Lyon, tarifs sans créneaux), Sofia Benali (Annemasse, tarifs + créneaux), Maëlle Dupuis (Thonon, sur devis), Nora Diallo (Gex, tarif scène). Photos = images du site. Comptes sans mot de passe, adresses `@demo.glambook.invalid` : personne ne peut s'y connecter ni répondre aux demandes.
+**Suppression complète** : `delete from bookings where artist_id in (select a.id from artists a join auth.users u on u.id = a.user_id where u.email like '%@demo.glambook.invalid'); delete from auth.users where email like '%@demo.glambook.invalid';` (les rendez-vous d'abord, car leur lien vers la fiche ne se supprime pas en cascade ; le reste — fiches, photos, tarifs, créneaux, demandes — part avec les comptes).
+
+## 21. Parcours cliente sans compte « C′ » (9 octobre 2026)
+
+Validé par Fernand. Plus aucun mur d'inscription pour demander un devis ou réserver.
+- **Accueil** : section « C'est pour quoi ? » → *Mariage / grand événement* (recherche mariage, sur devis) ou *Soirée / shooting* (`/artists.html?mode=express`). Lien « Mon rendez-vous » dans le menu et le pied de page.
+- **Recherche** : bouton « Réservable en ligne » (`?mode=express`) = seulement les maquilleuses avec tarifs + créneaux libres.
+- **Fiche** : un seul bouton principal selon le mode — « Choisir un créneau » (`/reserver.html`) ou « Demander un devis » (`/reservation.html`) ; chaque prestation est cliquable vers son créneau. Écrire reste réservé aux comptes (messagerie). L'ancien tunnel `booking.html` (Stripe) n'est plus relié depuis la fiche.
+- **`/reserver.html`** (nouveau) : prestation → jour → heure → adresse → coordonnées, RPC `book_slot_guest`. **`/reservation.html`** : demande de devis sans compte, RPC `submit_request`.
+- **Écran « C'est envoyé »** (`js/rdv.js`) : lien personnel copiable, gardé aussi sur le téléphone ; création d'espace facultative.
+- **`/rdv.html?t=…`** (nouveau) : suivi par lien personnel (statut, devis à signer, ajout à l'agenda, annuler, changer de créneau). Sans lien : formulaire « Retrouver mon rendez-vous » (renvoi des liens par e-mail) + liste gardée sur l'appareil.
+- **E-mails** : `api/send-link.js` (lien à la cliente + alerte à la maquilleuse, une fois par demande ; renvoi des liens limité). Ne part que si `RESEND_API_KEY` et un expéditeur vérifié sont configurés sur Vercel ; sinon le lien reste affiché à l'écran.
+- **Mon espace** : à la connexion, `claim_my_items` rattache les demandes faites sans compte avec la même adresse (e-mail confirmé) ; boutons « Suivre » / « Détails ».
+- **Espace pro** : adresse, téléphone et note affichés sur les rendez-vous.
+- **Base** : migration `supabase-parcours-sans-compte.sql` appliquée (jetons `access_token`, `bookings.address`, statut `cancelled` pour les demandes, fonctions `submit_request`, `book_slot_guest`, `get_by_token`, `cancel_by_token`, `claim_my_items`).
+
+## 22. Nuit du 9 au 10 octobre 2026 : parcours maquilleuse et audit complet
+
+**Hébergement** : on reste sur Vercel pour l'instant. Attention : le plan gratuit Hobby est réservé à un usage non commercial. Avant le vrai lancement, il faudra soit passer en Vercel Pro (20 $/mois), soit migrer vers Cloudflare Pages (gratuit, usage commercial permis, 100 000 appels de fonctions par jour). La migration demande de réécrire les 9 fonctions `api/`. Limite Hobby à surveiller : 12 fonctions au plus (9 aujourd'hui).
+
+**Parcours maquilleuse** (`/dashboard/bienvenue.html`, mise en route guidée en 6 écrans : fiche, photos, présentation, tarifs ou devis, créneaux, aperçu) :
+- Photos de toutes tailles (y compris HEIC d'iPhone) : réduites dans le navigateur à 2000 px en JPEG avant l'envoi (`shrinkImage` dans `js/utils.js`), aussi dans l'espace pro (photos et couverture).
+- Tarifs : plus aucun prix proposé à sa place. Elle écrit son prix et la ligne se coche ; le prix habituel n'est qu'un exemple grisé.
+- Heures de créneaux communes à la mise en route et à l'agenda : 8 h à 20 h (`SLOT_HOURS`). Une heure présente en base reste affichée dans l'agenda (avant, elle était effacée à l'enregistrement).
+- Compteur d'étapes stable (« sur 6 » tant que « Sur devis » n'est pas choisi).
+- Mise en ligne : nom, ville, spécialités et au moins une photo exigés (mise en route et bouton de l'espace pro).
+- Compte cliente (ou créé avec Google) : la mise en route propose « Devenir maquilleuse » au lieu de renvoyer vers Mon espace.
+- Fiche hors ligne : sa propriétaire la voit en aperçu, avec un bandeau.
+- La couverture s'enregistre dès l'envoi.
+
+**Corrections** (fichiers) :
+- Annulation par la cliente (lien personnel, Mon espace, changement de créneau) : la maquilleuse est prévenue par e-mail (`api/send-link.js`, `{ cancelled: jeton }`, une fois, statut vérifié en base).
+- Une demande annulée ne repasse plus en « devis envoyé », et l'éditeur de devis refuse l'envoi.
+- Devis signé : bouton Supprimer masqué et suppression bloquée côté requête.
+- Double clic : Confirmer, Refuser, Ajouter une prestation, Supprimer un devis.
+- Envoi de devis : 5 e-mails par jour au plus vers une même adresse, tous comptes confondus.
+- La maquilleuse ne reçoit plus les liens personnels des clientes (colonnes listées).
+- Suivi `/rdv.html` : « devis retiré » au lieu d'un faux « en attente » ; devis signé en vert.
+- Supabase JS figé en 2.117.2 (plus de mise à jour silencieuse).
+- Service worker : page « hors connexion » dédiée, recherche d'adresses jamais en cache, requêtes POST ignorées.
+- `signature.html` et `rdv.html` : non indexées, pas de fuite de l'adresse (referrer) ; robots.txt mis à jour ; zoom autorisé sur la signature.
+- Région mise à jour avec la ville dans l'espace pro ; admin redirigé vers son tableau après connexion ; libellés reliés aux champs (devis, demande, agenda).
+- Session interrompue de la veille, aussi livrée ici : migration `correctifs_2026_10_10` **appliquée** (créneau du jour déjà passé refusé, annulation impossible après signature, devis expiré non signable, garde-fous par maquilleuse, etc.), `api/notify-booking.js` (la cliente est prévenue quand sa réservation est confirmée ou refusée), CGV et confidentialité alignées sur le règlement sur place, tâche quotidienne `api/keepalive` (la base gratuite ne se met plus en pause).
+
+**À faire par Fernand** :
+1. Valider l'application de `supabase-securite-2026-10.sql`. Urgent : aujourd'hui une personne connectée peut encore se donner le rôle admin en modifiant sa propre ligne `profiles`.
+2. Resend : vérifier un domaine et définir `MAIL_FROM` sur Vercel. Sans cela, aucun e-mail n'atteint les maquilleuses ni les clientes (seule l'adresse du compte Resend reçoit).
+3. Supabase → Authentication → URL : ajouter `/auth/reset.html`, `/dashboard/bienvenue.html` et `/mes-devis.html`.
+
+**Reste connu** (non bloquant) : une maquilleuse peut techniquement lire en base le lien personnel de ses clientes (il faudrait des droits par colonne) ; `booking.html` (ancien tunnel Stripe) n'est plus relié, il est redirigé vers `/reserver.html`.

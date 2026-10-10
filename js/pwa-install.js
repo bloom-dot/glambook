@@ -122,8 +122,8 @@
     setTimeout(() => {
       banner.querySelector('#pwa-banner-text span').textContent =
         'Appuyez sur Partager puis "Sur l\'écran d\'accueil"';
-      document.getElementById('pwa-btn-install') &&
-        (banner.querySelector('#pwa-btn-install').style.display = 'none');
+      const ib = banner.querySelector('#pwa-btn-install'); // la bannière n'est pas encore dans la page
+      if (ib) ib.style.display = 'none';
       showBanner();
     }, 3000);
   }

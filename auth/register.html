@@ -86,33 +86,10 @@
         <div class="hint">8 caractères minimum</div>
       </div>
 
-      <!-- Champs maquilleuse -->
+      <!-- Maquilleuse : rien de plus ici, la fiche se crée juste après, écran par écran -->
       <div class="artist-fields" id="artist-fields">
-        <div class="artist-note">Vous compléterez votre profil (présentation, photos, tarifs) depuis votre tableau de bord, puis vous l'activerez quand il sera prêt.</div>
-        <div class="field">
-          <label for="artist-name">Nom professionnel <span style="color:var(--gb-ink-2);font-weight:400;font-size:.8rem;">(facultatif)</span></label>
-          <input type="text" id="artist-name" placeholder="Ex. Nadia Beauty, Studio Glam…" autocomplete="off"/>
-          <div class="hint">Le nom affiché sur votre profil public. Vide = votre prénom et votre nom.</div>
-        </div>
-        <div class="field">
-          <label for="phone">Téléphone</label>
-          <input type="tel" id="phone" placeholder="06 00 00 00 00" autocomplete="tel"/>
-        </div>
-        <div class="field">
-          <label for="region">Région d'activité</label>
-          <select id="region">
-            <option value="">Choisir…</option>
-            <option>Île-de-France</option><option>Auvergne-Rhône-Alpes</option>
-            <option>Provence-Alpes-Côte d'Azur</option><option>Nouvelle-Aquitaine</option>
-            <option>Occitanie</option><option>Hauts-de-France</option>
-            <option>Grand Est</option><option>Normandie</option>
-            <option>Bretagne</option><option>Pays de la Loire</option>
-            <option>Bourgogne-Franche-Comté</option><option>Centre-Val de Loire</option>
-            <option>Corse</option><option>Outre-Mer</option>
-          </select>
-        </div>
+        <div class="artist-note">Ensuite, cinq minutes pour créer votre fiche : vos photos, vos tarifs, vos créneaux. Gratuit, sans engagement.</div>
       </div>
-
       <label class="consent">
         <input type="checkbox" id="cgu" required/>
         <span>J'accepte les <a href="/legal/cgu.html" target="_blank" class="auth-link">CGU</a> et la <a href="/legal/confidentialite.html" target="_blank" class="auth-link">politique de confidentialité</a></span>
@@ -149,6 +126,7 @@ function setRole(role) {
   document.getElementById('role-client').setAttribute('aria-pressed', String(role === 'client'));
   document.getElementById('role-artist').setAttribute('aria-pressed', String(role === 'artist'));
   document.getElementById('artist-fields').classList.toggle('show', role === 'artist');
+  document.querySelector('.auth-title').textContent = role === 'artist' ? 'Créer mon profil pro' : 'Créer mon compte';
 }
 document.querySelectorAll('.role-btn').forEach(btn => btn.addEventListener('click', () => setRole(btn.dataset.role)));
 setRole(currentRole);
@@ -177,16 +155,17 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   const lastName   = document.getElementById('lastname').value.trim();
   const city       = document.getElementById('city').value.trim();
   const isArtist   = currentRole === 'artist';
-  const phone      = isArtist ? document.getElementById('phone').value.trim() : '';
-  const region     = isArtist ? document.getElementById('region').value : '';
-  const artistName = isArtist ? document.getElementById('artist-name').value.trim() : '';
   const fullName   = `${firstName} ${lastName}`.trim();
 
   try {
     // Le profil (table profiles) est créé côté base à partir de ces métadonnées.
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { full_name: fullName, display_name: artistName || fullName, role: currentRole, city, phone, region } }
+      options: {
+        data: { full_name: fullName, display_name: fullName, role: currentRole, city },
+        // Après le clic sur le lien de confirmation : là où elle allait
+        emailRedirectTo: location.origin + (redirect || (isArtist ? '/dashboard/bienvenue.html' : '/mes-devis.html')),
+      }
     });
 
     if (error) {
@@ -216,12 +195,12 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
 
     if (isArtist) {
       // Fiche artiste inactive ; note et vérification sont fixées côté base, pas ici.
-      const { error: artistErr } = await supabase.from('artists').insert({ user_id: data.user.id, display_name: artistName || fullName, is_active: false });
+      const { error: artistErr } = await supabase.from('artists').insert({ user_id: data.user.id, display_name: fullName, is_active: false });
       if (artistErr) console.warn('Fiche artiste :', artistErr.message); // le tableau de bord la recrée au besoin
     }
 
     showSuccess('Compte créé. Redirection…');
-    const next = redirect || (isArtist ? '/dashboard/artist.html' : '/artists.html');
+    const next = redirect || (isArtist ? '/dashboard/bienvenue.html' : '/artists.html');
     setTimeout(() => { location.href = next; }, 900);
 
   } catch (err) {

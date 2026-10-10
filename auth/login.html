@@ -122,7 +122,7 @@ async function redirectAfterLogin(user) {
   if (redirect) { location.href = redirect; return; }
   let role = null;
   try { role = (await supabase.from('profiles').select('role').eq('user_id', user.id).maybeSingle()).data?.role; } catch (_) {}
-  location.href = role === 'artist' ? '/dashboard/artist.html' : '/mes-devis.html';
+  location.href = role === 'artist' ? '/dashboard/artist.html' : role === 'admin' ? '/dashboard/admin.html' : '/mes-devis.html';
 }
 
 function showError(msg) { const el = document.getElementById('error-msg'); el.textContent = msg; el.classList.add('show'); }

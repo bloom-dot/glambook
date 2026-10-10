@@ -51,8 +51,8 @@ module.exports = async function handler(req, res) {
     if (!userRes.ok) return res.status(401).json({ error: 'Session invalide' });
     const user = await userRes.json();
 
-    // Rate limiting : max 60 envois / heure / artiste
-    const allowed = await rateLimit(supabaseUrl, serviceKey, user.id, 'send-quote', 60, 60);
+    // Rate limiting : max 20 envois / heure / artiste
+    const allowed = await rateLimit(supabaseUrl, serviceKey, user.id, 'send-quote', 20, 60);
     if (!allowed) return res.status(429).json({ error: "Trop d'envois. Réessayez dans un moment." });
 
     // 2) Charger le devis + le user_id du propriétaire (embed artists)
@@ -96,6 +96,12 @@ module.exports = async function handler(req, res) {
       // Pas de fournisseur email configuré : on renvoie quand même le lien pour partage manuel
       return res.status(200).json({ ok: true, emailed: false, link });
     }
+    // Garde-fou anti-envoi en masse : 5 e-mails de devis par jour et par adresse destinataire,
+    // tous comptes confondus. Au-delà, le lien est rendu pour un partage manuel.
+    const dest = 'devis-dest:' + require('crypto').createHash('sha256').update(String(q.client_email).trim().toLowerCase()).digest('hex').slice(0, 32);
+    if (!(await rateLimit(supabaseUrl, serviceKey, user.id, dest, 5, 24 * 60, true))) {
+      return res.status(200).json({ ok: true, emailed: false, link, limited: true });
+    }
 
     const mailRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -129,13 +135,13 @@ module.exports = async function handler(req, res) {
 };
 
 // Rate limiting via la table api_usage (service role). true = autorisé.
-async function rateLimit(url, key, userId, endpoint, max, minutes) {
+async function rateLimit(url, key, userId, endpoint, max, minutes, anyUser = false) {
   if (!userId) return true;
   const h = { apikey: key, Authorization: `Bearer ${key}` };
   try {
     const since = new Date(Date.now() - minutes * 60000).toISOString();
     const cRes = await fetch(
-      `${url}/rest/v1/api_usage?user_id=eq.${userId}&endpoint=eq.${encodeURIComponent(endpoint)}&created_at=gte.${encodeURIComponent(since)}&select=id`,
+      `${url}/rest/v1/api_usage?${anyUser ? '' : `user_id=eq.${userId}&`}endpoint=eq.${encodeURIComponent(endpoint)}&created_at=gte.${encodeURIComponent(since)}&select=id`,
       { headers: { ...h, Prefer: 'count=exact', Range: '0-0' } });
     const cr = cRes.headers.get('content-range');
     const total = cr && cr.includes('/') ? parseInt(cr.split('/')[1], 10) : 0;

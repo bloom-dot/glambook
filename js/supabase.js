@@ -1,4 +1,4 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm';
 
 // esc() et safeUrl() vivent dans utils.js — réexportés ici pour compatibilité
 export { esc, safeUrl, specialtyLabel, SPECIALTY_LABELS } from '/js/utils.js';

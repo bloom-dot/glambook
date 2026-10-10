@@ -9,6 +9,8 @@ module.exports = async function handler(req, res) {
     // de réservation proposerait une carte bancaire que le serveur ne peut pas débiter.
     stripePublishableKey: (process.env.STRIPE_PUBLISHABLE_KEY && process.env.STRIPE_SECRET_KEY) ? process.env.STRIPE_PUBLISHABLE_KEY : null,
     // Diagnostic visage : proposé seulement si la clé du service d'analyse est configurée
-    diagnosticEnabled: !!process.env.OPENAI_API_KEY
+    diagnosticEnabled: !!process.env.OPENAI_API_KEY,
+    // E-mails (devis, liens personnels) : sans clé, les pages proposent de copier le lien
+    emailEnabled: !!process.env.RESEND_API_KEY
   });
 };

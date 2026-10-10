@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Créer ma fiche — GlamBook</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#0E0E10"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    /* Mise en route maquilleuse : un écran = une question, enregistré à chaque étape */
+    .ob { max-width: 680px; margin: 0 auto; padding: 0 20px 150px; }
+    .ob-top { display: flex; align-items: center; gap: 14px; padding: 22px 0 0; }
+    .ob-prog { flex: 1; height: 3px; background: var(--gb-line); border-radius: 3px; overflow: hidden; }
+    .ob-prog i { display: block; height: 100%; width: 0; background: var(--gb-gold); transition: width .3s; }
+    .ob-n { font-size: .7rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--gb-ink-3); white-space: nowrap; }
+    .ob-later { font-size: .7rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-ink-2); text-decoration: none; white-space: nowrap; }
+    .ob-later:hover { color: var(--gb-champagne); }
+    .scr[hidden] { display: none; }
+    .scr h1 { font-size: clamp(2.4rem, 8.5vw, 3.4rem); line-height: .92; margin: 30px 0 8px; }
+    .scr .lead { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.18rem; color: var(--gb-ink-2); margin: 0 0 22px; line-height: 1.35; }
+    .q { padding: 18px 0 4px; }
+    .q-t { font-size: .7rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gb-ink-3); margin: 0 0 10px; }
+    .fld { display: grid; gap: 6px; font-size: .82rem; color: var(--gb-ink-2); margin-bottom: 14px; }
+    .fld small { color: var(--gb-ink-3); font-size: .76rem; }
+    .fld input, .fld textarea, .fld select { width: 100%; box-sizing: border-box; padding: 13px 12px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-md); color: var(--gb-ink); font: 1rem var(--gb-font-body); }
+    .fld input:focus, .fld textarea:focus, .fld select:focus { outline: none; border-color: var(--gb-champagne); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { border: 1px solid var(--gb-line-strong); background: transparent; color: var(--gb-ink); border-radius: 999px; padding: 10px 16px; cursor: pointer; font: 600 .9rem var(--gb-font-body); display: inline-flex; align-items: center; gap: 6px; }
+    .chip:hover { border-color: var(--gb-champagne); }
+    .chip[aria-pressed="true"] { border-color: var(--gb-gold); background: var(--gb-gold-tint); color: var(--gb-champagne); }
+    .chip .gb-ico { width: 16px; height: 16px; }
+    .tip { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--gb-r-md); background: var(--gb-gold-tint); font-size: .86rem; color: #D9D4DB; margin: 8px 0 0; line-height: 1.45; }
+    .tip .gb-ico { color: var(--gb-champagne); width: 20px; height: 20px; flex: 0 0 auto; margin-top: 1px; }
+    /* Photos */
+    .drop { display: grid; place-items: center; gap: 8px; text-align: center; padding: 30px 16px; border: 1.5px dashed var(--gb-line-strong); border-radius: 12px; cursor: pointer; color: var(--gb-ink-2); }
+    .drop:hover, .drop.over { border-color: var(--gb-gold); color: var(--gb-champagne); }
+    .drop .gb-ico { width: 30px; height: 30px; color: var(--gb-champagne); }
+    .drop b { color: var(--gb-ink); font-size: 1.05rem; }
+    .drop input { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+    .pgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+    .ph { position: relative; aspect-ratio: 3/4; border-radius: 8px; overflow: hidden; background: var(--gb-surface); }
+    .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ph .cov { position: absolute; left: 6px; top: 6px; font-size: .6rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; background: var(--gb-gold); color: var(--gb-cta-ink); padding: 3px 6px; border-radius: 4px; }
+    .ph button { position: absolute; right: 6px; top: 6px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(14,14,16,.78); color: #fff; cursor: pointer; display: grid; place-items: center; }
+    .ph button .gb-ico { width: 15px; height: 15px; }
+    .ph.up { display: grid; place-items: center; color: var(--gb-ink-3); font-size: .78rem; }
+    .pcount { font-size: .86rem; color: var(--gb-ink-2); margin-top: 10px; }
+    .pcount b { color: var(--gb-champagne); }
+    /* Bio */
+    .starts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+    .starts button { font-size: .8rem; padding: 7px 12px; }
+    .cnt { font-size: .76rem; color: var(--gb-ink-3); text-align: right; margin-top: -8px; }
+    .cnt.ok { color: var(--gb-champagne); }
+    /* Mode de travail */
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mode { text-align: left; padding: 18px 16px; border: 1px solid var(--gb-line-strong); border-radius: 12px; background: transparent; color: var(--gb-ink); cursor: pointer; font-family: var(--gb-font-body); display: grid; gap: 6px; align-content: start; }
+    .mode:hover { border-color: var(--gb-champagne); }
+    .mode[aria-pressed="true"] { border-color: var(--gb-gold); background: var(--gb-gold-tint); }
+    .mode .t { font-size: 1.35rem; font-weight: 800; font-stretch: 75%; text-transform: uppercase; line-height: 1; }
+    .mode[aria-pressed="true"] .t { color: var(--gb-champagne); }
+    .mode .d { font-size: .84rem; color: var(--gb-ink-2); line-height: 1.4; }
+    .mode .mtag { font-size: .62rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-ink-3); }
+    .svcs { margin-top: 18px; border-top: 1px solid var(--gb-line); }
+    .sv { display: grid; grid-template-columns: auto minmax(0, 1fr) 92px 92px; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gb-line); }
+    .sv input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--gb-gold); margin: 0; }
+    .sv .n { font-weight: 700; font-size: .95rem; }
+    .sv .n input { width: 100%; box-sizing: border-box; padding: 9px 10px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: 6px; color: var(--gb-ink); font: 600 .95rem var(--gb-font-body); }
+    .sv .unit { position: relative; }
+    .sv .unit input, .sv select { width: 100%; box-sizing: border-box; padding: 9px 22px 9px 10px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: 6px; color: var(--gb-ink); font: .95rem var(--gb-font-body); }
+    .sv select { padding-right: 6px; }
+    .sv .unit span { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: var(--gb-ink-3); font-size: .85rem; pointer-events: none; }
+    .sv.off .n, .sv.off .unit, .sv.off select { opacity: .45; }
+    .sv.saved { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .sv.saved .p { color: var(--gb-champagne); font-weight: 600; }
+    .sv-head { font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-ink-3); padding: 10px 0 0; display: grid; grid-template-columns: auto minmax(0, 1fr) 92px 92px; gap: 10px; }
+    .sv-head span:first-child { width: 20px; }
+    .add-row { margin-top: 12px; }
+    /* Créneaux */
+    .wd { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+    .wd .chip { justify-content: center; padding: 12px 0; border-radius: var(--gb-r-md); }
+    .hrs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .hrs .chip { justify-content: center; border-radius: var(--gb-r-md); padding: 11px 0; }
+    .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .presets button { font-size: .78rem; padding: 7px 12px; }
+    .slot-sum { margin-top: 14px; font-size: .9rem; color: var(--gb-ink-2); }
+    .slot-sum b { color: var(--gb-champagne); }
+    /* Aperçu */
+    .pv { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; align-items: start; }
+    .pv .artist-card { pointer-events: none; }
+    .chk { list-style: none; margin: 0; padding: 0; }
+    .chk li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--gb-line); font-size: .92rem; }
+    .chk li .ck { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--gb-line-strong); display: grid; place-items: center; color: transparent; }
+    .chk li.ok .ck { background: var(--gb-gold); border-color: var(--gb-gold); color: var(--gb-cta-ink); }
+    .chk li .ck .gb-ico { width: 13px; height: 13px; }
+    .chk li small { display: block; color: var(--gb-ink-3); font-size: .78rem; }
+    .chk li button { font-size: .66rem; }
+    .live { text-align: center; padding: 30px 0 0; }
+    .live .done-ok { margin: 0 auto 14px; }
+    .share { display: flex; gap: 8px; margin: 16px 0; }
+    .share input { flex: 1; min-width: 0; padding: 12px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-md); color: var(--gb-ink); font: .9rem var(--gb-font-body); }
+    .live-actions { display: grid; gap: 10px; max-width: 360px; margin: 18px auto 0; }
+    /* Barre du bas */
+    .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--gb-surface); border-top: 1px solid var(--gb-line); padding: 12px 20px calc(16px + env(safe-area-inset-bottom)); }
+    .bar-in { max-width: 680px; margin: 0 auto; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
+    .bar .btn { height: 54px; }
+    .bar #next { font-size: 1.25rem; font-stretch: 75%; font-weight: 800; }
+    .bar #back[hidden] + #next { grid-column: 1 / -1; }
+    @media (max-width: 560px) {
+      .modes { grid-template-columns: 1fr; }
+      .pv { grid-template-columns: 1fr; }
+      .pv .artist-card { max-width: 240px; }
+      .sv, .sv-head { grid-template-columns: auto minmax(0, 1fr) 68px 88px; gap: 8px; }
+      .sv select { padding: 9px 4px; font-size: .9rem; }
+      .sv .n { font-size: .9rem; }
+      .hrs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .wd .chip { font-size: .78rem; }
+    }
+  </style>
+</head>
+<body>
+<a href="#main" class="skip-link">Aller au contenu</a>
+<nav class="nav">
+  <div class="nav-inner" style="max-width:1200px;">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+    <div class="nav-links"><a href="/dashboard/artist.html" class="hide-mobile">Mon espace pro</a></div>
+  </div>
+</nav>
+
+<main class="ob" id="main">
+  <div class="ob-top">
+    <span class="ob-n" id="ob-n">Étape 1 sur 5</span>
+    <div class="ob-prog" aria-hidden="true"><i id="ob-bar"></i></div>
+    <a class="ob-later" id="later" href="/dashboard/artist.html">Finir plus tard</a>
+  </div>
+
+  <!-- 1. Vous -->
+  <section class="scr" data-step="vous">
+    <h1>Votre <em>fiche</em></h1>
+    <p class="lead">Cinq minutes, une question par écran. Tout est enregistré au fur et à mesure.</p>
+    <label class="fld">Le nom affiché aux clientes
+      <input id="o-name" autocomplete="organization" placeholder="Ex. Nadia Beauty, ou votre prénom et nom"/>
+    </label>
+    <label class="fld">Votre ville
+      <input id="o-city" autocomplete="address-level2" placeholder="Annecy, Lyon, Gex…" list="o-city-list"/>
+      <datalist id="o-city-list"></datalist>
+      <small>Pour apparaître dans la recherche par ville et autour de chez les clientes.</small>
+    </label>
+    <div class="q">
+      <p class="q-t">Ce que vous faites</p>
+      <div class="chips" id="o-specs"></div>
+    </div>
+  </section>
+
+  <!-- 2. Photos -->
+  <section class="scr" data-step="photos" hidden>
+    <h1>Vos <em>réalisations</em></h1>
+    <p class="lead">C’est ce que les clientes regardent en premier. Trois photos suffisent pour commencer.</p>
+    <label class="drop" id="drop">
+      <span data-ico="camera"></span>
+      <b>Ajouter des photos</b>
+      <span>Depuis votre téléphone ou votre ordinateur · toutes tailles, elles sont réduites automatiquement</span>
+      <input type="file" id="o-files" accept="image/*" multiple/>
+    </label>
+    <div class="pgrid" id="o-photos"></div>
+    <p class="pcount" id="o-pcount"></p>
+    <div class="tip"><span data-ico="star"></span><span>La première photo sert de couverture. Privilégiez un visage net, en lumière naturelle, sans filtre lourd.</span></div>
+  </section>
+
+  <!-- 3. Présentation -->
+  <section class="scr" data-step="bio" hidden>
+    <h1>En quelques <em>mots</em></h1>
+    <p class="lead">Votre parcours, votre style, ce qui vous distingue. Trois phrases suffisent.</p>
+    <p class="q-t">Pour vous lancer, touchez un début de phrase</p>
+    <div class="starts" id="o-starts"></div>
+    <label class="fld">
+      <textarea id="o-bio" aria-label="Présentation" rows="6" maxlength="1200" placeholder="Ex : Maquilleuse depuis huit ans, je travaille surtout pour les mariages et les shootings. Teint lumineux, tenue longue durée. Je me déplace à domicile autour d’Annecy."></textarea>
+    </label>
+    <p class="cnt" id="o-bio-cnt"></p>
+    <label class="fld">Votre Instagram <span style="color:var(--gb-ink-3)">(facultatif)</span>
+      <input id="o-ig" inputmode="url" placeholder="@votrecompte ou lien complet"/>
+    </label>
+  </section>
+
+  <!-- 4. Tarifs -->
+  <section class="scr" data-step="tarifs" hidden>
+    <h1>Comment on vous <em>réserve</em></h1>
+    <p class="lead">Vous pourrez changer d’avis à tout moment.</p>
+    <div class="modes" role="group" aria-label="Mode de réservation">
+      <button type="button" class="mode" data-mode="slots" aria-pressed="false">
+        <span class="mtag">Le plus simple pour les clientes</span>
+        <span class="t">Prix affichés + créneaux</span>
+        <span class="d">Elles choisissent une prestation et une heure libre. Vous confirmez chaque rendez-vous.</span>
+      </button>
+      <button type="button" class="mode" data-mode="quote" aria-pressed="false">
+        <span class="mtag">Mariages, groupes, sur mesure</span>
+        <span class="t">Sur devis</span>
+        <span class="d">Elles décrivent leur événement, vous répondez avec un devis qu’elles signent en ligne.</span>
+      </button>
+    </div>
+    <div id="o-svc-box" hidden>
+      <div class="q"><p class="q-t">Écrivez votre prix sur ce que vous proposez</p><p class="q-s" style="margin:4px 0 0;color:var(--gb-ink-3);font-size:.85rem;">La ligne se coche toute seule. Les lignes vides ne sont pas publiées.</p></div>
+      <div class="sv-head" aria-hidden="true"><span></span><span>Prestation</span><span>Prix</span><span>Durée</span></div>
+      <div class="svcs" id="o-svcs"></div>
+      <button type="button" class="btn btn-ghost btn-sm add-row" id="o-add-svc">+ Autre prestation</button>
+      <div class="tip"><span data-ico="tag"></span><span>Prix réglés sur place par la cliente. Les demandes sur devis restent possibles en plus.</span></div>
+    </div>
+    <div id="o-quote-note" class="tip" hidden><span data-ico="doc"></span><span>Rien d’autre à préparer : vos demandes arrivent dans votre espace, et vous rédigez le devis en deux minutes depuis la demande.</span></div>
+  </section>
+
+  <!-- 5. Créneaux (seulement en mode prix affichés) -->
+  <section class="scr" data-step="creneaux" hidden>
+    <h1>Vos <em>disponibilités</em></h1>
+    <p class="lead">Une semaine type, recopiée sur les deux prochains mois. Vous ajusterez jour par jour dans votre agenda.</p>
+    <div class="q">
+      <p class="q-t">Les jours où vous travaillez</p>
+      <div class="wd" id="o-days"></div>
+    </div>
+    <div class="q">
+      <p class="q-t">Les heures de début possibles</p>
+      <div class="presets" id="o-presets"></div>
+      <div class="hrs" id="o-hours"></div>
+    </div>
+    <p class="slot-sum" id="o-slot-sum"></p>
+  </section>
+
+  <!-- 6. Aperçu -->
+  <section class="scr" data-step="apercu" hidden>
+    <h1>Prête à être <em>vue</em></h1>
+    <p class="lead">Voici votre carte dans la recherche. Mettez-la en ligne quand vous voulez.</p>
+    <div class="pv">
+      <div id="o-card"></div>
+      <ul class="chk" id="o-chk"></ul>
+    </div>
+  </section>
+
+  <!-- Fin -->
+  <section class="scr" data-step="fin" hidden>
+    <div class="live">
+      <div class="done-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div>
+      <h1 style="margin-top:0;">Vous êtes <em>en ligne</em></h1>
+      <p class="lead">Les clientes peuvent vous trouver dès maintenant. Partagez votre lien en bio Instagram : c’est le plus efficace pour démarrer.</p>
+      <div class="share"><input id="o-link" readonly aria-label="Lien de votre fiche"/><button type="button" class="btn btn-ghost" id="o-copy">Copier</button></div>
+      <div class="live-actions">
+        <a class="btn btn-primary" id="o-see" href="#">Voir ma fiche</a>
+        <a class="btn btn-ghost" href="/dashboard/artist.html">Aller à mon espace</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="bar" id="bar">
+  <div class="bar-in">
+    <button type="button" class="btn btn-ghost" id="back" hidden>Retour</button>
+    <button type="button" class="btn btn-primary" id="next">Continuer</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<script type="module">
+import { supabase, getCurrentUser, esc } from '/js/supabase.js';
+import { ICON, SPECIALTY_LABELS, specialtyLabel, localISODate, safeUrl, showToast, SLOT_HOURS, shrinkImage } from '/js/utils.js';
+
+document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ICON[el.dataset.ico] || ''; });
+const $ = (id) => document.getElementById(id);
+
+const user = await getCurrentUser().catch(() => null);
+if (!user) { location.replace('/auth/login.html?redirect=' + encodeURIComponent('/dashboard/bienvenue.html')); await new Promise(() => {}); }
+
+// ── Données ──────────────────────────────────────────────────────────────
+const [{ data: profile }, { data: artist0 }] = await Promise.all([
+  supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle(),
+  supabase.from('artists').select('*').eq('user_id', user.id).maybeSingle(),
+]);
+// Compte cliente existant (ou créé avec Google) : on propose de le passer en compte maquilleuse
+if (!artist0 && profile?.role === 'client') {
+  $('bar').hidden = true;
+  $('main').innerHTML = `<div class="state-msg" style="max-width:520px;margin:56px auto 0;">
+    <h2>Vous avez un compte <em>cliente</em></h2>
+    <p>Pour proposer vos prestations, transformez-le en compte maquilleuse. Vos demandes et rendez-vous passés restent dans « Mon espace ».</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px;">
+      <button type="button" class="btn btn-primary" id="to-artist">Devenir maquilleuse sur GlamBook</button>
+      <a class="btn btn-ghost" href="/mes-devis.html">Rester cliente</a>
+    </div></div>`;
+  await new Promise((done) => $('to-artist').addEventListener('click', async () => {
+    $('to-artist').disabled = true;
+    const { error } = await supabase.from('profiles').update({ role: 'artist' }).eq('user_id', user.id);
+    if (error) { console.error(error); $('to-artist').disabled = false; showToast('Le changement n’a pas abouti. Réessayez.', 'error'); return; }
+    location.reload(); done();
+  }));
+  await new Promise(() => {});
+}
+let artist = artist0;
+if (!profile) await supabase.from('profiles').insert({ user_id: user.id, full_name: user.user_metadata?.full_name || '', role: 'artist' });
+if (!artist) {
+  const wanted = user.user_metadata?.display_name || user.user_metadata?.full_name || profile?.full_name || '';
+  await supabase.from('artists').insert({ user_id: user.id, display_name: wanted || user.email.split('@')[0], is_active: false });
+  ({ data: artist } = await supabase.from('artists').select('*').eq('user_id', user.id).maybeSingle());
+}
+if (!artist?.id) {
+  $('main').innerHTML = '<div class="state-msg"><h2>Votre fiche n’a pas pu être préparée</h2><p>Rechargez la page dans un instant.</p><a class="btn btn-primary" href="/dashboard/bienvenue.html">Recharger</a></div>';
+  $('bar').remove(); throw new Error('artist');
+}
+// Ne plus rediriger automatiquement ici depuis l'espace pro : la maquilleuse a vu la mise en route
+try { localStorage.setItem('gb_onb_seen', '1'); } catch (_) {}
+
+let photos = [], services = [], templ = [[], [], [], [], [], [], []];
+async function loadPhotos() {
+  const { data } = await supabase.from('artist_photos').select('id,url').eq('artist_id', artist.id).order('created_at', { ascending: true });
+  photos = data || [];
+}
+async function loadServices() {
+  const { data } = await supabase.from('services').select('id,name,price_cents,duration_min').eq('artist_id', artist.id).order('price_cents');
+  services = data || [];
+}
+const [, , tpl, slotCount] = await Promise.all([
+  loadPhotos(), loadServices(),
+  supabase.from('availability_templates').select('weekday,slots').eq('artist_id', artist.id),
+  supabase.from('availabilities').select('id', { count: 'exact', head: true }).eq('artist_id', artist.id).gte('date', localISODate()),
+]);
+(tpl.data || []).forEach(r => { if (r.weekday >= 0 && r.weekday <= 6) templ[r.weekday] = r.slots || []; });
+const hadSlots = (slotCount.count || 0) > 0;
+
+const st = {
+  specs: new Set(artist.specialties || []),
+  mode: services.length ? 'slots' : (localStorage.getItem('gb_onb_mode') || null),
+  days: new Set(templ.map((s, i) => s.length ? i : -1).filter(i => i >= 0)),
+  hours: new Set(templ.flat()),
+};
+if (!st.days.size) [1, 2, 3, 4, 5].forEach(d => st.days.add(d));         // mardi → samedi
+if (!st.hours.size) ['09:00', '11:00', '14:00', '16:00'].forEach(h => st.hours.add(h));
+
+// ── Étapes ───────────────────────────────────────────────────────────────
+// « Créneaux » compte tant que « Sur devis » n'est pas choisi : le total d'étapes ne saute plus en cours de route
+const order = () => ['vous', 'photos', 'bio', 'tarifs', ...(st.mode !== 'quote' ? ['creneaux'] : []), 'apercu'];
+let cur = 'vous';
+function show(step) {
+  cur = step;
+  document.querySelectorAll('.scr').forEach(s => { s.hidden = s.dataset.step !== step; });
+  const list = order(), i = list.indexOf(step);
+  if (step === 'fin') { $('bar').hidden = true; $('ob-n').textContent = 'Terminé'; $('ob-bar').style.width = '100%'; $('later').hidden = true; window.scrollTo({ top: 0 }); return; }
+  $('bar').hidden = false;
+  $('ob-n').textContent = `Étape ${i + 1} sur ${list.length}`;
+  $('ob-bar').style.width = Math.round((i + 1) / list.length * 100) + '%';
+  $('back').hidden = i === 0;
+  $('next').textContent = step === 'apercu' ? (artist.is_active ? 'Terminer' : 'Mettre ma fiche en ligne') : 'Continuer';
+  if (step === 'photos') renderPhotos();
+  if (step === 'apercu') renderPreview();
+  history.replaceState(null, '', '#' + step);
+  window.scrollTo({ top: 0 });
+}
+
+// 1. Vous
+$('o-name').value = artist.display_name || '';
+$('o-city').value = profile?.city || '';
+$('o-specs').innerHTML = Object.entries(SPECIALTY_LABELS).map(([k, v]) => `<button type="button" class="chip" data-spec="${k}" aria-pressed="${st.specs.has(k)}">${esc(v)}</button>`).join('');
+$('o-specs').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-spec]'); if (!b) return;
+  st.specs.has(b.dataset.spec) ? st.specs.delete(b.dataset.spec) : st.specs.add(b.dataset.spec);
+  b.setAttribute('aria-pressed', String(st.specs.has(b.dataset.spec)));
+});
+// Suggestions de communes (Base Adresse Nationale)
+let cityT;
+$('o-city').addEventListener('input', () => {
+  clearTimeout(cityT);
+  const q = $('o-city').value.trim(); if (q.length < 3) return;
+  cityT = setTimeout(async () => {
+    try {
+      const j = await (await fetch('https://api-adresse.data.gouv.fr/search/?type=municipality&limit=5&q=' + encodeURIComponent(q))).json();
+      $('o-city-list').innerHTML = (j.features || []).map(f => `<option value="${esc(f.properties.city || f.properties.name)}">${esc(f.properties.postcode || '')} ${esc(f.properties.context || '')}</option>`).join('');
+    } catch (_) {}
+  }, 250);
+});
+async function geocode(city) {
+  try {
+    const j = await (await fetch('https://api-adresse.data.gouv.fr/search/?type=municipality&limit=1&q=' + encodeURIComponent(city))).json();
+    const f = j.features?.[0]; if (!f) return null;
+    const ctx = (f.properties.context || '').split(',').map(s => s.trim());
+    return { lng: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], region: ctx[2] || ctx[1] || null };
+  } catch (_) { return null; }
+}
+async function saveVous() {
+  const name = $('o-name').value.trim(), city = $('o-city').value.trim();
+  if (!name) { showToast('Indiquez le nom affiché aux clientes.', 'error'); $('o-name').focus(); return false; }
+  if (!city) { showToast('Indiquez votre ville.', 'error'); $('o-city').focus(); return false; }
+  if (!st.specs.size) { showToast('Choisissez au moins une spécialité.', 'error'); return false; }
+  const geo = city !== (profile?.city || '') || profile?.lat == null ? await geocode(city) : { lat: profile.lat, lng: profile.lng, region: profile.region };
+  const [r1, r2] = await Promise.all([
+    supabase.from('artists').update({ display_name: name, specialties: [...st.specs] }).eq('id', artist.id),
+    supabase.from('profiles').update({ city, lat: geo?.lat ?? null, lng: geo?.lng ?? null, ...(geo?.region ? { region: geo.region } : {}) }).eq('user_id', user.id),
+  ]);
+  if (r1.error || r2.error) { console.error(r1.error || r2.error); showToast('L’enregistrement n’a pas abouti. Réessayez.', 'error'); return false; }
+  Object.assign(artist, { display_name: name, specialties: [...st.specs] });
+  if (profile) Object.assign(profile, { city, lat: geo?.lat ?? null, lng: geo?.lng ?? null });
+  if (!geo) showToast('Ville non reconnue : vous apparaîtrez dans la recherche par ville, pas par distance.', 'error');
+  return true;
+}
+
+// 2. Photos
+function renderPhotos(uploading = 0) {
+  $('o-photos').innerHTML = photos.map((p, i) => `<div class="ph"><img src="${esc(safeUrl(p.url) || '')}" alt="Photo ${i + 1}"/>${i === 0 ? '<span class="cov">Couverture</span>' : ''}<button type="button" data-del="${esc(p.id)}" aria-label="Retirer la photo ${i + 1}">${ICON.trash}</button></div>`).join('')
+    + Array.from({ length: uploading }, () => '<div class="ph up"><span class="spinner"></span></div>').join('');
+  const n = photos.length;
+  $('o-pcount').innerHTML = n >= 3 ? `<b>${n} photos</b> · parfait, vous pourrez en ajouter d’autres plus tard.` : n ? `<b>${n} photo${n > 1 ? 's' : ''}</b> · encore ${3 - n} pour une fiche qui donne envie.` : 'Aucune photo pour l’instant.';
+}
+const IMG_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+async function upload(files) {
+  files = [...files]; if (!files.length) return;
+  let left = files.length; renderPhotos(left);
+  const refused = [];
+  for (const [i, file] of files.entries()) {
+    const out = await shrinkImage(file);
+    if (out.error) refused.push(`${file.name} : ${out.error}`);
+    else {
+      const f = out.file, ext = IMG_TYPES[f.type] || 'jpg';
+      const path = `${artist.id}/${Date.now()}-${i}.${ext}`;
+      const { error: upErr } = await supabase.storage.from('portfolio').upload(path, f, { upsert: false, contentType: f.type });
+      if (upErr) { console.error(upErr); refused.push(`${file.name} : envoi impossible`); }
+      else {
+        const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
+        const { data: row, error } = await supabase.from('artist_photos').insert({ artist_id: artist.id, url: publicUrl }).select('id,url').maybeSingle();
+        if (error || !row) { console.error(error); refused.push(`${file.name} : enregistrement impossible`); supabase.storage.from('portfolio').remove([path]).catch(() => {}); }
+        else photos.push(row);
+      }
+    }
+    renderPhotos(--left);
+  }
+  if (refused.length) showToast(refused.join(' ; '), 'error');
+}
+$('o-files').addEventListener('change', (e) => { upload(e.target.files).finally(() => { e.target.value = ''; }); });
+const drop = $('drop');
+['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', (e) => upload(e.dataTransfer.files));
+$('o-photos').addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-del]'); if (!b) return;
+  const p = photos.find(x => x.id === b.dataset.del); if (!p) return;
+  const { error } = await supabase.from('artist_photos').delete().eq('id', p.id);
+  if (error) { showToast('Suppression impossible.', 'error'); return; }
+  const m = (p.url || '').match(/\/portfolio\/(.+)$/);
+  if (m) supabase.storage.from('portfolio').remove([decodeURIComponent(m[1].split('?')[0])]).catch(() => {});
+  photos = photos.filter(x => x.id !== p.id); renderPhotos();
+});
+
+// 3. Présentation
+const specTxt = () => [...st.specs].map(s => specialtyLabel(s).toLowerCase()).slice(0, 3).join(', ').replace(/, ([^,]*)$/, ' et $1') || 'les mariages et les soirées';
+const STARTS = [
+  ['Mon parcours', () => `Maquilleuse depuis … ans, je travaille surtout pour ${specTxt()}. `],
+  ['Mon style', () => 'Mon style : un teint lumineux, naturel, qui tient toute la journée. '],
+  ['Je me déplace', () => `Je me déplace à domicile${profile?.city ? ' autour de ' + profile.city : ''}, avec tout mon matériel. `],
+  ['Pour les mariées', () => 'Pour les mariées, je propose un essai quelques semaines avant le jour J. '],
+];
+$('o-starts').innerHTML = STARTS.map(([t], i) => `<button type="button" class="chip" data-start="${i}">${esc(t)}</button>`).join('');
+$('o-starts').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-start]'); if (!b) return;
+  const ta = $('o-bio'), add = STARTS[+b.dataset.start][1]();
+  ta.value = (ta.value.trim() ? ta.value.trim() + ' ' : '') + add;
+  ta.focus(); const k = ta.value.indexOf('…'); if (k >= 0) ta.setSelectionRange(k, k + 1); else ta.setSelectionRange(ta.value.length, ta.value.length);
+  bioCnt();
+});
+$('o-bio').value = artist.bio || '';
+$('o-ig').value = artist.instagram || '';
+function bioCnt() {
+  const n = $('o-bio').value.trim().length;
+  $('o-bio-cnt').textContent = n >= 60 ? `${n} caractères · très bien` : `${n} caractère${n > 1 ? 's' : ''} · au moins 60 conseillés`;
+  $('o-bio-cnt').classList.toggle('ok', n >= 60);
+}
+$('o-bio').addEventListener('input', bioCnt); bioCnt();
+function igUrl(v) {
+  v = v.trim(); if (!v) return null;
+  if (/^@?[A-Za-z0-9._]{1,30}$/.test(v)) return 'https://instagram.com/' + v.replace(/^@/, '');
+  if (!/^https?:\/\//i.test(v)) v = 'https://' + v.replace(/^\/+/, '');
+  return safeUrl(v.replace(/^http:\/\//i, 'https://'));
+}
+async function saveBio() {
+  const bio = $('o-bio').value.trim();
+  if (bio.includes('…')) { showToast('Complétez les « … » de votre présentation.', 'error'); $('o-bio').focus(); return false; }
+  const ig = $('o-ig').value.trim(), url = igUrl(ig);
+  if (ig && !url) { showToast('Ce lien Instagram n’est pas valide.', 'error'); return false; }
+  const { error } = await supabase.from('artists').update({ bio, instagram: url }).eq('id', artist.id);
+  if (error) { console.error(error); showToast('L’enregistrement n’a pas abouti. Réessayez.', 'error'); return false; }
+  Object.assign(artist, { bio, instagram: url });
+  return true;
+}
+
+// 4. Tarifs
+const PRESETS = [
+  { name: 'Maquillage mariée', p: 180, d: 90, c: 'mariage', on: ['mariage'] },
+  { name: 'Essai maquillage mariée', p: 80, d: 60, c: 'mariage', on: ['mariage'] },
+  { name: 'Maquillage invitée', p: 65, d: 45, c: 'soiree', on: ['mariage', 'soiree'] },
+  { name: 'Maquillage soirée', p: 60, d: 45, c: 'soiree', on: ['soiree'] },
+  { name: 'Maquillage shooting photo', p: 120, d: 90, c: 'editorial', on: ['editorial'] },
+  { name: 'Maquillage naturel du quotidien', p: 45, d: 45, c: 'quotidien', on: ['quotidien'] },
+  { name: 'Maquillage scène / spectacle', p: 90, d: 60, c: 'scene', on: ['scene'] },
+];
+const DUR = [30, 45, 60, 90, 120, 180];
+let extra = 0;
+// Aucun prix n'est proposé à sa place : la ligne se coche quand elle écrit son prix
+// (le prix habituel n'apparaît qu'en exemple grisé).
+function svcRow(p, k) {
+  return `<div class="sv off" data-row="${k}">
+    <input type="checkbox" aria-label="Proposer ${esc(p.name || 'cette prestation')}"/>
+    <span class="n">${p.custom ? `<input placeholder="Nom de la prestation" aria-label="Nom de la prestation"/>` : esc(p.name)}</span>
+    <span class="unit"><input inputmode="decimal" value="" placeholder="${p.p || ''}" aria-label="Prix en euros${p.name ? ' pour ' + esc(p.name) : ''}"/><span>€</span></span>
+    <select aria-label="Durée">${DUR.map(d => `<option value="${d}" ${d === p.d ? 'selected' : ''}>${d < 60 ? d + ' min' : (d / 60).toString().replace('.', ',') + ' h' + (d % 60 ? '' : '')}</option>`).join('')}</select>
+  </div>`;
+}
+function renderTarifs() {
+  document.querySelectorAll('.mode').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === st.mode)));
+  $('o-svc-box').hidden = st.mode !== 'slots';
+  $('o-quote-note').hidden = st.mode !== 'quote';
+  if (st.mode !== 'slots' || $('o-svcs').dataset.ready) return;
+  $('o-svcs').dataset.ready = '1';
+  const have = new Set(services.map(s => s.name.toLowerCase()));
+  $('o-svcs').innerHTML = services.map(s => `<div class="sv saved"><span class="ck" style="color:var(--gb-champagne)">${ICON.check}</span><span class="n">${esc(s.name)} <small style="color:var(--gb-ink-3);font-weight:400;">· ${s.duration_min} min · déjà enregistrée</small></span><span class="p">${Math.round(s.price_cents / 100)} €</span></div>`).join('')
+    // Ses spécialités d'abord
+    + PRESETS.map((p, k) => [p, k]).sort((a, b) => (b[0].on.some(s => st.specs.has(s)) ? 1 : 0) - (a[0].on.some(s => st.specs.has(s)) ? 1 : 0))
+      .map(([p, k]) => have.has(p.name.toLowerCase()) ? '' : svcRow(p, k)).join('');
+}
+document.querySelectorAll('.mode').forEach(b => b.addEventListener('click', () => { st.mode = b.dataset.mode; try { localStorage.setItem('gb_onb_mode', st.mode); } catch (_) {} renderTarifs(); }));
+$('o-svcs').addEventListener('change', (e) => { const r = e.target.closest('.sv'); if (r && e.target.type === 'checkbox') r.classList.toggle('off', !e.target.checked); });
+$('o-svcs').addEventListener('input', (e) => {
+  const r = e.target.closest('.sv'); if (!r || e.target.type === 'checkbox' || e.target.tagName === 'SELECT') return;
+  const c = r.querySelector('input[type=checkbox]'); if (!c) return;
+  const has = e.target.value.trim() !== '';
+  if (has !== c.checked && e.target.closest('.unit')) { c.checked = has; r.classList.toggle('off', !has); }
+  else if (has && !c.checked) { c.checked = true; r.classList.remove('off'); }
+});
+$('o-add-svc').addEventListener('click', () => {
+  $('o-svcs').insertAdjacentHTML('beforeend', svcRow({ custom: true, p: '', d: 60, on: [] }, 'x' + (extra++)));
+  const r = $('o-svcs').lastElementChild; r.classList.remove('off'); r.querySelector('input[type=checkbox]').checked = true; r.querySelector('.n input').focus();
+});
+async function saveTarifs() {
+  if (!st.mode) { showToast('Choisissez comment on vous réserve.', 'error'); return false; }
+  if (st.mode === 'quote') return true;
+  const rows = [];
+  for (const r of $('o-svcs').querySelectorAll('.sv:not(.saved)')) {
+    if (!r.querySelector('input[type=checkbox]').checked) continue;
+    const k = r.dataset.row, p = PRESETS[k];
+    const name = p ? p.name : r.querySelector('.n input').value.trim();
+    const price = Math.round(parseFloat(r.querySelector('.unit input').value.replace(',', '.')) * 100);
+    if (!name) { showToast('Donnez un nom à votre prestation.', 'error'); r.querySelector('.n input').focus(); return false; }
+    if (!Number.isFinite(price) || price < 100) { showToast(`Indiquez un prix pour « ${name} ».`, 'error'); r.querySelector('.unit input').focus(); return false; }
+    rows.push({ artist_id: artist.id, name, price_cents: price, duration_min: +r.querySelector('select').value, category: p ? p.c : ([...st.specs][0] || 'soiree'), description: null });
+  }
+  if (!rows.length && !services.length) { showToast('Écrivez le prix d’au moins une prestation, ou choisissez « Sur devis ».', 'error'); return false; }
+  if (rows.length) {
+    const { error } = await supabase.from('services').insert(rows);
+    if (error) { console.error(error); showToast('Les tarifs n’ont pas pu être enregistrés.', 'error'); return false; }
+    await loadServices();
+    $('o-svcs').dataset.ready = ''; renderTarifs();
+  }
+  const min = Math.min(...services.map(s => s.price_cents)) / 100;
+  if (Number.isFinite(min)) { await supabase.from('artists').update({ price_from: min }).eq('id', artist.id); artist.price_from = min; }
+  return true;
+}
+
+// 5. Créneaux
+const WD = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+const HOURS = SLOT_HOURS;
+const PRE = [['Matin', ['09:00', '10:00', '11:00']], ['Après-midi', ['14:00', '15:00', '16:00', '17:00']], ['Journée', ['09:00', '11:00', '14:00', '16:00']], ['Soirée', ['17:00', '18:00', '19:00', '20:00']]];
+function renderSlots() {
+  $('o-days').innerHTML = WD.map((d, i) => `<button type="button" class="chip" data-wd="${i}" aria-pressed="${st.days.has(i)}">${d}</button>`).join('');
+  $('o-hours').innerHTML = HOURS.map(h => `<button type="button" class="chip" data-h="${h}" aria-pressed="${st.hours.has(h)}">${h.replace(':00', ' h')}</button>`).join('');
+  $('o-presets').innerHTML = PRE.map(([t], i) => `<button type="button" class="chip" data-pre="${i}">${t}</button>`).join('') + '<button type="button" class="chip" data-pre="clear">Effacer</button>';
+  const n = st.days.size * st.hours.size;
+  $('o-slot-sum').innerHTML = n ? `<b>${n} créneaux par semaine</b>, soit environ ${n * 8} sur les huit prochaines semaines. Un créneau réservé n’est plus proposé aux autres.` : 'Choisissez au moins un jour et une heure.';
+}
+$('o-days').addEventListener('click', (e) => { const b = e.target.closest('[data-wd]'); if (!b) return; const i = +b.dataset.wd; st.days.has(i) ? st.days.delete(i) : st.days.add(i); renderSlots(); });
+$('o-hours').addEventListener('click', (e) => { const b = e.target.closest('[data-h]'); if (!b) return; const h = b.dataset.h; st.hours.has(h) ? st.hours.delete(h) : st.hours.add(h); renderSlots(); });
+$('o-presets').addEventListener('click', (e) => { const b = e.target.closest('[data-pre]'); if (!b) return; st.hours = new Set(b.dataset.pre === 'clear' ? [] : PRE[+b.dataset.pre][1]); renderSlots(); });
+async function saveSlots() {
+  if (!st.days.size || !st.hours.size) { showToast('Choisissez au moins un jour et une heure.', 'error'); return false; }
+  const hours = [...st.hours].sort();
+  const tpl = WD.map((_, wd) => ({ artist_id: artist.id, weekday: wd, slots: st.days.has(wd) ? hours : [], updated_at: new Date().toISOString() }));
+  const t = await supabase.from('availability_templates').upsert(tpl, { onConflict: 'artist_id,weekday' });
+  if (t.error) console.warn('modèle', t.error);
+  // Huit semaines à partir de demain ; les créneaux existants sont conservés (doublons ignorés)
+  const rows = [], d = new Date(); d.setHours(0, 0, 0, 0);
+  for (let k = 1; k <= 56; k++) {
+    d.setDate(d.getDate() + 1);
+    const wd = (d.getDay() + 6) % 7;
+    if (st.days.has(wd)) for (const h of hours) rows.push({ artist_id: artist.id, date: localISODate(d), time_slot: h, is_available: true, is_booked: false });
+  }
+  const { error } = await supabase.from('availabilities').upsert(rows, { onConflict: 'artist_id,date,time_slot', ignoreDuplicates: true });
+  if (error) { console.error(error); showToast('Les créneaux n’ont pas pu être créés.', 'error'); return false; }
+  return true;
+}
+
+// 6. Aperçu
+function checks() {
+  return [
+    { ok: !!(artist.display_name && profile?.city && (artist.specialties || []).length), t: 'Nom, ville et spécialités', go: 'vous' },
+    { ok: photos.length >= 3, t: 'Au moins 3 photos', s: photos.length ? `${photos.length} pour l’instant` : 'Aucune pour l’instant', go: 'photos' },
+    { ok: (artist.bio || '').trim().length >= 60, t: 'Une présentation', go: 'bio' },
+    { ok: st.mode === 'quote' || services.length > 0, t: st.mode === 'quote' ? 'Sur devis' : 'Vos tarifs', s: st.mode === 'quote' ? 'Les clientes vous envoient une demande' : services.length ? `${services.length} prestation${services.length > 1 ? 's' : ''} · dès ${Math.round(Math.min(...services.map(s => s.price_cents)) / 100)} €` : '', go: 'tarifs' },
+  ];
+}
+function renderPreview() {
+  const cover = safeUrl(photos[0]?.url);
+  const specs = (artist.specialties || []).map(s => specialtyLabel(s).toLowerCase()).join(', ');
+  const slots = st.mode === 'slots' && services.length;
+  $('o-card').innerHTML = `<div class="artist-card">
+    ${cover ? `<img class="artist-card-cover" src="${esc(cover)}" alt=""/>` : `<div class="artist-card-cover cover-ph" role="img" aria-label="Pas encore de photo">${ICON.image}</div>`}
+    <div class="artist-card-body">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+        <span class="artist-name">${esc(artist.display_name || '')}</span><span class="artist-price">${slots && artist.price_from ? 'dès ' + Math.round(artist.price_from) + ' €' : 'Sur devis'}</span>
+      </div>
+      <div class="artist-city">${esc(profile?.city || '')}${specs ? ' — ' + esc(specs) : ''}</div>
+      <div class="card-tags">${slots ? '<span class="mode-tag is-slots">Réservation en ligne</span>' : '<span class="mode-tag">Sur devis</span>'}</div>
+    </div></div>`;
+  $('o-chk').innerHTML = checks().map(c => `<li class="${c.ok ? 'ok' : ''}"><span class="ck">${ICON.check}</span><span>${esc(c.t)}${c.s ? `<small>${esc(c.s)}</small>` : ''}</span>${c.ok ? '' : `<button type="button" class="btn btn-quiet btn-sm" data-go="${c.go}">Compléter</button>`}</li>`).join('');
+}
+$('o-chk').addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) show(b.dataset.go); });
+async function goLive() {
+  // Le minimum pour ne pas publier une carte vide dans la recherche : nom, ville, spécialités et une photo
+  const c = checks();
+  if (!c[0].ok) { showToast('Indiquez d’abord votre nom, votre ville et vos spécialités.', 'error'); show('vous'); return false; }
+  if (!photos.length) { showToast('Ajoutez au moins une photo : c’est elle qui apparaît dans la recherche.', 'error'); show('photos'); return false; }
+  const miss = c.filter(x => !x.ok);
+  if (!artist.is_active && miss.length && !confirm(`Il manque encore : ${miss.map(m => m.t.toLowerCase()).join(', ')}.\nMettre la fiche en ligne quand même ? Vous pourrez compléter ensuite.`)) return false;
+  if (!artist.is_active) {
+    const { error } = await supabase.from('artists').update({ is_active: true }).eq('id', artist.id);
+    if (error) { console.error(error); showToast('La mise en ligne n’a pas abouti. Réessayez.', 'error'); return false; }
+    artist.is_active = true;
+  }
+  const { data: a } = await supabase.from('artists').select('slug').eq('id', artist.id).maybeSingle();
+  const url = location.origin + (a?.slug ? '/artiste/' + encodeURIComponent(a.slug) : '/artist.html?id=' + encodeURIComponent(artist.id));
+  $('o-link').value = url; $('o-see').href = url;
+  try { localStorage.removeItem('gb_onb_mode'); } catch (_) {}
+  show('fin');
+  return true;
+}
+$('o-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('o-link').value); $('o-copy').textContent = 'Copié'; } catch (_) { $('o-link').select(); } });
+
+// ── Navigation ───────────────────────────────────────────────────────────
+const SAVE = { vous: saveVous, photos: async () => true, bio: saveBio, tarifs: saveTarifs, creneaux: saveSlots, apercu: goLive };
+$('next').addEventListener('click', async () => {
+  const btn = $('next'); btn.disabled = true; const label = btn.textContent; btn.innerHTML = '<span class="spinner"></span>';
+  let ok = false; const from = cur;
+  try { ok = await SAVE[from](); } catch (e) { console.error(e); showToast('Une erreur est survenue. Réessayez.', 'error'); }
+  btn.disabled = false; btn.textContent = label;
+  if (!ok || from === 'apercu') return;
+  const list = order(); show(list[list.indexOf(from) + 1]);
+});
+$('back').addEventListener('click', () => { const list = order(); const i = list.indexOf(cur); if (i > 0) show(list[i - 1]); });
+
+renderTarifs(); renderSlots();
+if (hadSlots) $('o-slot-sum').insertAdjacentHTML('beforeend', '<br/>Vous avez déjà des créneaux : ils sont conservés, seuls les manquants sont ajoutés.');
+// Reprise : l'étape demandée dans l'adresse, sinon la première qui manque
+const want = location.hash.slice(1);
+const firstMissing = !(artist.display_name && profile?.city && (artist.specialties || []).length) ? 'vous'
+  : photos.length < 3 ? 'photos' : (artist.bio || '').trim().length < 60 ? 'bio' : !st.mode ? 'tarifs' : 'apercu';
+show(order().includes(want) ? want : firstMissing);
+</script>
+</body>
+</html>

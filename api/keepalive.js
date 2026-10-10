@@ -3,6 +3,8 @@
 // (connexion, profils, devis, messagerie) cesse alors de répondre. Vercel appelle cette fonction
 // une fois par jour (voir « crons » dans vercel.json) ; une lecture minuscule suffit.
 module.exports = async function handler(req, res) {
+  // Vercel envoie « Bearer <CRON_SECRET> » aux tâches planifiées quand la variable existe
+  if (process.env.CRON_SECRET && req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) return res.status(401).json({ ok: false });
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return res.status(503).json({ ok: false, error: 'non configuré' });

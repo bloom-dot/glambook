@@ -124,7 +124,7 @@
       <div class="h-sub">Sélectionnez une ou plusieurs prestations.</div>
       <div id="svc-list"><div class="center"><div class="spinner"></div></div></div>
       <div class="field" style="margin-top:14px;">
-        <label id="note-label">Précisions (facultatif)</label>
+        <label for="cli_note" id="note-label">Précisions (facultatif)</label>
         <textarea id="cli_note" rows="3" placeholder="Nombre de personnes, style souhaité, contraintes horaires…"></textarea>
       </div>
     </div>
@@ -132,13 +132,17 @@
       <h2>Événement</h2>
       <div class="h-sub">Quand et où aura lieu la prestation ?</div>
       <div class="grid2">
-        <div class="field"><label for="event_date">Date &amp; heure</label><input id="event_date" type="datetime-local"/></div>
-        <div class="field"><label>Téléphone</label><input id="cli_phone" type="tel"/></div>
+        <div class="field"><label for="event_date">Date et heure</label><input id="event_date" type="datetime-local"/></div>
+        <div class="field"><label for="event_address">Lieu</label><input id="event_address" placeholder="Ville, ou adresse précise" autocomplete="street-address"/></div>
       </div>
-      <div class="field"><label>Adresse de l'événement</label><input id="event_address" placeholder="N°, rue, ville"/></div>
+    </div>
+    <div class="panel">
+      <h2>Pour vous répondre</h2>
+      <div class="h-sub">Pas de compte à créer : la maquilleuse vous répond par e-mail.</div>
+      <div class="field"><label for="cli_name">Prénom et nom</label><input id="cli_name" autocomplete="name"/></div>
       <div class="grid2">
-        <div class="field"><label>Votre nom</label><input id="cli_name"/></div>
-        <div class="field"><label>Email</label><input id="cli_email" type="email"/></div>
+        <div class="field"><label for="cli_email">E-mail</label><input id="cli_email" type="email" autocomplete="email" inputmode="email"/></div>
+        <div class="field"><label for="cli_phone">Téléphone <span style="color:var(--gb-ink-3);font-weight:400;">(conseillé)</span></label><input id="cli_phone" type="tel" autocomplete="tel"/></div>
       </div>
     </div>
     <div class="nav-btns">
@@ -208,18 +212,6 @@
     </div>
   </div>
 
-  <!-- SUCCÈS -->
-  <div id="done" class="hide">
-    <div class="panel center" style="padding:44px 22px;">
-      <div style="font-size:2.2rem;line-height:0;margin-bottom:16px;color:var(--gb-champagne);" data-ico="mail"></div>
-      <h2 style="margin-bottom:6px;">Demande envoyée</h2>
-      <p style="color:var(--gris);font-size:.9rem;">La maquilleuse prépare votre devis. Vous le recevrez par email et le retrouverez dans votre espace, où vous pourrez le signer.</p>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;">
-        <a href="/mes-devis.html" class="btn btn-primary">Suivre ma demande</a>
-        <a id="doneContact" class="btn btn-ghost">Écrire à la maquilleuse</a>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -229,6 +221,7 @@
   import { getArtistServices, getArtistName, requestFaceDiagnostic, createBookingRequest } from '/js/booking/store.js';
   import { euros } from '/js/devis/model.js';
   import { showToast, esc, ICON } from '/js/utils.js';
+  import { rememberLocal, sendLink, renderDone, errorText } from '/js/rdv.js';
 
   document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ICON[el.dataset.ico] || ''; });
 
@@ -243,26 +236,29 @@
   };
   let stream = null;
 
-  // Auth requise
-  const user = await getCurrentUser();
-  if (!user) { location.href = `/auth/login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`; }
+  // Compte facultatif : s'il y en a un, on préremplit
+  let user = null;
+  try { user = await getCurrentUser(); } catch (_) {}
   if (!artistId) {
     document.querySelector('.rz').innerHTML = '<div class="state-msg"><h2>Maquilleuse introuvable</h2><p>Le lien suivi est incomplet.</p><a class="btn btn-primary" href="/artists.html">Voir les maquilleuses</a></div>';
     throw new Error('artist manquant');
   }
-  getArtistName(artistId).then(n => { if (n) $('rz-title').textContent = 'Demande de devis à ' + n; }).catch(() => {});
+  let artistLabel = 'La maquilleuse';
+  getArtistName(artistId).then(n => { if (n) { artistLabel = n; $('rz-title').textContent = 'Demande de devis à ' + n; } }).catch(() => {});
+  // Retour : la fiche de la maquilleuse quand la page est ouverte directement (e-mail, nouvel onglet)
+  { const back = document.querySelector('.nav-links a'); if (back) back.href = history.length > 1 && document.referrer.startsWith(location.origin) ? 'javascript:history.back()' : '/artist.html?id=' + encodeURIComponent(artistId); }
 
   // Le diagnostic visage n'est proposé que s'il est réellement branché côté serveur :
   // sans cela, l'étape 2 menait à un message d'erreur.
   let diagEnabled = false;
-  try { diagEnabled = !!(await (await fetch('/api/config')).json()).diagnosticEnabled; } catch (_) {}
+  // Le diagnostic demande une session (coût de l'analyse) : proposé seulement aux clientes connectées
+  try { diagEnabled = !!user && !!(await (await fetch('/api/config')).json()).diagnosticEnabled; } catch (_) {}
   if (!diagEnabled) { $('sd-b').hidden = true; $('sd-c').textContent = '2 · Confirmation'; }
 
   // Pas de date dans le passé
   { const n = new Date(), p = (x) => String(x).padStart(2, '0');
     $('event_date').min = `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}T00:00`; }
 
-  if (artistId) { const dc = $('doneContact'); if (dc) dc.href = '/messages.html?artist=' + encodeURIComponent(artistId); }
 
   // ── ÉTAPE A : services + préremplissage ──
   (async () => {
@@ -305,7 +301,6 @@
   function goto(step) {
     const gf = $('glossFill'); if (gf) gf.style.width = (diagEnabled ? { a:'33%', b:'66%', c:'100%' } : { a:'50%', c:'100%' })[step] || '33%';
     for (const s of ['a','b','c']) $('step-'+s).classList.toggle('hide', s !== step);
-    $('done').classList.add('hide');
     $('sd-a').className = 'step-dot' + (step==='a'?' active':' done');
     $('sd-b').className = 'step-dot' + (step==='b'?' active':(step==='c'?' done':''));
     $('sd-c').className = 'step-dot' + (step==='c'?' active':'');
@@ -551,22 +546,27 @@
     const btn = $('submitReq'); btn.disabled = true; btn.textContent = 'Envoi…';
     try {
       const chosen = state.services.filter(s => state.selected.has(s.id));
-      await createBookingRequest({
-        artistId,
-        clientName: $('cli_name').value.trim(),
-        clientEmail: $('cli_email').value.trim(),
-        clientPhone: $('cli_phone').value.trim(),
-        eventAddress: $('event_address').value.trim(),
-        eventDate: $('event_date').value ? new Date($('event_date').value).toISOString() : '',
-        services: chosen,
-        note: $('cli_note').value.trim() || null,
-        travelDistanceKm: 0,
-        diagnostic: state.diagnostic,
+      const when = $('event_date').value ? new Date($('event_date').value) : null;
+      const { data, error } = await supabase.rpc('submit_request', {
+        p_artist: artistId,
+        p_name: $('cli_name').value.trim(),
+        p_email: $('cli_email').value.trim(),
+        p_phone: $('cli_phone').value.trim(),
+        p_event_date: when ? when.toISOString() : null,
+        p_address: $('event_address').value.trim(),
+        p_note: $('cli_note').value.trim(),
+        p_services: chosen.map(s => ({ id: s.id })),
+        p_diagnostic: state.diagnostic || null,
       });
-      $('step-c').classList.add('hide');
-      $('done').classList.remove('hide');
-      $('sd-c').className = 'step-dot done';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (error) throw error;
+      if (!data?.ok) { showToast(errorText(data?.error), 'error'); btn.disabled = false; btn.textContent = 'Envoyer ma demande'; return; }
+      const artistName = artistLabel;
+      const whenTxt = when ? when.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+      rememberLocal({ t: data.token, kind: 'request', artist: artistName, when: whenTxt });
+      const emailed = await sendLink(data.token);
+      document.querySelector('.rz').classList.add('is-done');
+      renderDone(document.querySelector('.rz'), { kind: 'request', token: data.token, artistName, when: whenTxt,
+        email: $('cli_email').value.trim(), name: $('cli_name').value.trim(), emailed, loggedIn: !!user });
     } catch (e) {
       console.error(e); showToast("L'envoi a échoué. Vérifiez votre connexion et réessayez.", 'error');
       btn.disabled = false; btn.textContent = 'Envoyer ma demande';

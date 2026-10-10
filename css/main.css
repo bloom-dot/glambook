@@ -590,3 +590,39 @@ body.has-pshell { padding-left: 232px; }
   .pshell-mob a.active { color: var(--gb-champagne); }
 }
 .artist-card-cover.cover-ph { display: flex; }
+
+/* ══════════════════════════════════════
+   PARCOURS SANS COMPTE (js/rdv.js) : écran « C'est envoyé »
+   ══════════════════════════════════════ */
+.gb-done { max-width: 560px; margin: 0 auto; padding: 24px 0 48px; }
+.done-ok { width: 56px; height: 56px; border-radius: 50%; background: var(--gb-gold); color: var(--gb-cta-ink); display: flex; align-items: center; justify-content: center; }
+.done-ok svg { width: 28px; height: 28px; }
+.gb-done h1 { font-size: clamp(3rem, 10vw, 4.4rem); line-height: .9; margin: 22px 0 10px; }
+.done-lead { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.3rem; color: #D9D4DB; margin: 0; }
+.done-mail { margin-top: 26px; padding: 18px; border: 1px solid var(--gb-line-strong); border-radius: var(--radius); background: var(--gb-surface); display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 14px; }
+.done-mail > svg { width: 28px; height: 28px; color: var(--gb-champagne); }
+.done-mail b { display: block; margin-bottom: 4px; }
+.done-mail span { display: block; font-size: .88rem; color: var(--gb-ink-2); line-height: 1.5; }
+.done-link { display: flex; gap: 8px; margin-top: 12px; }
+.done-link input { flex: 1; min-width: 0; height: 40px; padding: 0 10px; background: var(--gb-ground); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-sm); color: var(--gb-ink-2); font: .8rem var(--gb-font-body); }
+.done-next { list-style: none; margin: 28px 0 0; padding: 0; border-top: 1px solid var(--gb-line); }
+.done-next li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; padding: 14px 0; border-bottom: 1px solid var(--gb-line); }
+.done-next li > span { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.5rem; color: var(--gb-gold); line-height: 1; }
+.done-next b { display: block; font-size: .96rem; }
+.done-next small { font-size: .82rem; color: var(--gb-ink-2); }
+.done-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.done-space { margin-top: 26px; font-size: .9rem; color: var(--gb-ink-2); }
+details.done-space summary { cursor: pointer; color: var(--gb-champagne); font-weight: 600; }
+.done-acc { margin-top: 14px; display: grid; gap: 12px; max-width: 380px; }
+.done-acc p { margin: 0; }
+.done-acc label { display: grid; gap: 6px; font-size: .82rem; color: var(--gb-ink-2); }
+.done-acc input { height: 46px; padding: 0 12px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-md); color: var(--gb-ink); font: 1rem var(--gb-font-body); }
+.done-acc-msg { color: var(--gb-champagne); font-size: .86rem; min-height: 1em; }
+.done-acc .done-cgu { display: flex; gap: 10px; align-items: flex-start; }
+.done-acc .done-cgu input { height: auto; width: 18px; margin-top: 2px; accent-color: var(--gb-gold); }
+.done-acc .done-cgu a { color: var(--gb-champagne); }
+
+/* iOS zoome la page quand un champ fait moins de 16 px : on l'évite sur téléphone */
+@media (max-width: 600px) {
+  input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea { font-size: 16px; }
+}

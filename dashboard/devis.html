@@ -99,11 +99,11 @@
     <div class="panel">
       <h2>Vos informations (prestataire)</h2>
       <div class="grid2">
-        <div class="field"><label>Nom / Nom commercial</label><input id="mua_name" placeholder="Ex. Studio Léa Makeup"/></div>
-        <div class="field"><label>SIRET</label><input id="mua_siret" placeholder="123 456 789 00012"/></div>
-        <div class="field"><label>Email</label><input id="mua_email" type="email"/></div>
-        <div class="field"><label>Téléphone</label><input id="mua_phone" type="tel"/></div>
-        <div class="field" style="grid-column:1/-1"><label>Adresse</label><input id="mua_address"/></div>
+        <div class="field"><label for="mua_name">Nom / Nom commercial</label><input id="mua_name" placeholder="Ex. Studio Léa Makeup"/></div>
+        <div class="field"><label for="mua_siret">SIRET</label><input id="mua_siret" placeholder="123 456 789 00012"/></div>
+        <div class="field"><label for="mua_email">Email</label><input id="mua_email" type="email"/></div>
+        <div class="field"><label for="mua_phone">Téléphone</label><input id="mua_phone" type="tel"/></div>
+        <div class="field" style="grid-column:1/-1"><label for="mua_address">Adresse</label><input id="mua_address"/></div>
         <div class="field" style="grid-column:1/-1">
           <label>Logo (optionnel)</label>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -121,11 +121,11 @@
     <div class="panel">
       <h2>Cliente</h2>
       <div class="grid2">
-        <div class="field"><label>Nom</label><input id="cli_name"/></div>
-        <div class="field"><label>Email</label><input id="cli_email" type="email" placeholder="Pour l'envoi du lien de signature"/></div>
-        <div class="field"><label>Téléphone</label><input id="cli_phone" type="tel"/></div>
-        <div class="field"><label>Date &amp; heure de l'événement</label><input id="event_date" type="datetime-local"/></div>
-        <div class="field" style="grid-column:1/-1"><label>Adresse de l'événement</label><input id="event_address" placeholder="Lieu de la prestation"/></div>
+        <div class="field"><label for="cli_name">Nom</label><input id="cli_name"/></div>
+        <div class="field"><label for="cli_email">Email</label><input id="cli_email" type="email" placeholder="Pour l'envoi du lien de signature"/></div>
+        <div class="field"><label for="cli_phone">Téléphone</label><input id="cli_phone" type="tel"/></div>
+        <div class="field"><label for="event_date">Date &amp; heure de l'événement</label><input id="event_date" type="datetime-local"/></div>
+        <div class="field" style="grid-column:1/-1"><label for="event_address">Adresse de l'événement</label><input id="event_address" placeholder="Lieu de la prestation"/></div>
       </div>
     </div>
 
@@ -143,20 +143,20 @@
     <div class="panel">
       <h2>Déplacement, TVA &amp; paiement</h2>
       <div class="grid2">
-        <div class="field"><label>Distance (km, aller-retour)</label><input id="travel_km" type="number" min="0" step="1" value="0"/></div>
-        <div class="field"><label>Tarif au km (€)</label><input id="travel_rate" type="number" min="0" step="0.05" value="0.50"/></div>
-        <div class="field"><label>Acompte demandé (€)</label><input id="deposit" type="number" min="0" step="1" value="0"/></div>
+        <div class="field"><label for="travel_km">Distance (km, aller-retour)</label><input id="travel_km" type="number" min="0" step="1" value="0"/></div>
+        <div class="field"><label for="travel_rate">Tarif au km (€)</label><input id="travel_rate" type="number" min="0" step="0.05" value="0.50"/></div>
+        <div class="field"><label for="deposit">Acompte demandé (€)</label><input id="deposit" type="number" min="0" step="1" value="0"/></div>
         <div class="field">
-          <label>Régime TVA</label>
+          <label for="vat_mode">Régime TVA</label>
           <select id="vat_mode">
             <option value="exempt">Franchise en base (auto-entrepreneur) — TVA non applicable</option>
             <option value="taxed">Assujetti à la TVA</option>
           </select>
         </div>
-        <div class="field" id="vatRateField" style="display:none"><label>Taux de TVA (%)</label><input id="vat_rate" type="number" min="0" step="0.1" value="20"/></div>
-        <div class="field"><label>Date de validité du devis</label><input id="valid_until" type="date"/></div>
-        <div class="field" style="grid-column:1/-1"><label>Conditions de paiement</label><textarea id="payment_terms"></textarea></div>
-        <div class="field" style="grid-column:1/-1"><label>Notes (optionnel)</label><textarea id="notes" placeholder="Précisions, mentions particulières…"></textarea></div>
+        <div class="field" id="vatRateField" style="display:none"><label for="vat_rate">Taux de TVA (%)</label><input id="vat_rate" type="number" min="0" step="0.1" value="20"/></div>
+        <div class="field"><label for="valid_until">Date de validité du devis</label><input id="valid_until" type="date"/></div>
+        <div class="field" style="grid-column:1/-1"><label for="payment_terms">Conditions de paiement</label><textarea id="payment_terms"></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label for="notes">Notes (optionnel)</label><textarea id="notes" placeholder="Précisions, mentions particulières…"></textarea></div>
       </div>
     </div>
 
@@ -189,6 +189,7 @@
 
     // Devis préparé en réponse à une demande : /dashboard/devis.html?request=<id>
     const requestId = new URLSearchParams(location.search).get('request');
+    let reqStatus = null;
     import { showToast, esc } from '/js/utils.js';
     import { mountShell } from '/js/shell.js';
     mountShell('devis');
@@ -313,10 +314,11 @@
     $('btnSend').onclick = async () => {
       const errs = validateForSend(quote);
       if (errs.length) { showToast(errs[0], 'error'); return; }
+      if (requestId && reqStatus === 'cancelled') { showToast('La cliente a annulé cette demande : envoi impossible.', 'error'); return; }
       const btn = $('btnSend');
       btn.disabled = true; btn.textContent = 'Envoi…';
       try {
-        if (!quote.id) await persist();
+        await persist(); // toujours : les dernières modifications partent avec le devis
         let url, emailed = false;
         try {
           // Envoi email via la fonction serverless (marque aussi "sent" côté serveur)
@@ -331,7 +333,7 @@
         }
         // Le devis répond à une demande : elle passe à « devis envoyé » et quitte la liste d'attente
         if (requestId) {
-          const { error: linkErr } = await supabase.from('booking_requests').update({ status: 'quoted', quote_id: quote.id }).eq('id', requestId);
+          const { error: linkErr } = await supabase.from('booking_requests').update({ status: 'quoted', quote_id: quote.id }).eq('id', requestId).in('status', ['pending', 'quoted']);
           if (linkErr) console.warn('Lien demande ↔ devis :', linkErr.message);
         }
         $('shareLink').value = url;
@@ -431,7 +433,7 @@
       // Devis en réponse à une demande : cliente, date, lieu et prestations demandées sont repris
       if (requestId) {
         try {
-          const { data: row, error } = await supabase.from('booking_requests').select('*').eq('id', requestId).maybeSingle();
+          const { data: row, error } = await supabase.from('booking_requests').select('id,artist_id,client_id,client_name,client_email,client_phone,event_address,event_date,services_snapshot,travel_distance_km,diagnostic,note,status,quote_id,created_at').eq('id', requestId).maybeSingle();
           if (error || !row) throw error || new Error('introuvable');
           const req = requestFromRow(row);
           const number = quote.quoteNumber;
@@ -440,7 +442,10 @@
           quote.paymentTerms = emptyQuote().paymentTerms;
           document.querySelector('.top h1').textContent = 'Devis pour ' + (req.clientName || 'la cliente');
           if (req.note) { $('reqNoteTxt').textContent = req.note; $('reqNote').hidden = false; }
-          if (row.status !== 'pending') { $('reqNoteLbl').textContent = 'Demande de la cliente (déjà traitée)'; }
+          reqStatus = row.status;
+          if (row.status === 'cancelled') { $('reqNoteLbl').textContent = 'Demande annulée par la cliente'; showToast('La cliente a annulé cette demande : le devis ne peut plus lui être envoyé.', 'error'); }
+          else if (row.status === 'declined') { $('reqNoteLbl').textContent = 'Demande que vous avez déclinée'; }
+          else if (row.status !== 'pending') { $('reqNoteLbl').textContent = 'Demande de la cliente (déjà traitée)'; }
         } catch (e) { console.error(e); showToast('La demande n’a pas pu être chargée.', 'error'); }
       }
 

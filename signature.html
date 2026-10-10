@@ -2,7 +2,9 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta name="referrer" content="no-referrer"/>
   <title>Signer votre devis — GlamBook</title>
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#0E0E10"/>
@@ -174,9 +176,13 @@
     function renderQuote() {
       $('qNo').textContent = quote.quoteNumber || '';
       const signed = quote.status === 'signed';
+      // Un devis retiré, refusé ou dont la date de validité est passée n'est plus à signer
+      const d = new Date(), today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const expired = !signed && quote.validUntil && quote.validUntil < today;
+      const closed = !signed && (quote.status !== 'sent' || expired);
       const pill = $('statusPill');
       pill.className = 'status-pill ' + (signed ? 'pill-signed' : 'pill-sent');
-      pill.textContent = signed ? 'Signé' : 'À signer';
+      pill.textContent = signed ? 'Signé' : expired || quote.status === 'expired' ? 'Expiré' : closed ? 'Plus à signer' : 'À signer';
 
       $('muaName').textContent = quote.mua.name;
       $('muaAddr').textContent = quote.mua.address || '';
@@ -216,7 +222,12 @@
           (quote.notes ? `<div style="margin-top:6px">${esc(quote.notes)}</div>` : '');
       }
 
-      if (signed) {
+      if (closed) {
+        hide($('signBox')); show($('signedBox'));
+        $('signedBox').querySelector('h2').textContent = expired || quote.status === 'expired' ? 'Devis expiré' : 'Devis plus disponible';
+        $('signedInfo').textContent = 'Ce devis ne peut plus être signé. Écrivez à votre maquilleuse pour qu’elle vous en envoie un nouveau.';
+        $('btnDownload').textContent = 'Télécharger le PDF';
+      } else if (signed) {
         hide($('signBox')); show($('signedBox'));
         $('signedInfo').textContent = `Signé${quote.signedName ? ' par ' + quote.signedName : ''} le ${fmtDate(quote.signedAt, true)}.`;
       } else {
@@ -249,6 +260,8 @@
         if (!res.ok) {
           const msg = res.error === 'already_signed' ? 'Ce devis a déjà été signé.'
                     : res.error === 'empty_signature' ? 'Signature vide.'
+                    : res.error === 'expired' ? 'Ce devis a expiré : demandez-en un nouveau à votre maquilleuse.'
+                    : res.error === 'not_sendable' ? 'Ce devis n’est plus à signer.'
                     : "Impossible de signer ce devis.";
           showToast(msg, 'error');
           btn.disabled = false; btn.textContent = 'Valider et signer';

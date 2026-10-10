@@ -49,9 +49,11 @@ async function handler(req, res) {
     userId = (await u.json())?.id;
   } catch { return res.status(401).json({ error: 'Session invalide' }); }
 
-  // Rate limiting : max 30 diagnostics / heure / utilisateur
-  const rlOk = await rateLimit(userId, 'face-diagnostic', 30, 60);
-  if (!rlOk) return res.status(429).json({ error: 'Trop de diagnostics. Réessayez dans un moment.' });
+  // Coût OpenAI : 5 diagnostics par jour et par compte, 200 par jour pour tout le site
+  const globalOk = await globalLimit('face-diagnostic', 200, 24 * 60);
+  if (!globalOk) return res.status(429).json({ error: 'Le diagnostic est très demandé aujourd’hui. Réessayez demain.' });
+  const rlOk = await rateLimit(userId, 'face-diagnostic', 5, 24 * 60);
+  if (!rlOk) return res.status(429).json({ error: 'Vous avez atteint le nombre de diagnostics du jour. Réessayez demain.' });
 
   const { image } = req.body || {};
   if (!image || typeof image !== 'string' || !/^data:image\/(png|jpe?g|webp);base64,/.test(image)) {
@@ -108,8 +110,18 @@ async function handler(req, res) {
 };
 
 // Rate limiting via la table api_usage (service role). true = autorisé.
+async function globalLimit(endpoint, max, minutes) {
+  const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  try {
+    const since = new Date(Date.now() - minutes * 60000).toISOString();
+    const r = await fetch(`${url}/rest/v1/api_usage?endpoint=eq.${encodeURIComponent(endpoint)}&created_at=gte.${encodeURIComponent(since)}&select=id`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}`, Prefer: 'count=exact', Range: '0-0' } });
+    const cr = r.headers.get('content-range');
+    return (cr && cr.includes('/') ? parseInt(cr.split('/')[1], 10) : 0) < max;
+  } catch (e) { console.error('globalLimit err', e); return false; }
+}
 async function rateLimit(userId, endpoint, max, minutes) {
-  if (!userId) return true;
+  if (!userId) return false;
   const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const h = { apikey: key, Authorization: `Bearer ${key}` };
   try {
@@ -124,7 +136,7 @@ async function rateLimit(userId, endpoint, max, minutes) {
       method: 'POST', headers: { ...h, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify({ user_id: userId, endpoint }) });
     return true;
-  } catch (e) { console.error('rateLimit err', e); return true; } // en cas d'erreur, ne pas bloquer
+  } catch (e) { console.error('rateLimit err', e); return false; } // en cas d'erreur : refuser (chaque appel coûte)
 }
 
 // Normalise / valide la sortie de l'IA pour garantir le schéma

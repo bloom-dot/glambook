@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Réserver un créneau — GlamBook</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#0E0E10"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    /* Réservation express : une seule page, de haut en bas, sans compte */
+    .rx { max-width: 640px; margin: 0 auto; padding: 0 20px 150px; }
+    .rx-who { display: flex; align-items: center; gap: 14px; padding: 22px 0 18px; border-bottom: 1px solid var(--gb-line); }
+    .rx-who img, .rx-who .ph { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: var(--gb-surface-2); flex: 0 0 auto; }
+    .rx-who .nm { font-size: 1.7rem; font-weight: 800; font-stretch: var(--gb-condensed); text-transform: uppercase; line-height: 1; }
+    .rx-who .ct { font-family: var(--gb-font-serif); font-style: italic; color: var(--gb-ink-2); font-size: 1.05rem; }
+    .rx-who a { margin-left: auto; font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gb-champagne); text-decoration: none; }
+    .rx h1 { font-size: clamp(2.6rem, 9vw, 3.6rem); line-height: .9; margin: 26px 0 6px; }
+    .rx .lead { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.15rem; color: var(--gb-ink-2); margin: 0 0 6px; }
+    .step { padding: 22px 0 6px; }
+    .step-t { font-size: .7rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gb-ink-3); margin: 0 0 12px; }
+    .svc { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 12px; border-bottom: 1px solid var(--gb-line); cursor: pointer; }
+    .svc:first-of-type { border-top: 1px solid var(--gb-line); }
+    .svc input { position: absolute; opacity: 0; pointer-events: none; }
+    .svc .n { font-size: 1.15rem; font-weight: 800; font-stretch: 75%; text-transform: uppercase; }
+    .svc .d { display: block; font-size: .8rem; color: var(--gb-ink-3); margin-top: 2px; }
+    .svc .p { color: var(--gb-champagne); font-weight: 600; white-space: nowrap; }
+    .svc:has(input:checked) { background: var(--gb-gold-tint); box-shadow: inset 2px 0 0 var(--gb-gold); }
+    .svc:has(input:focus-visible) { outline: 2px solid var(--gb-champagne); }
+    .days { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .days::-webkit-scrollbar { display: none; }
+    .chip { border: 1px solid var(--gb-line-strong); background: transparent; color: var(--gb-ink); border-radius: var(--gb-r-md); cursor: pointer; font-family: var(--gb-font-body); }
+    .chip:hover { border-color: var(--gb-champagne); }
+    .chip[aria-pressed="true"] { border-color: var(--gb-gold); background: var(--gb-gold-tint); color: var(--gb-champagne); }
+    .day { flex: 0 0 64px; padding: 8px 0; text-align: center; font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gb-ink-2); }
+    .day b { display: block; font-size: 1.3rem; letter-spacing: 0; color: var(--gb-ink); margin: 2px 0; }
+    .day[aria-pressed="true"] b { color: var(--gb-champagne); }
+    .times { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .time { padding: 12px 0; font-size: .95rem; }
+    .fld { display: grid; gap: 6px; font-size: .8rem; color: var(--gb-ink-2); margin-bottom: 12px; }
+    .fld input, .fld textarea { width: 100%; box-sizing: border-box; padding: 12px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-md); color: var(--gb-ink); font: 1rem var(--gb-font-body); }
+    .fld input:focus, .fld textarea:focus { outline: none; border-color: var(--gb-champagne); }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .reassure { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: var(--gb-r-md); background: var(--gb-gold-tint); font-size: .86rem; color: #D9D4DB; margin-top: 4px; }
+    .reassure .gb-ico { color: var(--gb-champagne); width: 20px; height: 20px; }
+    .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--gb-surface); border-top: 1px solid var(--gb-line); padding: 12px 20px calc(16px + env(safe-area-inset-bottom)); }
+    .bar-in { max-width: 640px; margin: 0 auto; display: grid; gap: 8px; }
+    .bar .sum { display: flex; justify-content: space-between; gap: 10px; font-size: .86rem; color: var(--gb-ink-2); }
+    .bar .sum b { color: var(--gb-champagne); white-space: nowrap; }
+    .bar .btn { width: 100%; height: 54px; font-size: 1.25rem; font-stretch: 75%; font-weight: 800; }
+    .empty-slots { color: var(--gb-ink-2); font-size: .92rem; }
+    .empty-slots a { color: var(--gb-champagne); }
+    @media (max-width: 480px) { .two { grid-template-columns: 1fr; } .times { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  </style>
+</head>
+<body>
+<a href="#main" class="skip-link">Aller au contenu</a>
+<nav class="nav">
+  <div class="nav-inner" style="max-width:1200px;">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+    <div class="nav-links">
+      <a href="/rdv.html" class="hide-mobile">Mon rendez-vous</a>
+      <span id="nav-auth"><a href="/auth/login.html">Connexion</a></span>
+    </div>
+  </div>
+</nav>
+
+<main class="rx" id="main">
+  <div class="rx-who" id="who"><span class="ph"></span><div><div class="nm">Chargement…</div></div></div>
+  <h1>Réserver un <em>créneau</em></h1>
+  <p class="lead">Prix affiché, réglé sur place. Aucun compte à créer.</p>
+
+  <form id="f" novalidate>
+    <section class="step" aria-labelledby="t1"><p class="step-t" id="t1">1 · Prestation</p><div id="svcs"></div></section>
+    <section class="step" aria-labelledby="t2"><p class="step-t" id="t2">2 · Jour</p><div class="days" id="days" role="group" aria-labelledby="t2"></div></section>
+    <section class="step" aria-labelledby="t3"><p class="step-t" id="t3">3 · Heure</p><div class="times" id="times" role="group" aria-labelledby="t3"></div></section>
+    <section class="step" aria-labelledby="t4">
+      <p class="step-t" id="t4">4 · Où</p>
+      <label class="fld">Adresse (elle vient à vous)<input id="address" autocomplete="street-address" placeholder="N°, rue, ville"/></label>
+    </section>
+    <section class="step" aria-labelledby="t5">
+      <p class="step-t" id="t5">5 · Vous</p>
+      <div class="two">
+        <label class="fld">Prénom et nom<input id="name" autocomplete="name"/></label>
+        <label class="fld">Téléphone<input id="phone" type="tel" autocomplete="tel"/></label>
+      </div>
+      <label class="fld">E-mail, pour recevoir la confirmation<input id="email" type="email" autocomplete="email" inputmode="email"/></label>
+      <label class="fld">Un mot pour elle <span style="color:var(--gb-ink-3)">(facultatif)</span><textarea id="note" rows="2" placeholder="Look souhaité, étage, code d’entrée…"></textarea></label>
+      <div class="reassure"><span data-ico="check"></span>Aucun compte à créer : vous recevez un lien personnel pour suivre votre rendez-vous.</div>
+    </section>
+  </form>
+</main>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="sum"><span id="sum">Choisissez une prestation, un jour et une heure</span><b id="sum-p"></b></div>
+    <button class="btn btn-primary" id="go" type="button" disabled>Réserver</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<script type="module">
+import { supabase, getCurrentUser, getProfile, esc } from '/js/supabase.js';
+import { ICON, localISODate, safeUrl, showToast } from '/js/utils.js';
+import { initNav } from '/js/nav.js';
+import { euros } from '/js/devis/model.js';
+import { rememberLocal, sendLink, renderDone, errorText, notifyCancel } from '/js/rdv.js';
+initNav();
+document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ICON[el.dataset.ico] || ''; });
+
+const $ = (id) => document.getElementById(id);
+const qs = new URLSearchParams(location.search);
+const artistId = qs.get('artist');
+const st = { svc: qs.get('service'), day: null, slot: null };
+// Changement de créneau depuis « Mon rendez-vous » : l'ancien est annulé après la nouvelle réservation
+const replaceTok = /^[0-9a-f]{64}$/.test(qs.get('replace') || '') ? qs.get('replace') : null;
+let user = null; try { user = await getCurrentUser(); } catch (_) {}
+
+const fail = (msg) => { document.querySelector('.rx').innerHTML = `<div class="state-msg"><h2>${msg}</h2><a class="btn btn-primary" href="/artists.html">Voir les maquilleuses</a></div>`; document.querySelector('.bar').remove(); };
+if (!artistId) { fail('Maquilleuse introuvable'); throw new Error('artist'); }
+
+const [{ data: a }, { data: services }, { data: slots }] = await Promise.all([
+  supabase.from('artists_public').select('id,slug,display_name,city,photos').eq('id', artistId).maybeSingle(),
+  supabase.from('services').select('id,name,description,price_cents,duration_min').eq('artist_id', artistId).order('price_cents'),
+  supabase.from('availabilities').select('id,date,time_slot').eq('artist_id', artistId).gte('date', localISODate())
+    .eq('is_available', true).eq('is_booked', false).order('date').order('time_slot').limit(400),
+]);
+if (!a) { fail('Cette fiche n’est plus en ligne'); throw new Error('artist'); }
+
+const name = a.display_name || 'La maquilleuse';
+const photo = safeUrl((a.photos || [])[0]?.url);
+const fiche = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : `/artist.html?id=${encodeURIComponent(a.id)}`;
+$('who').innerHTML = `${photo ? `<img src="${esc(photo)}" alt=""/>` : '<span class="ph"></span>'}<div><div class="nm">${esc(name)}</div><div class="ct">${esc(a.city || '')}</div></div><a href="${fiche}">Sa fiche</a>`;
+document.title = `Réserver avec ${name} — GlamBook`;
+
+if (!(services || []).length || !(slots || []).length) {
+  document.querySelector('#f').innerHTML = `<p class="empty-slots">${esc(name)} n’a pas de créneau ouvert en ligne pour le moment. <a href="/reservation.html?artist=${encodeURIComponent(a.id)}">Demandez-lui un devis</a> : elle vous proposera une date.</p>`;
+  document.querySelector('.bar').remove();
+  throw new Error('no slots');
+}
+
+// Préremplissage pour une cliente connectée
+if (user) {
+  $('email').value = user.email || '';
+  try { const p = await getProfile(user.id); if (p) { $('name').value = p.full_name || ''; $('phone').value = p.phone || ''; } } catch (_) {}
+}
+
+// Changement de créneau : on reprend l'adresse et l'e-mail du rendez-vous actuel
+if (replaceTok) {
+  try {
+    const { data: old } = await supabase.rpc('get_by_token', { p_token: replaceTok });
+    if (old) { if (old.email && !$('email').value) $('email').value = old.email; if (old.address) $('address').value = old.address; if (old.note) $('note').value = old.note; }
+    document.querySelector('.rx .lead').textContent = 'Choisissez le nouveau créneau : l’ancien sera libéré une fois celui-ci réservé.';
+  } catch (_) {}
+}
+
+// 1. Prestations
+$('svcs').innerHTML = services.map(s => `<label class="svc"><input type="radio" name="svc" value="${esc(s.id)}" ${s.id === st.svc ? 'checked' : ''}/>
+  <span><span class="n">${esc(s.name)}</span><span class="d">${esc(String(s.duration_min || 60))} min${s.description ? ' · ' + esc(s.description) : ''}</span></span>
+  <span class="p">${esc(euros(s.price_cents))}</span></label>`).join('');
+if (!services.some(s => s.id === st.svc)) st.svc = null;
+if (services.length === 1) { st.svc = services[0].id; $('svcs').querySelector('input').checked = true; }
+$('svcs').addEventListener('change', (e) => { st.svc = e.target.value; refresh(); });
+
+// 2. Jours qui ont au moins un créneau libre
+const byDay = new Map();
+// Les créneaux d'aujourd'hui déjà passés ne sont pas proposés
+const nowHM = new Date().toTimeString().slice(0, 5), todayISO = localISODate();
+slots.filter(s => s.date > todayISO || String(s.time_slot) > nowHM).forEach(s => { if (!byDay.has(s.date)) byDay.set(s.date, []); byDay.get(s.date).push(s); });
+const days = [...byDay.keys()].slice(0, 21);
+$('days').innerHTML = days.map(d => {
+  const x = new Date(d + 'T12:00:00');
+  return `<button type="button" class="chip day" data-day="${d}" aria-pressed="false">${x.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '')}<b>${x.getDate()}</b>${x.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}</button>`;
+}).join('');
+$('days').addEventListener('click', (e) => { const b = e.target.closest('[data-day]'); if (!b) return; st.day = b.dataset.day; st.slot = null; refresh(); });
+
+function refresh() {
+  $('days').querySelectorAll('[data-day]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.day === st.day)));
+  const list = st.day ? byDay.get(st.day) : [];
+  $('times').innerHTML = st.day
+    ? list.map(s => `<button type="button" class="chip time" data-slot="${esc(s.id)}" aria-pressed="${s.id === st.slot}">${esc(s.time_slot)}</button>`).join('')
+    : '<p class="empty-slots" style="grid-column:1/-1;margin:0;">Choisissez d’abord un jour.</p>';
+  const svc = services.find(s => s.id === st.svc);
+  const slot = list?.find(s => s.id === st.slot);
+  const dayTxt = st.day ? new Date(st.day + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+  $('sum').textContent = [svc?.name, dayTxt, slot?.time_slot].filter(Boolean).join(' · ') || 'Choisissez une prestation, un jour et une heure';
+  $('sum-p').textContent = svc ? euros(svc.price_cents) + ' sur place' : '';
+  $('go').disabled = !(svc && slot);
+}
+$('times').addEventListener('click', (e) => { const b = e.target.closest('[data-slot]'); if (!b) return; st.slot = b.dataset.slot; refresh(); });
+st.day = days[0]; refresh();
+
+// Réserver
+$('go').addEventListener('click', async () => {
+  const v = (id) => $(id).value.trim();
+  if (!v('address')) return showToast('Indiquez l’adresse où elle doit venir.', 'error'), $('address').focus();
+  if (!v('name')) return showToast('Indiquez votre prénom et votre nom.', 'error'), $('name').focus();
+  if (!v('phone')) return showToast('Indiquez votre téléphone.', 'error'), $('phone').focus();
+  if (!/^\S+@\S+\.\S+$/.test(v('email'))) return showToast('Vérifiez votre adresse e-mail.', 'error'), $('email').focus();
+  const btn = $('go'); btn.disabled = true; btn.textContent = 'Réservation…';
+  try {
+    const { data, error } = await supabase.rpc('book_slot_guest', { p_slot: st.slot, p_service: st.svc, p_name: v('name'), p_email: v('email'), p_phone: v('phone'), p_address: v('address'), p_note: v('note') });
+    if (error) throw error;
+    if (!data?.ok) {
+      showToast(errorText(data?.error), 'error');
+      if (data?.error === 'slot_unavailable') { byDay.set(st.day, byDay.get(st.day).filter(s => s.id !== st.slot)); st.slot = null; refresh(); }
+      btn.disabled = false; btn.textContent = 'Réserver'; return;
+    }
+    if (replaceTok) { try { const c = await supabase.rpc('cancel_by_token', { p_token: replaceTok }); if (c.data?.ok) notifyCancel(replaceTok); } catch (_) {} }
+    const slot = byDay.get(st.day).find(s => s.id === st.slot);
+    const when = `${new Date(st.day + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à ${slot?.time_slot || ''}`;
+    rememberLocal({ t: data.token, kind: 'booking', artist: name, when });
+    const emailed = await sendLink(data.token);
+    document.querySelector('.bar').remove();
+    renderDone($('main'), { kind: 'booking', token: data.token, artistName: name, when, email: v('email'), name: v('name'), emailed, loggedIn: !!user });
+  } catch (e) {
+    console.error(e); showToast('La réservation n’a pas abouti. Réessayez dans un instant.', 'error');
+    btn.disabled = false; btn.textContent = 'Réserver';
+  }
+});
+</script>
+</body>
+</html>

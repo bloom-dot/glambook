@@ -1,11 +1,10 @@
 // Sitemap dynamique : pages statiques + profils artistes actifs (slug)
-const SITE = 'https://glambook-pi.vercel.app';
+const SITE = (process.env.PUBLIC_SITE_URL || 'https://glambook-pi.vercel.app').replace(/\/+$/, '');
 
 module.exports = async function handler(req, res) {
   const staticPages = [
     { loc: '/', priority: '1.0', changefreq: 'daily' },
     { loc: '/artists.html', priority: '0.9', changefreq: 'daily' },
-    { loc: '/auth/register.html', priority: '0.6', changefreq: 'monthly' },
     { loc: '/legal/mentions-legales.html', priority: '0.2', changefreq: 'yearly' },
     { loc: '/legal/cgu.html', priority: '0.2', changefreq: 'yearly' },
     { loc: '/legal/cgv.html', priority: '0.2', changefreq: 'yearly' },

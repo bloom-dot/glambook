@@ -1,6 +1,8 @@
 -- ══════════════════════════════════════════════════════════════════════
 -- GlamBook — Durcissement des droits (7 octobre 2026)
--- ⚠️ PAS ENCORE APPLIQUÉ sur le projet lcrrdwlnxmneqfzqediu.
+-- ⚠️ PAS ENCORE APPLIQUÉ sur le projet lcrrdwlnxmneqfzqediu (accord donné le 10 octobre, application à relancer).
+-- Revu le 10 octobre 2026 : toujours nécessaire (la faille « rôle admin » est réelle en base),
+-- compatible avec le parcours sans compte, complété (jetons figés, devis signés intouchables).
 -- Pour l'appliquer : Supabase → SQL Editor → coller ce fichier en entier → Run.
 -- Testé à blanc sur une base locale (21 vérifications, aucune en échec).
 --
@@ -16,7 +18,7 @@
 -- Principe du correctif : des déclencheurs qui ne s'appliquent qu'aux rôles de l'API
 -- (authenticated, anon). Les fonctions internes SECURITY DEFINER (admin_*, book_slot,
 -- cancel_booking, calcul de la note…) s'exécutent sous un autre rôle et ne sont pas gênées.
--- Pour revenir en arrière : supprimer les déclencheurs trg_guard_* et trg_review_check.
+-- Pour revenir en arrière : supprimer les déclencheurs trg_guard_* (dont trg_guard_quotes) et trg_review_check.
 -- ══════════════════════════════════════════════════════════════════════
 
 -- Vrai quand la requête vient de l'API (navigateur), faux depuis une fonction interne ou le tableau de bord Supabase.
@@ -78,6 +80,10 @@ begin
     new.client_id := old.client_id; new.artist_id := old.artist_id; new.service_id := old.service_id;
     new.slot_id := old.slot_id; new.date := old.date; new.time_slot := old.time_slot;
     new.stripe_pi_id := old.stripe_pi_id; new.reviewed := old.reviewed;
+    -- lien personnel et coordonnées de la cliente : jamais modifiés depuis le navigateur
+    new.access_token := old.access_token; new.link_sent_at := old.link_sent_at;
+    new.client_email := old.client_email; new.client_name := old.client_name;
+    new.client_phone := old.client_phone; new.address := old.address; new.created_at := old.created_at;
     if new.status is distinct from old.status then
       select exists (select 1 from public.artists a where a.id = old.artist_id and a.user_id = auth.uid()) into is_owner;
       if not is_owner or not (old.status in ('pending', 'confirmed') and new.status in ('confirmed', 'done')) then
@@ -139,12 +145,50 @@ begin
     end if;
     new.artist_id := b.artist_id;   -- jamais celle indiquée par le navigateur
     new.client_id := auth.uid();
+    new.quote_id := null;           -- l'avis sur devis passe par review_quote()
   end if;
   return new;
 end $$;
 drop trigger if exists trg_review_check on public.reviews;
 create trigger trg_review_check before insert on public.reviews
   for each row execute function public.review_check();
+
+-- ── quotes : un devis signé ne se retouche plus ; seule la cliente signe (sign_quote) ──
+create or replace function public.guard_quotes() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  if public.from_api() then
+    if tg_op = 'UPDATE' and old.status = 'signed' then
+      raise exception 'Devis signé : il ne peut plus être modifié' using errcode = '42501';
+    end if;
+    if new.status = 'signed' then
+      raise exception 'Seule la cliente signe un devis' using errcode = '42501';
+    end if;
+    if tg_op = 'UPDATE' then
+      new.signature_data := old.signature_data; new.signed_at := old.signed_at; new.signed_name := old.signed_name;
+      new.share_token := old.share_token; new.artist_id := old.artist_id;
+    else
+      new.signature_data := null; new.signed_at := null; new.signed_name := null;
+    end if;
+  end if;
+  return new;
+end $$;
+drop trigger if exists trg_guard_quotes on public.quotes;
+create trigger trg_guard_quotes before insert or update on public.quotes
+  for each row execute function public.guard_quotes();
+
+-- Un devis signé ne se supprime pas non plus depuis le navigateur
+create or replace function public.guard_quotes_delete() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  if public.from_api() and old.status = 'signed' then
+    raise exception 'Devis signé : il ne peut pas être supprimé' using errcode = '42501';
+  end if;
+  return old;
+end $$;
+drop trigger if exists trg_guard_quotes_delete on public.quotes;
+create trigger trg_guard_quotes_delete before delete on public.quotes
+  for each row execute function public.guard_quotes_delete();
 
 -- ── Avis publics : prénom et initiale, pas le nom complet de la cliente ──
 create or replace view public.reviews_public as

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mon rendez-vous — GlamBook</title>
+  <meta name="robots" content="noindex"/>
+  <meta name="referrer" content="no-referrer"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#0E0E10"/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    .rv { max-width: 640px; margin: 0 auto; padding: 0 20px 140px; }
+    .rv-hero { position: relative; height: 220px; margin: 0 -20px; overflow: hidden; background: var(--gb-surface); }
+    .rv-hero img { width: 100%; height: 100%; object-fit: cover; }
+    .rv-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--gb-ground) 6%, rgba(14,14,16,.15) 70%); }
+    .rv-hero .in { position: absolute; left: 20px; right: 20px; bottom: 8px; z-index: 1; }
+    .rv-st { font-size: .7rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    .rv-st.ok { color: var(--gb-ok); } .rv-st.wait { color: var(--gb-champagne); } .rv-st.off { color: var(--gb-ink-3); }
+    .rv h1 { font-size: clamp(2.4rem, 9vw, 3.4rem); line-height: .9; margin: 6px 0 0; }
+    .rv-lead { font-family: var(--gb-font-serif); font-style: italic; font-size: 1.15rem; color: #D9D4DB; margin: 16px 0 0; }
+    .rv-rows { margin-top: 18px; border-top: 1px solid var(--gb-line); }
+    .rv-rows > div { display: flex; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--gb-line); font-size: .92rem; }
+    .rv-rows > div > span:first-child { color: var(--gb-ink-2); white-space: nowrap; }
+    .rv-rows > div > b { text-align: right; font-weight: 600; }
+    .rv-quote { margin-top: 22px; padding: 18px; border: 1px solid var(--gb-gold); border-radius: var(--radius); background: var(--gb-gold-tint); display: grid; gap: 10px; }
+    .rv-quote .amt { font-size: 2rem; font-weight: 800; font-stretch: 75%; color: var(--gb-champagne); }
+    .rv-actions { display: grid; gap: 10px; margin-top: 22px; }
+    .rv-actions .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .rv-cancel { color: var(--gb-bad) !important; }
+    .rv-space { margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--gb-line); font-size: .88rem; color: var(--gb-ink-2); }
+    .rv-space a { color: var(--gb-champagne); }
+    /* Sans lien : retrouver */
+    .find h1 { margin-top: 34px; }
+    .find form { display: grid; gap: 10px; margin-top: 20px; }
+    .find label { display: grid; gap: 6px; font-size: .82rem; color: var(--gb-ink-2); }
+    .find input { height: 50px; padding: 0 14px; background: var(--gb-surface); border: 1px solid var(--gb-line-strong); border-radius: var(--gb-r-md); color: var(--gb-ink); font: 1rem var(--gb-font-body); }
+    .find .msg { color: var(--gb-champagne); font-size: .9rem; min-height: 1.2em; }
+    .loc { margin-top: 30px; }
+    .loc a { display: flex; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--gb-line); text-decoration: none; color: var(--gb-ink); }
+    .loc a span { color: var(--gb-ink-2); font-size: .86rem; }
+  </style>
+</head>
+<body>
+<a href="#main" class="skip-link">Aller au contenu</a>
+<nav class="nav">
+  <div class="nav-inner" style="max-width:1200px;">
+    <a href="/" class="nav-logo">Glam<span>Book</span></a>
+    <div class="nav-links"><a href="/artists.html" class="hide-mobile">Maquilleuses</a><span id="nav-auth"><a href="/auth/login.html">Connexion</a></span></div>
+  </div>
+</nav>
+<main class="rv" id="main"><p class="quiet" style="padding:40px 0;font-family:var(--gb-font-serif);font-style:italic;color:var(--gb-ink-3);">Chargement…</p></main>
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<script type="module">
+import { supabase, getCurrentUser, esc } from '/js/supabase.js';
+import { ICON, safeUrl, showToast } from '/js/utils.js';
+import { initNav } from '/js/nav.js';
+import { euros } from '/js/devis/model.js';
+import { listLocal, rememberLocal, emailEnabled, notifyCancel } from '/js/rdv.js';
+initNav();
+const main = document.getElementById('main');
+const token = new URLSearchParams(location.search).get('t') || '';
+let user = null; try { user = await getCurrentUser(); } catch (_) {}
+
+if (!/^[0-9a-f]{64}$/.test(token)) { renderFind(); }
+else {
+  const { data, error } = await supabase.rpc('get_by_token', { p_token: token });
+  if (error || !data) { renderFind('Ce lien ne correspond à aucun rendez-vous. Il a peut-être été mal copié.'); }
+  else render(data);
+}
+
+function statusOf(d) {
+  if (d.kind === 'booking') return ({ pending: ['wait', 'En attente de confirmation'], confirmed: ['ok', 'Confirmé par ' + (d.artist?.name || 'la maquilleuse')], cancelled: ['off', 'Annulé'], done: ['off', 'Terminé'] })[d.status] || ['off', d.status];
+  if (d.status === 'cancelled') return ['off', 'Demande annulée'];
+  if (d.status === 'declined') return ['off', 'Demande non retenue'];
+  if (d.quote?.status === 'signed') return ['ok', 'Devis signé'];
+  if (d.quote) return ['wait', 'Devis reçu : à lire et signer'];
+  // « Devis envoyé » mais devis retiré ou refusé entre-temps : on ne promet pas un devis qui ne viendra pas
+  if (d.status === 'quoted') return ['off', 'Devis retiré par la maquilleuse : écrivez-lui ou refaites une demande'];
+  return ['wait', 'En attente de son devis'];
+}
+
+function render(d) {
+  const a = d.artist || {};
+  const photo = safeUrl(a.photo);
+  const fiche = a.slug ? `/artiste/${encodeURIComponent(a.slug)}` : '/artists.html';
+  const [cls, label] = statusOf(d);
+  const isB = d.kind === 'booking';
+  const when = isB
+    ? new Date(d.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+    : (d.event_date ? new Date(d.event_date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : 'Date à préciser');
+  // Une demande dont le devis est signé n'est plus annulable ici : c'est un engagement, on écrit à la maquilleuse
+  const open = isB ? ['pending', 'confirmed'].includes(d.status) : ['pending', 'quoted'].includes(d.status) && d.quote?.status !== 'signed';
+  rememberLocal({ t: token, kind: d.kind, artist: a.name, when: isB ? `${when} à ${d.time}` : when });
+  document.title = `${isB ? 'Mon rendez-vous' : 'Ma demande'} avec ${a.name || 'ma maquilleuse'} — GlamBook`;
+
+  main.innerHTML = `
+    <div class="rv-hero">${photo ? `<img src="${esc(photo)}" alt=""/>` : ''}
+      <div class="in"><span class="rv-st ${cls}">${esc(label)}</span>
+        <h1>${isB ? `${esc(when.split(' ').slice(0, 3).join(' '))} · <em>${esc(d.time)}</em>` : `Ma <em>demande</em>`}</h1></div>
+    </div>
+    ${d.first_name ? `<p class="rv-lead">Bonjour ${esc(d.first_name)}${!isB && d.status === 'pending' ? ', ' + esc(a.name || 'elle') + ' prépare votre devis.' : '.'}</p>` : ''}
+    ${d.quote ? `<div class="rv-quote">
+        <span class="rv-st ${d.quote.status === 'signed' ? 'ok' : 'wait'}">${d.quote.status === 'signed' ? 'Devis signé' : 'Son devis est arrivé'}</span>
+        <span class="amt">${esc(euros(d.quote.total_cents))}</span>
+        <a class="btn btn-primary" href="/signature.html?t=${encodeURIComponent(d.quote.token)}">${d.quote.status === 'signed' ? 'Revoir le devis' : 'Lire et signer le devis'}</a>
+      </div>` : ''}
+    <div class="rv-rows">
+      <div><span>Maquilleuse</span><b><a href="${fiche}" style="color:inherit;">${esc(a.name || '—')}</a></b></div>
+      <div><span>${isB ? 'Quand' : 'Événement'}</span><b>${esc(isB ? `${when} à ${d.time}` : when)}</b></div>
+      ${d.address ? `<div><span>Où</span><b>${esc(d.address)}</b></div>` : ''}
+      ${isB && d.service ? `<div><span>Prestation</span><b>${esc(d.service.name)}</b></div><div><span>À régler sur place</span><b style="color:var(--gb-champagne);">${esc(euros(d.service.price_cents))}</b></div>` : ''}
+      ${!isB && (d.services || []).length ? `<div><span>Prestations</span><b>${d.services.map(s => esc(s.name)).join(', ')}</b></div>` : ''}
+      ${d.note ? `<div><span>${isB ? 'Votre mot' : 'Votre besoin'}</span><b style="font-weight:400;">${esc(d.note)}</b></div>` : ''}
+    </div>
+    <div class="rv-actions">
+      ${isB && open ? `<a class="btn btn-primary" href="#" id="ics">${ICON.calendar} Ajouter à mon agenda</a>` : ''}
+      ${open ? `<div class="two">
+          <a class="btn btn-ghost" href="${user ? '/messages.html?artist=' + encodeURIComponent(a.id) : '#space'}" id="write">Écrire</a>
+          <button type="button" class="btn btn-ghost rv-cancel" id="cancel">Annuler</button>
+        </div>` : `<a class="btn btn-ghost" href="${fiche}">Revoir sa fiche</a>`}
+      ${isB && open ? `<a class="btn btn-quiet" href="#" id="move">Changer de créneau</a>` : ''}
+    </div>
+    <div class="rv-space" id="space">${user
+      ? `Vous retrouvez tout dans <a href="/mes-devis.html">Mon espace</a>.`
+      : `Pour écrire à ${esc(a.name || 'la maquilleuse')} et garder l’historique, <a href="/auth/register.html?redirect=${encodeURIComponent(location.pathname + location.search)}">créez votre espace</a> avec la même adresse e-mail : tout s’y ajoutera. Facultatif.`}</div>`;
+
+  document.getElementById('ics')?.addEventListener('click', (e) => { e.preventDefault(); downloadIcs(d); });
+  document.getElementById('cancel')?.addEventListener('click', () => cancel(isB ? 'Annuler ce rendez-vous ? Le créneau sera libéré.' : 'Annuler cette demande ? Elle le verra dans son espace.'));
+  document.getElementById('move')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    // Le rendez-vous actuel n'est libéré qu'une fois le nouveau réservé (voir reserver.html)
+    location.href = `/reserver.html?artist=${encodeURIComponent(a.id)}${d.service ? '&service=' + encodeURIComponent(d.service.id) : ''}&replace=${encodeURIComponent(token)}`;
+  });
+}
+
+async function cancel(msg) {
+  if (!confirm(msg)) return;
+  const { data, error } = await supabase.rpc('cancel_by_token', { p_token: token });
+  if (error || !data?.ok) return showToast('L’annulation n’a pas abouti.', 'error');
+  notifyCancel(token);
+  showToast('C’est annulé. La maquilleuse est prévenue.');
+  const r = await supabase.rpc('get_by_token', { p_token: token });
+  if (r.data) render(r.data);
+}
+
+function downloadIcs(d) {
+  const [h, m] = String(d.time || '10:00').split(':').map(Number);
+  const start = new Date(d.date + 'T00:00:00'); start.setHours(h, m || 0, 0, 0);
+  const end = new Date(start.getTime() + ((d.service?.duration_min || 60) * 60000));
+  const f = (x) => x.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const txt = (s) => String(s || '').replace(/[,;\\]/g, (c) => '\\' + c).replace(/\n/g, '\\n');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//GlamBook//FR', 'BEGIN:VEVENT', `UID:${token.slice(0, 16)}@glambook`, `DTSTAMP:${f(new Date())}`,
+    `DTSTART:${f(start)}`, `DTEND:${f(end)}`, `SUMMARY:${txt('Maquillage avec ' + (d.artist?.name || 'ma maquilleuse'))}`,
+    `LOCATION:${txt(d.address)}`, `DESCRIPTION:${txt((d.service?.name || '') + ' — ' + location.href)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  a.download = 'rendez-vous-glambook.ics'; a.click();
+}
+
+async function renderFind(msg) {
+  const local = listLocal();
+  const mailOn = await emailEnabled();
+  main.innerHTML = `<section class="find">
+    <h1>Retrouver mon <em>rendez-vous</em></h1>
+    ${msg ? `<p class="rv-lead">${esc(msg)}</p>` : `<p class="rv-lead">Indiquez l’adresse e-mail utilisée : nous vous renvoyons vos liens.</p>`}
+    ${mailOn ? `<form id="find" novalidate>
+      <label>Votre e-mail<input type="email" id="fmail" autocomplete="email" inputmode="email" required/></label>
+      <button class="btn btn-primary" type="submit">Recevoir mes liens</button>
+      <p class="msg" id="fmsg" role="status"></p>
+    </form>` : `<p class="rv-lead" style="font-size:1rem;">L’envoi par e-mail n’est pas encore activé sur GlamBook. Utilisez le lien affiché après votre réservation, ou les rendez-vous gardés sur ce téléphone ci-dessous.</p>`}
+    ${local.length ? `<div class="loc"><div class="rule-head"><span class="lbl">Sur ce téléphone</span></div>
+      ${local.map(x => `<a href="/rdv.html?t=${x.t}"><b>${esc(x.artist || 'Rendez-vous')}</b><span>${esc(x.when || '')}</span></a>`).join('')}</div>` : ''}
+    ${user ? `<p class="rv-space">Vous avez un compte : tout est aussi dans <a href="/mes-devis.html">Mon espace</a>.</p>` : ''}
+  </section>`;
+  document.getElementById('find')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const mail = document.getElementById('fmail').value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(mail)) { document.getElementById('fmsg').textContent = 'Vérifiez l’adresse.'; return; }
+    e.target.querySelector('button').disabled = true;
+    try { await fetch('/api/send-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: mail }) }); } catch (_) {}
+    document.getElementById('fmsg').textContent = 'Si des rendez-vous sont liés à cette adresse, vous allez recevoir un e-mail dans quelques minutes.';
+  });
+}
+</script>
+</body>
+</html>

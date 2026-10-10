@@ -105,7 +105,8 @@ export async function createBookingRequest(req) {
 
 // ── Liste des demandes reçues par l'artiste connecté ──
 export async function listArtistRequests(status = null) {
-  let q = supabase.from('booking_requests').select('*').order('created_at', { ascending: false });
+  // Colonnes listées : le lien personnel de la cliente (access_token) ne descend pas chez la maquilleuse
+  let q = supabase.from('booking_requests').select(REQ_COLS).order('created_at', { ascending: false });
   if (status) q = q.eq('status', status);
   const { data, error } = await q;
   if (error) throw error;
@@ -159,12 +160,15 @@ export async function validateRequestToQuote(req, mua, opts) {
     link = signatureUrl(shareToken);
   }
   // Lier le devis à la demande + statut quoted
-  await supabase.from('booking_requests')
-    .update({ status: 'quoted', quote_id: saved.id }).eq('id', req.id);
+  // Erreur ici = la demande resterait « à chiffrer » et un second clic créerait un second devis
+  const { error: linkErr } = await supabase.from('booking_requests')
+    .update({ status: 'quoted', quote_id: saved.id }).eq('id', req.id).in('status', ['pending', 'quoted']);  // jamais une demande annulée
+  if (linkErr) console.error('Liaison demande → devis', linkErr);
   return { quoteId: saved.id, link, emailed };
 }
 
 // ── Mapping DB → JS ──
+export const REQ_COLS = 'id,artist_id,client_id,client_name,client_email,client_phone,event_address,event_date,services_snapshot,travel_distance_km,diagnostic,note,status,quote_id,created_at';
 export function fromRow(row) {
   if (!row) return null;
   return {

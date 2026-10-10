@@ -4,7 +4,9 @@
 // ═══════════════════════════════════════════════════
 import { jsPDF } from 'https://cdn.jsdelivr.net/npm/jspdf@2.5.2/+esm';
 import autoTable from 'https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/+esm';
-import { computeTotals, euros } from '/js/devis/model.js';
+import { computeTotals, euros as eurosFr } from '/js/devis/model.js';
+// Helvetica (jsPDF) ne connaît pas l'espace fine insécable des milliers : « 1 200 € » s'affichait avec un caractère parasite
+const euros = (c) => eurosFr(c).replace(/[\u202F\u00A0]/g, ' ');
 
 // Palette (RGB) alignée sur le design system GlamBook
 const ROSE  = [232, 84, 122];
@@ -244,7 +246,7 @@ export function buildQuotePdf(quote) {
     // Tampon "SIGNÉ"
     doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
     doc.setTextColor(...OR);
-    doc.text('✓ SIGNÉ', M, sbY + 6);
+    doc.text('SIGNÉ', M, sbY + 6);
   }
 
   // ── Pied de page ──
